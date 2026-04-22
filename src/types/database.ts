@@ -57,3 +57,21 @@ export type JournalEntry = {
   gratitude_list: string[];
   reading_log?: ReadingLog;
 };
+
+export type DeepWorkSession = {
+  id: string;
+  user_id: string;
+  project_title: string;
+  duration_minutes: number;
+  date: Date;
+};
+
+export type FinancialMetrics = {
+  id: string;
+  user_id: string;
+  month_year: string; // "04-2026"
+  revenue: number;
+  ad_spend: number;
+  fixed_costs: number;
+  net_profit: number; // revenue - ad_spend - fixed_costs
+};
