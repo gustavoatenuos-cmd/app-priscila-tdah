@@ -14,8 +14,8 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "App Neuroplasticidade & TDAH",
-  description: "Organize sua mente, recrie seus hábitos e vença desafios diários.",
+  title: "TDAH Constante | Seu Acompanhamento Diário",
+  description: "Um segundo cérebro focado em transformar a neuroplasticidade em ação sem fricção.",
 };
 
 export default function RootLayout({

@@ -28,8 +28,10 @@ export default function Home() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="text-4xl md:text-7xl font-extrabold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/60"
         >
-          O Poder da <span className="text-primary">Neuroplasticidade</span>
-          <br /> em suas Mãos
+          O Seu Segundo Cérebro <br className="hidden sm:block" />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">
+            Sem Fricção
+          </span>
         </motion.h1>
 
         <motion.p
@@ -38,7 +40,7 @@ export default function Home() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mt-4 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
         >
-          Ferramentas práticas, Planner de TDAH e um guia guiado para reestruturar seu cérebro, aumentar a produtividade e vencer desafios diários.
+          O <strong className="text-foreground">TDAH Constante</strong> não é apenas um curso. É um acompanhamento diário visual e neutro desenhado para reconstruir seus caminhos de recompensa sem causar sobrecarga.
         </motion.p>
 
         <motion.div
