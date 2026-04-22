@@ -2,68 +2,46 @@
 @plugin "tailwindcss-animate";
 @custom-variant dark (&:is(.dark *));
 
+/* Clean, Light Mode Premium & Foco TDAH */
 :root {
-  --background: oklch(0.98 0.01 240);
-  --foreground: oklch(0.1 0.02 240);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.1 0.02 240);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.1 0.02 240);
-  --primary: oklch(0.2 0.05 240);
-  --primary-foreground: oklch(0.98 0.01 240);
-  --secondary: oklch(0.96 0.02 240);
-  --secondary-foreground: oklch(0.2 0.05 240);
-  --muted: oklch(0.96 0.02 240);
-  --muted-foreground: oklch(0.55 0.05 240);
-  --accent: oklch(0.96 0.02 240);
-  --accent-foreground: oklch(0.2 0.05 240);
-  --destructive: oklch(0.57 0.22 27);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.92 0.02 240);
-  --input: oklch(0.92 0.02 240);
-  --ring: oklch(0.2 0.05 240);
-  --radius: 0.75rem;
-}
-
-/* Forced Cinematic Dark Mode */
-.dark, :root {
-  /* Fundo principal #080808 */
-  --background: #080808; 
-  --foreground: #f3f4f6;
+  /* Fundo Off-White #F5F5F0 para não estressar a visão */
+  --background: #F5F5F0; 
+  --foreground: #333333; /* Cinza Chumbo para leitura confortável */
   
-  /* Glassmorphism base vars */
-  --card: rgba(255, 255, 255, 0.04);
-  --card-foreground: #f3f4f6;
+  /* Superfícies em Branco Puro, Papel Matte */
+  --card: #FFFFFF;
+  --card-foreground: #1F2937;
   
-  --popover: rgba(255, 255, 255, 0.04);
-  --popover-foreground: #f3f4f6;
+  --popover: #FFFFFF;
+  --popover-foreground: #1F2937;
   
-  /* Ciano Suave / Teal-400 (#2DD4BF) para foco sem sobrecarga */
-  --primary: #2DD4BF; 
-  --primary-foreground: #080808;
+  /* Slate Blue / Azul Acinzentado (#64748B) - Neutro e elegante */
+  --primary: #64748B; 
+  --primary-foreground: #FFFFFF;
   
-  --secondary: rgba(255, 255, 255, 0.08);
-  --secondary-foreground: #f3f4f6;
+  --secondary: #F1F5F9;
+  --secondary-foreground: #333333;
   
-  --muted: rgba(255, 255, 255, 0.05);
-  --muted-foreground: #9ca3af;
+  --muted: #E2E8F0;
+  --muted-foreground: #64748B;
   
-  /* Laranja Queimado / Amber-500 (#F59E0B) para urgencia limpa */
-  --accent: #F59E0B; 
-  --accent-foreground: #080808;
+  /* Sage Green suave de accent para botões alternativos se precisar */
+  --accent: #84A59D; 
+  --accent-foreground: #FFFFFF;
   
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   
-  --border: rgba(255, 255, 255, 0.1);
-  --input: rgba(255, 255, 255, 0.05);
-  --ring: rgba(45, 212, 191, 0.5); /* Glow base teal */
+  --border: #E5E7EB;
+  --input: #F1F5F9;
+  --ring: rgba(100, 116, 139, 0.3); /* Ring slate */
   
-  --chart-1: #2DD4BF;
-  --chart-2: #F59E0B;
-  --chart-3: #10B981;
-  --chart-4: #8B5CF6;
-  --chart-5: #F43F5E;
+  --chart-1: #64748B;
+  --chart-2: #84A59D;
+  --chart-3: #475569;
+  --chart-4: #9CA3AF;
+  --chart-5: #334155;
+  --radius: 0.75rem;
 }
 
 @theme inline {
@@ -105,27 +83,21 @@
   }
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
-    
-    /* Immersive Space grid if requested, but prompt requests 080808 clean. Keeping very subtle mesh if needed. */
   }
 }
 
-/* Glassmorphism Helper Utility */
+/* Premium Light Mode Utilities */
 @layer utilities {
-  .glass-panel {
-    @apply bg-[rgba(255,255,255,0.04)] backdrop-blur-md border border-[rgba(255,255,255,0.1)] rounded-3xl;
+  .premium-panel {
+    @apply bg-card border border-border shadow-[0_12px_40px_rgba(0,0,0,0.04)] rounded-3xl;
   }
   
-  .glass-hover {
-    @apply hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.15)] transition-all duration-300 hover:shadow-[0_0_20px_rgba(45,212,191,0.15)];
+  .premium-hover {
+    @apply hover:shadow-[0_16px_50px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300;
   }
   
-  /* Ambient glow shadow specific for accents */
-  .ambient-glow-primary {
-    @apply shadow-[0_0_40px_rgba(45,212,191,0.25)];
-  }
-  
-  .ambient-glow-accent {
-    @apply shadow-[0_0_40px_rgba(245,158,11,0.2)];
+  /* Forças os textos nas áreas de painel para não usar colorações de dark mode fixas */
+  .text-panel {
+    @apply text-foreground;
   }
 }
