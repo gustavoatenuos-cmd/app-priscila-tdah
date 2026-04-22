@@ -34,7 +34,7 @@ export default function DashboardPage() {
             <CheckSquare className="h-5 w-5" />
             Planner TDAH
           </Link>
-          <Link href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted font-medium transition-colors">
+          <Link href="/dashboard/module" className="flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted font-medium transition-colors">
             <BookOpen className="h-5 w-5" />
             Neuromassa
           </Link>
@@ -104,7 +104,9 @@ export default function DashboardPage() {
               <p className="text-sm text-muted-foreground mb-6 flex-1">
                 Aprenda as bases científicas e como aplicar os gatilhos certos para mudar seu comportamento de forma duradoura.
               </p>
-              <Button variant="outline">Continuar Leitura</Button>
+              <Link href="/dashboard/module">
+                <Button variant="outline">Continuar Leitura</Button>
+              </Link>
             </div>
             <div className="bg-card border rounded-2xl p-6 flex flex-col border-primary/20 bg-primary/5">
               <h4 className="font-bold text-lg mb-2 text-primary">Desafio de Hoje (Dia 13)</h4>
