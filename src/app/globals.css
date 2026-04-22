@@ -9,7 +9,7 @@
   --card-foreground: oklch(0.1 0.02 240);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.1 0.02 240);
-  --primary: oklch(0.2 0.05 240); /* Deep strict */
+  --primary: oklch(0.2 0.05 240);
   --primary-foreground: oklch(0.98 0.01 240);
   --secondary: oklch(0.96 0.02 240);
   --secondary-foreground: oklch(0.2 0.05 240);
@@ -27,40 +27,42 @@
 
 /* Forced Cinematic Dark Mode */
 .dark, :root {
-  --background: oklch(0.08 0.01 260); /* Onyx / Deep Space absolute black */
-  --foreground: oklch(0.95 0.01 260);
+  /* Fundo principal #080808 */
+  --background: #080808; 
+  --foreground: #f3f4f6;
   
-  /* Glassmorphism setup */
-  --card: oklch(0.12 0.02 260 / 0.4); /* Translucent */
-  --card-foreground: oklch(0.95 0.01 260);
+  /* Glassmorphism base vars */
+  --card: rgba(255, 255, 255, 0.04);
+  --card-foreground: #f3f4f6;
   
-  --popover: oklch(0.12 0.02 260 / 0.8);
-  --popover-foreground: oklch(0.95 0.01 260);
+  --popover: rgba(255, 255, 255, 0.04);
+  --popover-foreground: #f3f4f6;
   
-  --primary: oklch(0.85 0.02 260); /* Platinum silver primary */
-  --primary-foreground: oklch(0.08 0.01 260);
+  /* Azul Elétrico / Dourado Champagne (Usando Azul Elétrico como primário) */
+  --primary: #007AFF; /* Azul Elétrico base */
+  --primary-foreground: #ffffff;
   
-  --secondary: oklch(0.15 0.03 260 / 0.5);
-  --secondary-foreground: oklch(0.95 0.01 260);
+  --secondary: rgba(255, 255, 255, 0.08);
+  --secondary-foreground: #f3f4f6;
   
-  --muted: oklch(0.15 0.03 260 / 0.5);
-  --muted-foreground: oklch(0.65 0.02 260);
+  --muted: rgba(255, 255, 255, 0.05);
+  --muted-foreground: #9ca3af;
   
-  --accent: oklch(0.18 0.04 260 / 0.6);
-  --accent-foreground: oklch(0.98 0.01 260);
+  --accent: #D4AF37; /* Dourado Champagne Accent */
+  --accent-foreground: #080808;
   
-  --destructive: oklch(0.4 0.2 27);
-  --destructive-foreground: oklch(0.98 0 0);
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
   
-  --border: oklch(0.2 0.03 260 / 0.4);
-  --input: oklch(0.15 0.03 260 / 0.5);
-  --ring: oklch(0.85 0.02 260 / 0.3);
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.05);
+  --ring: rgba(0, 122, 255, 0.5); /* Glow base */
   
-  --chart-1: oklch(0.7 0.1 260); /* Frost blue */
-  --chart-2: oklch(0.8 0.05 280); /* Soft lavender */
-  --chart-3: oklch(0.6 0.15 200); /* Cyan touch */
-  --chart-4: oklch(0.85 0.02 260); /* Silver */
-  --chart-5: oklch(0.4 0.15 240); /* Deep blue */
+  --chart-1: #007AFF;
+  --chart-2: #D4AF37;
+  --chart-3: #10B981;
+  --chart-4: #8B5CF6;
+  --chart-5: #F43F5E;
 }
 
 @theme inline {
@@ -93,6 +95,7 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --font-sans: var(--font-inter);
+  --font-mono: var(--font-space-grotesk); /* Space Grotesk config */
 }
 
 @layer base {
@@ -101,23 +104,27 @@
   }
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
-    /* Immersive Grid Background Cinematic */
-    background-image: 
-      radial-gradient(ellipse at 50% -20%, rgba(120, 119, 198, 0.15), transparent 60%),
-      linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-    background-size: 100% 100%, 40px 40px, 40px 40px;
-    background-attachment: fixed;
+    
+    /* Immersive Space grid if requested, but prompt requests 080808 clean. Keeping very subtle mesh if needed. */
   }
 }
 
 /* Glassmorphism Helper Utility */
 @layer utilities {
   .glass-panel {
-    @apply bg-card backdrop-blur-xl border border-border shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] rounded-3xl;
+    @apply bg-[rgba(255,255,255,0.04)] backdrop-blur-md border border-[rgba(255,255,255,0.1)] rounded-3xl;
   }
   
   .glass-hover {
-    @apply hover:bg-white/5 hover:border-white/10 transition-all duration-300;
+    @apply hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.15)] transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,122,255,0.15)];
+  }
+  
+  /* Ambient glow shadow specific for accents */
+  .ambient-glow-primary {
+    @apply shadow-[0_0_30px_rgba(0,122,255,0.2)];
+  }
+  
+  .ambient-glow-accent {
+    @apply shadow-[0_0_30px_rgba(212,175,55,0.15)];
   }
 }
