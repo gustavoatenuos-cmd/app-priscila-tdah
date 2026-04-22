@@ -38,9 +38,9 @@
   --popover: rgba(255, 255, 255, 0.04);
   --popover-foreground: #f3f4f6;
   
-  /* Azul Elétrico / Dourado Champagne (Usando Azul Elétrico como primário) */
-  --primary: #007AFF; /* Azul Elétrico base */
-  --primary-foreground: #ffffff;
+  /* Ciano Suave / Teal-400 (#2DD4BF) para foco sem sobrecarga */
+  --primary: #2DD4BF; 
+  --primary-foreground: #080808;
   
   --secondary: rgba(255, 255, 255, 0.08);
   --secondary-foreground: #f3f4f6;
@@ -48,7 +48,8 @@
   --muted: rgba(255, 255, 255, 0.05);
   --muted-foreground: #9ca3af;
   
-  --accent: #D4AF37; /* Dourado Champagne Accent */
+  /* Laranja Queimado / Amber-500 (#F59E0B) para urgencia limpa */
+  --accent: #F59E0B; 
   --accent-foreground: #080808;
   
   --destructive: #ef4444;
@@ -56,10 +57,10 @@
   
   --border: rgba(255, 255, 255, 0.1);
   --input: rgba(255, 255, 255, 0.05);
-  --ring: rgba(0, 122, 255, 0.5); /* Glow base */
+  --ring: rgba(45, 212, 191, 0.5); /* Glow base teal */
   
-  --chart-1: #007AFF;
-  --chart-2: #D4AF37;
+  --chart-1: #2DD4BF;
+  --chart-2: #F59E0B;
   --chart-3: #10B981;
   --chart-4: #8B5CF6;
   --chart-5: #F43F5E;
@@ -116,15 +117,15 @@
   }
   
   .glass-hover {
-    @apply hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.15)] transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,122,255,0.15)];
+    @apply hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.15)] transition-all duration-300 hover:shadow-[0_0_20px_rgba(45,212,191,0.15)];
   }
   
   /* Ambient glow shadow specific for accents */
   .ambient-glow-primary {
-    @apply shadow-[0_0_30px_rgba(0,122,255,0.2)];
+    @apply shadow-[0_0_40px_rgba(45,212,191,0.25)];
   }
   
   .ambient-glow-accent {
-    @apply shadow-[0_0_30px_rgba(212,175,55,0.15)];
+    @apply shadow-[0_0_40px_rgba(245,158,11,0.2)];
   }
 }
