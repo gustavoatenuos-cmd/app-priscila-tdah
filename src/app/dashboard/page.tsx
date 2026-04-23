@@ -29,13 +29,13 @@ export default function DashboardPage() {
             <CheckSquare className="h-5 w-5" />
             Planner TDAH
           </Link>
-          <Link href="#" className="flex items-center gap-3 px-4 py-3 rounded-2xl text-muted-foreground hover:bg-secondary font-medium transition-colors opacity-50 cursor-not-allowed">
+          <Link href="/dashboard/focus" className="flex items-center gap-3 px-4 py-3 rounded-2xl text-muted-foreground hover:text-foreground hover:bg-secondary font-medium transition-colors">
             <Calendar className="h-5 w-5" />
-            Desafio 365
+            Deep Work
           </Link>
-          <Link href="/dashboard/module/neuroplasticidade" className="flex items-center gap-3 px-4 py-3 rounded-2xl text-muted-foreground hover:text-foreground hover:bg-secondary font-medium transition-colors">
+          <Link href="/dashboard/journal" className="flex items-center gap-3 px-4 py-3 rounded-2xl text-muted-foreground hover:text-foreground hover:bg-secondary font-medium transition-colors">
             <BookOpen className="h-5 w-5" />
-            Biblioteca
+            Journal
           </Link>
         </nav>
       </aside>

@@ -39,10 +39,7 @@ export default function AnalyticsPage() {
               <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest mt-1">Sincronizado na Nuvem</p>
             </div>
           </div>
-          <Button variant="outline" className="border-border hover:bg-secondary font-bold text-foreground">
-            <Zap className="h-4 w-4 mr-2 text-primary" />
-            Atualizar Dados
-          </Button>
+          <Link href="/dashboard/planner" className="text-muted-foreground hover:text-foreground mt-4 block text-sm transition-colors font-medium">Voltar e acessar Planner →</Link>
         </header>
 
         <div className="p-8 md:p-16 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-8">
