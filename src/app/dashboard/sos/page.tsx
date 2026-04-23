@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sidebar } from "@/components/sidebar";
-import { Brain, ArrowRight, CheckCircle2, Heart, Zap, Sparkles, MessageSquare } from "lucide-react";
+import { Heart, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -42,7 +42,7 @@ export default function SOSPage() {
 
     // 1. Identificação
     <motion.div key="input" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="max-w-2xl w-full">
-      <h2 className="text-3xl font-black text-[#1F2937] mb-4">Qual é o grande "monstro" hoje?</h2>
+      <h2 className="text-3xl font-black text-[#1F2937] mb-4">Qual é o grande &quot;monstro&quot; hoje?</h2>
       <p className="text-[#64748B] text-lg font-medium mb-10">Escreva apenas uma coisa que está te dando ansiedade.</p>
       <input 
         type="text" 
@@ -62,7 +62,7 @@ export default function SOSPage() {
 
     // 2. Micro-passos
     <motion.div key="breakdown" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl w-full">
-      <h2 className="text-3xl font-black text-[#1F2937] mb-2 text-center italic">"{task}"</h2>
+      <h2 className="text-3xl font-black text-[#1F2937] mb-2 text-center italic">&quot;{task}&quot;</h2>
       <h3 className="text-xl font-bold text-[#64748B] mb-12 text-center">é grande demais. Vamos focar apenas no primeiro passo ridículo:</h3>
       
       <div className="space-y-6">

@@ -76,7 +76,7 @@ export default function DynamicModulePage({ params }: { params: Promise<{ module
                 </p>
                 
                 <div className="bg-card border-l-4 border-primary p-6 rounded-r-2xl my-8 text-foreground shadow-sm">
-                  <p className="m-0 font-medium">"O cérebro não é uma estrutura fixa de concreto; é um labirinto orgânico que cresce dependendo de por quais caminhos você mais anda."</p>
+                  <p className="m-0 font-medium">&quot;O cérebro não é uma estrutura fixa de concreto; é um labirinto orgânico que cresce dependendo de por quais caminhos você mais anda.&quot;</p>
                 </div>
               </div>
 

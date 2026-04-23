@@ -184,7 +184,7 @@ export default function NeumorphicDashboard() {
                        <span className="text-2xl font-black text-[#333333] font-mono tracking-tighter">180m</span>
                      </div>
                      <div className="col-span-2 pt-4 border-t border-dashed border-[#F1F5F9]">
-                        <p className="text-[11px] text-[#64748B] font-medium italic">"Você está acima da média para uma manhã de quarta-feira."</p>
+                        <p className="text-[11px] text-[#64748B] font-medium italic">&quot;Você está acima da média para uma manhã de quarta-feira.&quot;</p>
                      </div>
                   </div>
                </motion.div>
