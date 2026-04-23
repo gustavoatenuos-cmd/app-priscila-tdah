@@ -4,6 +4,8 @@ import { Sidebar } from "@/components/sidebar";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
+import { Heart, Save, BookMarked } from "lucide-react";
 
 export default function JournalPage() {
   const [gratitude, setGratitude] = useState(["", "", ""]);

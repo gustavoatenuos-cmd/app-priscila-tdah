@@ -220,9 +220,6 @@ export default function OnboardingPage() {
         Finalizar Triagem <Check className="h-6 w-6" />
       </button>
     </motion.div>,
-  ];>
-      </button>
-    </motion.div>,
   ];
 
   return (

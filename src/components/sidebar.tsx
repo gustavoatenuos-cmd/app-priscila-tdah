@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, CheckSquare, Target, BarChart2, BookOpen, Brain, Crown } from "lucide-react";
+import { Home, CheckSquare, Target, BarChart2, BookOpen, Brain, Crown, Zap } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
