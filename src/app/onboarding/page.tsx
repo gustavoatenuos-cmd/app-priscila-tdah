@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Check, Heart, Battery, Brain, Sparkles, User, Sunset, Moon, Sun, Shield, Target, Zap, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
