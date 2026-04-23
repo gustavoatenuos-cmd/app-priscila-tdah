@@ -1,52 +1,21 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle2, Circle, Clock, Home, CheckSquare, Target, BarChart2, BookOpen, Search, Pause } from "lucide-react";
+import { CheckCircle2, Circle, Clock, Home, CheckSquare, Target, BarChart2, BookOpen, Search, Pause, Brain, Zap } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Sidebar } from "@/components/sidebar";
+import { useState } from "react";
 
 export default function NeumorphicDashboard() {
   const currentDate = format(new Date(), "EEEE, MMM dd, yyyy | hh:mm a", { locale: ptBR });
+  const [planoB, setPlanoB] = useState(false);
 
   return (
     <div className="flex bg-[#F5F5F0] min-h-screen text-[#333333] font-sans selection:bg-[#64748B]/20">
       
-      {/* THIN SIDEBAR */}
-      <aside className="w-24 border-r border-[#E5E7EB] bg-[#F5F5F0] hidden md:flex flex-col items-center py-8 z-10 sticky top-0 h-screen transition-all">
-        <div className="bg-[#64748B] w-2 h-8 rounded-r-lg absolute left-0 top-[108px]"></div> {/* Active Indicator */}
-
-        {/* Icons */}
-        <nav className="flex-1 flex flex-col items-center gap-10 mt-4">
-          <Link href="/dashboard" className="flex flex-col items-center gap-1 group">
-            <Home className="h-6 w-6 text-[#64748B]" strokeWidth={2.5} />
-            <span className="text-[10px] font-bold text-[#64748B]">Início</span>
-          </Link>
-          <Link href="/dashboard/planner" className="flex flex-col items-center gap-1 group">
-            <CheckSquare className="h-6 w-6 text-[#9CA3AF] group-hover:text-[#64748B] transition-colors" strokeWidth={2} />
-            <span className="text-[10px] font-bold text-[#9CA3AF] group-hover:text-[#64748B]">Tarefas</span>
-          </Link>
-          <Link href="/dashboard/focus" className="flex flex-col items-center gap-1 group">
-            <Target className="h-6 w-6 text-[#9CA3AF] group-hover:text-[#64748B] transition-colors" strokeWidth={2} />
-            <span className="text-[10px] font-bold text-[#9CA3AF] group-hover:text-[#64748B]">Foco</span>
-          </Link>
-          <Link href="/dashboard/analytics" className="flex flex-col items-center gap-1 group">
-            <BarChart2 className="h-6 w-6 text-[#9CA3AF] group-hover:text-[#64748B] transition-colors" strokeWidth={2} />
-            <span className="text-[10px] font-bold text-[#9CA3AF] group-hover:text-[#64748B]">Análises</span>
-          </Link>
-          <Link href="/dashboard/journal" className="flex flex-col items-center gap-1 group">
-            <BookOpen className="h-6 w-6 text-[#9CA3AF] group-hover:text-[#64748B] transition-colors" strokeWidth={2} />
-            <span className="text-[10px] font-bold text-[#9CA3AF] group-hover:text-[#64748B]">Diário</span>
-          </Link>
-        </nav>
-
-        {/* Streak Block */}
-        <div className="bg-[#FFFFFF] border border-[#E5E7EB] rounded-2xl flex flex-col items-center justify-center p-3 shadow-[0_4px_15px_rgba(0,0,0,0.02)]">
-          <span className="text-[7.5px] font-bold text-[#9CA3AF] uppercase text-center leading-tight tracking-wider">Sequência<br/>Atual</span>
-          <span className="text-2xl font-black text-[#333333] font-mono mt-1">14</span>
-          <span className="text-[9px] font-bold text-[#9CA3AF] uppercase">Dias</span>
-        </div>
-      </aside>
+      <Sidebar />
 
       {/* MAIN CONTENT DASHBOARD */}
       <main className="flex-1 px-8 py-10 md:px-14 lg:max-w-7xl mx-auto overflow-y-auto">
@@ -61,6 +30,35 @@ export default function NeumorphicDashboard() {
             {/* LEFT BIG COLUMN */}
             <div className="lg:col-span-8 flex flex-col gap-8">
                
+               {/* PRÓXIMA MELHOR AÇÃO (DYNAMIC) */}
+               <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-[#FFFFFF] rounded-[32px] p-8 shadow-[0_12px_40px_rgba(0,0,0,0.02)] border border-[#84A59D]/20 border-l-[12px] border-l-[#84A59D] relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                     <Brain className="h-24 w-24" />
+                  </div>
+                  
+                  <div className="flex items-center gap-3 mb-4">
+                     <div className="h-8 w-8 rounded-xl bg-[#84A59D]/10 flex items-center justify-center text-[#84A59D]">
+                        <Zap className="h-4 w-4" />
+                     </div>
+                     <span className="text-[10px] font-black text-[#84A59D] uppercase tracking-widest">Recomendado Agora</span>
+                  </div>
+
+                  <h2 className="text-2xl font-black text-[#1F2937] mb-2 leading-tight">
+                    {planoB ? "Vamos fazer apenas 2 minutos de foco?" : "Hora de revisar o projeto plan."}
+                  </h2>
+                  <p className="text-[#64748B] font-medium text-sm max-w-md">
+                    {planoB 
+                      ? "Sua energia está baixa, então não force. Um micro-passo é melhor que paralisia." 
+                      : "Sua energia está alta agora e você não tem nada agendado pelos próximos 30 minutos."}
+                  </p>
+
+                  <div className="mt-8">
+                    <button className="bg-[#333333] hover:bg-black text-white px-6 py-3 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all shadow-lg shadow-black/10">
+                      Aceitar Sugestão
+                    </button>
+                  </div>
+               </motion.div>
+
                {/* DAILY FOCUS PANEL */}
                <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-[#FFFFFF] rounded-3xl p-8 shadow-[0_12px_40px_rgba(0,0,0,0.03)] border border-[#E5E7EB]/50">
                   <div className="flex justify-between items-center mb-8">
@@ -133,26 +131,36 @@ export default function NeumorphicDashboard() {
             {/* RIGHT SMALL COLUMN */}
             <div className="lg:col-span-4 flex flex-col gap-8">
                
-               {/* TASK MANAGER PANEL */}
+               {/* 3 PRIORIDADES PANEL */}
                <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="bg-[#FFFFFF] rounded-3xl p-6 md:p-8 shadow-[0_12px_40px_rgba(0,0,0,0.03)] border border-[#E5E7EB]/50">
                   <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-sm font-bold text-[#333333] tracking-widest uppercase">Tarefas</h2>
-                    <span className="text-[#9CA3AF] tracking-widest font-bold">•••</span>
+                    <div>
+                      <h2 className="text-sm font-bold text-[#333333] tracking-widest uppercase">As 3 Prioridades</h2>
+                      <p className="text-[10px] text-[#9CA3AF] font-bold uppercase mt-1">Menos é Mais</p>
+                    </div>
+                    
+                    <button 
+                      onClick={() => setPlanoB(!planoB)}
+                      className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                        planoB ? 'bg-orange-100 text-orange-500 border-orange-200' : 'bg-[#F1F5F9] text-[#9CA3AF] border-transparent'
+                      } border`}
+                    >
+                      Plano B {planoB ? 'Ativo' : 'Desligado'}
+                    </button>
                   </div>
                   
                   <div className="space-y-4">
-                     <div className="flex items-center gap-3">
-                       <CheckCircle2 className="h-5 w-5 text-[#84A59D] fill-[#84A59D]/20" />
-                       <span className="text-[14px] font-bold text-[#333333]">Finalizar Relatório</span>
-                     </div>
-                     <div className="flex items-center gap-3">
-                       <CheckCircle2 className="h-5 w-5 text-[#84A59D] fill-[#84A59D]/20" />
-                       <span className="text-[14px] font-bold text-[#333333]">Enviar E-mails</span>
-                     </div>
-                     <div className="flex items-center gap-3">
-                       <Circle className="h-5 w-5 text-[#9CA3AF] fill-[#F1F5F9]" />
-                       <span className="text-[14px] font-bold text-[#9CA3AF]">Planejar Semana</span>
-                     </div>
+                     <PrioridadeItem index={1} title={planoB ? "Ver 1 aba do relatório" : "Finalizar Relatório"} completed={true} />
+                     <PrioridadeItem index={2} title={planoB ? "Responder 1 e-mail" : "Enviar E-mails"} completed={true} />
+                     <PrioridadeItem index={3} title={planoB ? "Apenas abrir a agenda" : "Planejar Semana"} completed={false} />
+                  </div>
+
+                  <div className="mt-8 pt-6 border-t border-[#F1F5F9] text-center">
+                    {planoB ? (
+                      <p className="text-orange-400 text-xs font-bold italic">"Hoje o mínimo é o seu 100%. Sem culpa."</p>
+                    ) : (
+                      <p className="text-[#64748B] text-xs font-semibold italic">"Focar em 3 coisas te dá liberdade, não limite."</p>
+                    )}
                   </div>
                </motion.div>
 
@@ -214,6 +222,19 @@ export default function NeumorphicDashboard() {
             </div>
          </div>
       </main>
+    </div>
+  );
+}
+
+function PrioridadeItem({ index, title, completed }: { index: number, title: string, completed: boolean }) {
+  return (
+    <div className={`flex items-center gap-4 p-3 rounded-2xl transition-all ${completed ? 'bg-[#F9FAFB] opacity-60' : 'bg-white'}`}>
+       <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold border-2 ${completed ? 'bg-[#84A59D] border-[#84A59D] text-white' : 'border-[#E5E7EB] text-[#9CA3AF]'}`}>
+          {completed ? <CheckCircle2 className="h-4 w-4" /> : index}
+       </div>
+       <span className={`text-[14px] font-bold flex-1 ${completed ? 'text-[#9CA3AF] line-through' : 'text-[#333333]'}`}>
+         {title}
+       </span>
     </div>
   );
 }
