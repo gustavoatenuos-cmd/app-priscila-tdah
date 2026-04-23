@@ -1,29 +1,87 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Send, Trash2, Clock, Zap, ArrowRight, Home, CheckSquare, Target, BarChart2, BookOpen, Brain, Check } from "lucide-react";
 import Link from "next/link";
 import { Sidebar } from "@/components/sidebar";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 export default function BrainDumpPage() {
   const [note, setNote] = useState("");
-  const [items, setItems] = useState<{ id: number; text: string; category?: string }[]>([]);
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const addItem = () => {
+  useEffect(() => {
+    loadItems();
+  }, []);
+
+  const loadItems = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('brain_dump')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('processed', false)
+      .order('created_at', { ascending: false });
+
+    setItems(data || []);
+    setLoading(false);
+  };
+
+  const addItem = async () => {
     if (note.trim()) {
-      setItems([{ id: Date.now(), text: note }, ...items]);
-      setNote("");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from('brain_dump')
+        .insert({ user_id: user.id, content: note });
+
+      if (error) toast.error("Erro ao descarregar");
+      else {
+        setNote("");
+        loadItems();
+      }
     }
   };
 
-  const setCategory = (id: number, cat: string) => {
-    setItems(items.map(item => item.id === id ? { ...item, category: cat } : item));
+  const setCategory = async (id: string, cat: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    if (cat === 'agora') {
+       // Mover para tarefas essenciais
+       const item = items.find(i => i.id === id);
+       await supabase.from('tasks').insert({
+         user_id: user.id,
+         title: item.content,
+         priority_level: 'essencial'
+       });
+    }
+
+    // Marcar como processado
+    await supabase
+      .from('brain_dump')
+      .update({ processed: true })
+      .eq('id', id);
+    
+    loadItems();
+    toast.success("Item processado!");
   };
 
-  const removeItem = (id: number) => {
-    setItems(items.filter(item => item.id !== id));
+  const removeItem = async (id: string) => {
+    await supabase
+      .from('brain_dump')
+      .update({ processed: true })
+      .eq('id', id);
+    loadItems();
   };
+
+  if (loading) return <div className="flex items-center justify-center min-h-screen bg-[#F5F5F0]">Libertando sua mente...</div>;
 
   return (
     <div className="flex bg-[#F5F5F0] min-h-screen text-[#333333] font-sans">
@@ -65,7 +123,7 @@ export default function BrainDumpPage() {
                 exit={{ opacity: 0, x: -20 }}
                 className="bg-white rounded-2xl p-6 shadow-sm border border-[#E5E7EB] flex flex-col gap-4"
               >
-                <p className="text-lg font-bold text-[#333333]">{item.text}</p>
+                <p className="text-lg font-bold text-[#333333]">{item.content}</p>
                 
                 <div className="flex flex-wrap gap-3">
                   {!item.category ? (

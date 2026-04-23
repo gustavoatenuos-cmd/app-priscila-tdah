@@ -57,6 +57,14 @@ export default function NeumorphicDashboard() {
   const getDecisionText = () => {
     if (planoB) return "Sua energia está baixa, então não force. Um micro-passo agora é melhor do que a paralisia total.";
     
+    if (profile?.mindset_profile === 'sobrecarga') {
+      return "Tudo bem se sentir assim. Vamos focar em UM micro-passo agora. Nada mais importa.";
+    }
+
+    if (profile?.mindset_profile === 'criativa') {
+      return "Sua mente está cheia de brilho. Que tal descarregar o que está flutuando e escolher uma única âncora?";
+    }
+
     if (profile?.energy_level === 'baixa') {
       return "Sugerimos focar apenas na tarefa essencial agora. Respeite o seu tempo.";
     }
@@ -92,32 +100,65 @@ export default function NeumorphicDashboard() {
             {/* LEFT BIG COLUMN */}
             <div className="lg:col-span-8 flex flex-col gap-8">
                
-               {/* SEU MELHOR PRÓXIMO PASSO (DYNAMIC) */}
-               <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-[#FFFFFF] rounded-[40px] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-[#84A59D]/20 border-l-[16px] border-l-[#84A59D] relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                     <Brain className="h-32 w-32" />
-                  </div>
-                  
-                  <div className="flex items-center gap-3 mb-6">
-                     <div className="h-8 w-8 rounded-xl bg-[#84A59D]/10 flex items-center justify-center text-[#84A59D]">
-                        <Zap className="h-4 w-4" />
-                     </div>
-                     <span className="text-[11px] font-black text-[#84A59D] uppercase tracking-widest">Decisão Inteligente</span>
-                  </div>
+                {/* SEU MELHOR PRÓXIMO PASSO (DYNAMIC) */}
+                <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-[#FFFFFF] rounded-[40px] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-[#84A59D]/20 border-l-[16px] border-l-[#84A59D] relative overflow-hidden group">
+                   <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                      <Brain className="h-32 w-32" />
+                   </div>
+                   
+                   <div className="flex items-center gap-3 mb-6">
+                      <div className="h-8 w-14 rounded-xl bg-[#84A59D]/10 flex items-center justify-center text-[#84A59D]">
+                         <Zap className="h-4 w-4" />
+                      </div>
+                      <span className="text-[11px] font-black text-[#84A59D] uppercase tracking-widest">Recomendação Personalizada</span>
+                   </div>
 
-                  <h2 className="text-3xl font-black text-[#1F2937] mb-3 leading-tight">
-                    {planoB ? "Vamos fazer apenas 2 minutos de foco?" : "Seu melhor próximo passo"}
-                  </h2>
-                  <p className="text-[#64748B] font-medium text-lg max-w-xl leading-relaxed">
-                    {getDecisionText()}
-                  </p>
+                   <h2 className="text-3xl font-black text-[#1F2937] mb-3 leading-tight">
+                     {profile?.mindset_profile === 'sobrecarga' ? 'Apenas respire e faça isto:' : 
+                      profile?.mindset_profile === 'criativa' ? 'Capture o brilho, mas foque nisto:' :
+                      'Aproveite o fluxo e avance nisto:'}
+                   </h2>
 
-                  <div className="mt-10">
-                    <button className="bg-[#333333] hover:bg-black text-white px-8 py-4 rounded-[20px] font-bold text-sm uppercase tracking-widest transition-all shadow-xl shadow-black/10 flex items-center gap-3">
-                      Aceitar Sugestão <ArrowRight className="h-4 w-4" />
-                    </button>
-                  </div>
-               </motion.div>
+                   <div className="flex flex-col sm:flex-row items-center gap-3 mt-8 mb-6 max-w-2xl">
+                      <div className="flex items-center gap-3 bg-[#F9FAFB] p-5 rounded-2xl border border-[#E5E7EB] flex-1 w-full">
+                         <div className="h-6 w-6 rounded-full border-2 border-[#84A59D] flex-shrink-0" />
+                         <input 
+                            type="text"
+                            placeholder="Defina sua prioridade essencial..."
+                            className="bg-transparent border-none focus:outline-none font-bold text-[#333333] text-lg w-full"
+                            defaultValue={tasks.find(t => t.priority_level === 'essencial')?.title || ""}
+                            onKeyDown={async (e) => {
+                               if (e.key === 'Enter') {
+                                  const title = (e.target as HTMLInputElement).value;
+                                  const { data: { user } } = await supabase.auth.getUser();
+                                  if (user) {
+                                     await supabase.from('tasks').insert({ user_id: user.id, title, priority_level: 'essencial' });
+                                     window.location.reload();
+                                  }
+                               }
+                            }}
+                         />
+                      </div>
+                      <Link href="/dashboard/sos" className="bg-red-50 hover:bg-red-100 text-red-500 px-6 py-5 rounded-2xl font-bold text-sm uppercase tracking-widest transition-all border border-red-100 flex items-center gap-2 shrink-0">
+                         <Zap className="h-4 w-4" /> Travei
+                      </Link>
+                   </div>
+
+                   <p className="text-[#64748B] font-medium text-lg max-w-xl leading-relaxed">
+                     {getDecisionText()}
+                   </p>
+
+                   <div className="mt-10 flex gap-4">
+                     <Link href="/dashboard/focus" className="bg-[#333333] hover:bg-black text-white px-8 py-5 rounded-[20px] font-bold text-sm uppercase tracking-widest transition-all shadow-xl shadow-black/10 flex items-center gap-3">
+                       {profile?.mindset_profile === 'sobrecarga' ? 'Fazer só isto' : 'Entrar em Fluxo'} <ArrowRight className="h-4 w-4" />
+                     </Link>
+                     {profile?.mindset_profile === 'sobrecarga' && (
+                        <button onClick={() => setPlanoB(true)} className="px-8 py-5 rounded-[20px] font-bold text-sm uppercase tracking-widest text-[#64748B] hover:text-[#333333] transition-all">
+                           Ativar Plano B
+                        </button>
+                     )}
+                   </div>
+                </motion.div>
 
                {/* MONITOR DE DESEMPENHO MINI */}
                <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-[#FFFFFF] rounded-[40px] p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-[#E5E7EB]/50 flex flex-col md:flex-row items-center gap-10">

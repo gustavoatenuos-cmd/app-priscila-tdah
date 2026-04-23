@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, CheckSquare, Target, BarChart2, BookOpen, Brain } from "lucide-react";
+import { Home, CheckSquare, Target, BarChart2, BookOpen, Brain, Crown } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -14,6 +14,8 @@ export function Sidebar() {
     { href: "/dashboard/analytics", icon: BarChart2, label: "Análises" },
     { href: "/dashboard/journal", icon: BookOpen, label: "Diário" },
     { href: "/dashboard/brain-dump", icon: Brain, label: "Descarrego" },
+    { href: "/dashboard/sos", icon: Zap, label: "SOS" },
+    { href: "/pricing", icon: Crown, label: "Assine" },
   ];
 
   return (

@@ -1,11 +1,13 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Target, Play, Square, Timer, Sidebar as SidebarIcon, Droplet, Wind, Music, Sparkles, CheckCircle2 } from "lucide-react";
+import { Target, Play, Square, Timer, Sidebar as SidebarIcon, Droplet, Wind, Music, Sparkles, CheckCircle2, Save } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/sidebar";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
+import { useState, useEffect } from "react";
 
 export default function FocusPage() {
   const [isRunning, setIsRunning] = useState(false);
@@ -14,21 +16,72 @@ export default function FocusPage() {
   const [microStep, setMicroStep] = useState("");
   const [distractions, setDistractions] = useState(0);
   const [selectedTask, setSelectedTask] = useState("");
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [startTime, setStartTime] = useState<number | null>(null);
+
+  useEffect(() => {
+    async function loadTasks() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('completed', false);
+
+      setTasks(data || []);
+      setLoading(false);
+    }
+    loadTasks();
+  }, []);
 
   const startFocus = () => {
-    if (!selectedTask) return alert("Selecione uma tarefa primeiro.");
+    if (!selectedTask) return toast.error("Selecione uma tarefa para focar.");
     setShowRitual(true);
   };
 
   const completeRitual = () => {
     setShowRitual(false);
     setIsRunning(true);
+    setStartTime(Date.now());
   };
 
-  const stopFocus = () => {
-    setIsRunning(false);
-    setShowSummary(true);
+  const stopFocus = async (emotion?: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const duration = startTime ? Math.round((Date.now() - startTime) / 60000) : 0;
+
+      const { error } = await supabase
+        .from('focus_sessions')
+        .insert({
+          user_id: user.id,
+          task_id: selectedTask !== "manual" ? selectedTask : null,
+          duration_minutes: duration,
+          distractions_count: distractions,
+          emotion_post_focus: emotion || 'focada'
+        });
+
+      if (error) throw error;
+      
+      setIsRunning(false);
+      setShowSummary(emotion ? false : true);
+      if (emotion) {
+         setShowSummary(false);
+         setSelectedTask("");
+         setDistractions(0);
+         setMicroStep("");
+         toast.success("Sessão salva com sucesso!");
+      }
+    } catch (err: any) {
+      toast.error("Erro ao salvar sessão: " + err.message);
+    }
   };
+
+  if (loading) return <div className="flex items-center justify-center min-h-screen bg-[#F5F5F0]">Entrando em Modo Deep...</div>;
 
   return (
     <div className="flex bg-[#F5F5F0] min-h-screen text-[#333333] font-sans">
@@ -59,17 +112,17 @@ export default function FocusPage() {
                  <p className="text-[#64748B] font-medium mb-10 text-lg">Como você se sentiu saindo dessa sessão?</p>
                  
                  <div className="grid grid-cols-3 gap-4 mb-10">
-                    <button className="p-4 rounded-2xl border-2 border-[#F1F5F9] hover:border-[#84A59D] transition-all flex flex-col items-center gap-2">
-                      <span className="text-2xl">✨</span>
-                      <span className="text-[10px] font-black uppercase text-[#9CA3AF]">Leve</span>
+                    <button onClick={() => stopFocus('leve')} className="p-4 rounded-2xl border-2 border-[#F1F5F9] hover:border-[#84A59D] transition-all flex flex-col items-center gap-2">
+                       <span className="text-2xl">✨</span>
+                       <span className="text-[10px] font-black uppercase text-[#9CA3AF]">Leve</span>
                     </button>
-                    <button className="p-4 rounded-2xl border-2 border-[#F1F5F9] hover:border-[#84A59D] transition-all flex flex-col items-center gap-2">
-                      <span className="text-2xl">⚡</span>
-                      <span className="text-[10px] font-black uppercase text-[#9CA3AF]">Focada</span>
+                    <button onClick={() => stopFocus('focada')} className="p-4 rounded-2xl border-2 border-[#F1F5F9] hover:border-[#84A59D] transition-all flex flex-col items-center gap-2">
+                       <span className="text-2xl">⚡</span>
+                       <span className="text-[10px] font-black uppercase text-[#9CA3AF]">Focada</span>
                     </button>
-                    <button className="p-4 rounded-2xl border-2 border-[#F1F5F9] hover:border-[#84A59D] transition-all flex flex-col items-center gap-2">
-                      <span className="text-2xl">😴</span>
-                      <span className="text-[10px] font-black uppercase text-[#9CA3AF]">Cansada</span>
+                    <button onClick={() => stopFocus('cansada')} className="p-4 rounded-2xl border-2 border-[#F1F5F9] hover:border-[#84A59D] transition-all flex flex-col items-center gap-2">
+                       <span className="text-2xl">😴</span>
+                       <span className="text-[10px] font-black uppercase text-[#9CA3AF]">Cansada</span>
                     </button>
                  </div>
 
@@ -77,7 +130,7 @@ export default function FocusPage() {
                     onClick={() => { setShowSummary(false); setSelectedTask(""); }} 
                     className="w-full bg-[#333333] text-white py-5 rounded-2xl font-bold text-lg hover:bg-black transition-all"
                  >
-                    Salvar e Voltar
+                    Apenas Voltar
                  </button>
                </motion.div>
              ) : !showRitual ? (
@@ -102,15 +155,16 @@ export default function FocusPage() {
                           className="w-full p-4 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] text-sm font-bold text-[#1F2937] focus:outline-none focus:border-[#64748B]"
                         >
                           <option value="">Selecione uma tarefa...</option>
-                          <option value="relatorio">Finalizar Relatório</option>
-                          <option value="emails">Responder E-mails</option>
-                          <option value="agenda">Planejar Semana</option>
+                          {tasks.map(t => (
+                            <option key={t.id} value={t.id}>{t.title}</option>
+                          ))}
+                          <option value="manual">-- Outra atividade --</option>
                         </select>
                       </div>
                     ) : (
                       <div className="text-center mb-10">
                         <h3 className="text-xs font-black text-[#9CA3AF] uppercase tracking-widest mb-2">Focando em:</h3>
-                        <p className="text-xl font-bold text-[#1F2937]">Finalizar Relatório</p>
+                        <p className="text-xl font-bold text-[#1F2937]">{tasks.find(t => t.id === selectedTask)?.title || "Em Fluxo. . ."}</p>
                       </div>
                     )}
                     
@@ -144,10 +198,10 @@ export default function FocusPage() {
                       ) : (
                         <div className="flex flex-col gap-4 w-full">
                            <button 
-                            onClick={stopFocus} 
+                            onClick={() => stopFocus()} 
                             className="w-full bg-[#84A59D] hover:bg-[#6c8c84] text-white font-bold h-16 rounded-2xl text-lg shadow-xl shadow-[#84A59D]/10 transition-all hover:-translate-y-1 flex items-center justify-center gap-3"
                           >
-                            <Square className="h-6 w-6" /> Concluir
+                            <Square className="h-6 w-6" /> Concluir Sessão
                           </button>
                           <button 
                             onClick={() => setDistractions(d => d + 1)}
@@ -160,7 +214,7 @@ export default function FocusPage() {
                     </div>
                  </div>
                  
-                 <p className="mt-8 text-[#9CA3AF] font-bold text-center uppercase tracking-widest text-[10px]">Total hoje: <span className="text-[#333333] ml-1">1h 20m</span></p>
+                 <p className="mt-8 text-[#9CA3AF] font-bold text-center uppercase tracking-widest text-[10px]">TDAH Constante: Zona de Fluxo</p>
                </motion.div>
              ) : (
                <motion.div 
@@ -207,4 +261,3 @@ function RitualOption({ icon, label }: { icon: any, label: string }) {
     </div>
   );
 }
-

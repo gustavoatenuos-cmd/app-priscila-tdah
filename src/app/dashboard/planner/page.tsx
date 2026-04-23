@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { syncTaskToGoogleCalendar } from "@/lib/calendar";
 
 export default function PlannerPage() {
   const [essencial, setEssencial] = useState<any[]>([]);
@@ -55,14 +56,23 @@ export default function PlannerPage() {
     const title = window.prompt(`Nova tarefa ${level}:`);
     if (!title || !user) return;
 
-    const { error } = await supabase.from('tasks').insert({
+    const { data, error } = await supabase.from('tasks').insert({
       user_id: user.id,
       title,
       priority_level: level
-    });
+    }).select().single();
 
-    if (error) toast.error("Erro ao adicionar");
-    else loadTasks();
+    if (error) {
+      toast.error("Erro ao adicionar");
+    } else {
+      loadTasks();
+      
+      // Automação Google Calendar para tarefas Essenciais
+      if (level === 'essencial') {
+         const synced = await syncTaskToGoogleCalendar({ title });
+         if (synced) toast.success("Sincronizado com seu Google Agenda!");
+      }
+    }
   };
 
   if (loading) return <div className="flex items-center justify-center min-h-screen bg-[#F5F5F0]">Carregando seu plano...</div>;
