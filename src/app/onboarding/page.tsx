@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Check, Heart, Battery, Brain, Sparkles, User, Sunset, Moon, Sun, Shield, Target, Zap } from "lucide-react";
+import { ArrowRight, Check, Heart, Battery, Brain, Sparkles, User, Sunset, Moon, Sun, Shield, Target, Zap, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
