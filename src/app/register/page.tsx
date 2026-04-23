@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -29,35 +30,48 @@ export default function RegisterPage() {
     const target = event.target as typeof event.target & {
       name: { value: string };
       email: { value: string };
+      password: { value: string };
       whatsapp: { value: string };
     };
 
-    const data = {
-      name: target.name.value,
-      email: target.email.value,
-      whatsapp: target.whatsapp.value,
-    };
+    const name = target.name.value;
+    const email = target.email.value;
+    const password = target.password.value;
+    const whatsapp = target.whatsapp.value;
 
-    // Simulate API request and pop-ups trigger
-    setTimeout(() => {
-      setIsLoading(false);
-      if (data.email.includes("erro")) {
-        toast.error("Erro ao validar e-mail. Tente novamente.");
-        return;
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: name,
+          whatsapp: whatsapp,
+        }
       }
+    });
 
-      toast.success("Cadastro realizado com sucesso!", {
-        description: "Seu acesso ao Planner e 365 Dias foi viabilizado.",
-      });
-      toast.info("Verifique seu WhatsApp e E-mail para os próximos passos.", {
-        duration: 8000,
-      });
+    if (error) {
+      toast.error("Erro ao cadastrar: " + error.message);
+      setIsLoading(false);
+      return;
+    }
 
-      // Redirect after success (mocked to dashboard or checkout)
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 2000);
-    }, 1500);
+    // In Next.js App Router, signUp might auto-login or require confirmation
+    toast.success("Conta criada! Verifique seu e-mail.");
+    
+    // Create initial profile
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .insert([
+        { id: data.user?.id, full_name: name }
+      ]);
+
+    if (profileError) {
+       console.error("Erro ao criar perfil:", profileError);
+    }
+
+    setIsLoading(false);
+    router.push("/onboarding");
   }
 
   return (
@@ -108,6 +122,16 @@ export default function RegisterPage() {
                   id="email"
                   type="email"
                   placeholder="nome@exemplo.com"
+                  required
+                  className="bg-background/50 h-11"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Senha Forte</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
                   required
                   className="bg-background/50 h-11"
                 />

@@ -6,11 +6,65 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Sidebar } from "@/components/sidebar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 export default function NeumorphicDashboard() {
+  const router = useRouter();
   const currentDate = format(new Date(), "EEEE, MMM dd, yyyy | hh:mm a", { locale: ptBR });
   const [planoB, setPlanoB] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<any>(null);
+  const [tasks, setTasks] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function loadData() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push("/register");
+        return;
+      }
+
+      // Load Profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      setProfile(profileData);
+
+      // Load Tasks
+      const { data: tasksData } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(3);
+      
+      setTasks(tasksData || []);
+      setLoading(false);
+    }
+    loadData();
+  }, [router]);
+
+  const getGreeting = () => {
+    const name = profile?.full_name?.split(' ')[0] || "Priscila";
+    return `Bom dia, ${name} 🌿`;
+  };
+
+  const getDecisionText = () => {
+    if (planoB) return "Sua energia está baixa, então não force. Um micro-passo agora é melhor do que a paralisia total.";
+    
+    if (profile?.energy_level === 'baixa') {
+      return "Sugerimos focar apenas na tarefa essencial agora. Respeite o seu tempo.";
+    }
+    
+    return "Você está em uma boa janela de energia. Este é um bom momento para avançar no que mais importa.";
+  };
+
+  if (loading) return <div className="flex items-center justify-center min-h-screen bg-[#F5F5F0]">Carregando seu refúgio...</div>;
 
   return (
     <div className="flex bg-[#F5F5F0] min-h-screen text-[#333333] font-sans selection:bg-[#64748B]/20">
@@ -22,13 +76,13 @@ export default function NeumorphicDashboard() {
          
          <header className="mb-10 flex justify-between items-end">
            <div>
-             <h1 className="text-3xl font-extrabold tracking-tight text-[#1F2937] uppercase">Bom dia, Priscila 🌿</h1>
-             <p className="text-[#64748B] font-medium text-sm mt-1">Sua mente está calma. {currentDate}</p>
+             <h1 className="text-3xl font-extrabold tracking-tight text-[#1F2937] uppercase">{getGreeting()}</h1>
+             <p className="text-[#64748B] font-medium text-sm mt-1">Sua mente está {profile?.energy_level === 'alta' ? 'vibrante' : 'calma'}. {currentDate}</p>
            </div>
            <div className="flex gap-4">
               <div className="bg-white border border-[#E5E7EB] rounded-2xl p-3 shadow-sm flex flex-col items-center min-w-[80px]">
                  <span className="text-[8px] font-black text-[#9CA3AF] uppercase">Sequência</span>
-                 <span className="text-xl font-black text-[#333333]">14 🔥</span>
+                 <span className="text-xl font-black text-[#333333]">{profile?.streak_count || 0} 🔥</span>
               </div>
            </div>
          </header>
@@ -55,9 +109,7 @@ export default function NeumorphicDashboard() {
                     {planoB ? "Vamos fazer apenas 2 minutos de foco?" : "Seu melhor próximo passo"}
                   </h2>
                   <p className="text-[#64748B] font-medium text-lg max-w-xl leading-relaxed">
-                    {planoB 
-                      ? "Sua energia está baixa, então não force. Um micro-passo agora é melhor do que a paralisia total." 
-                      : "Você está em uma boa janela de energia e tem 30 minutos livres. Este é um bom momento para avançar no que mais importa."}
+                    {getDecisionText()}
                   </p>
 
                   <div className="mt-10">
@@ -157,9 +209,19 @@ export default function NeumorphicDashboard() {
                   </div>
                   
                   <div className="space-y-6">
-                     <PrioridadeItem index={1} label="Essencial" title={planoB ? "Ver 1 aba do relatório" : "Finalizar Relatório"} completed={true} />
-                     <PrioridadeItem index={2} label="Importante" title={planoB ? "Responder 1 e-mail" : "Enviar E-mails"} completed={true} />
-                     <PrioridadeItem index={3} label="Opcional" title={planoB ? "Apenas abrir a agenda" : "Planejar Semana"} completed={false} />
+                     {tasks.length > 0 ? (
+                       tasks.map((task, idx) => (
+                         <PrioridadeItem 
+                            key={task.id} 
+                            index={idx + 1} 
+                            label={task.priority_level} 
+                            title={planoB ? `Modo Leve: ${task.title}` : task.title} 
+                            completed={task.completed} 
+                          />
+                       ))
+                     ) : (
+                       <p className="text-xs text-[#9CA3AF]">Nenhuma tarefa definida para hoje.</p>
+                     )}
                   </div>
 
                   <div className="mt-10 pt-8 border-t border-[#F1F5F9] text-center">
