@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { SosModal } from "@/components/sos-modal";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -30,6 +31,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col font-sans">
         {children}
+        <SosModal />
         <Toaster position="top-right" richColors />
       </body>
     </html>
