@@ -126,27 +126,51 @@ export default function OnboardingPage() {
       </button>
     </motion.div>,
 
-    // 3. Life Friction (Vida Pessoal)
-    <motion.div key="friction" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col items-center text-center max-w-4xl w-full">
-      <span className="text-[#9CA3AF] font-bold tracking-[0.3em] uppercase mb-6 text-[10px]">Módulo 03 — Fricção na Vida Pessoal</span>
-      <h2 className="text-4xl font-black text-[#1F2937] tracking-tight mb-8">Qual área pessoal mais sofre com a desorganização?</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
-         <button onClick={() => setSelections({...selections, life_friction: 'casa'})} className={`p-6 rounded-3xl border-2 transition-all text-left flex items-center gap-6 ${selections.life_friction === 'casa' ? 'border-[#1F2937] bg-white shadow-xl' : 'border-[#E5E7EB] hover:border-[#1F2937]/30'}`}>
-            <div className="h-12 w-12 bg-[#F8F9FA] rounded-2xl flex items-center justify-center shrink-0"><CircleCheck className="text-[#84A59D]" /></div>
-            <div>
-              <h4 className="font-bold text-[#1F2937]">Gestão Doméstica</h4>
-              <p className="text-xs text-[#64748B]">Manutenção da casa, alimentação e higiene do ambiente.</p>
-            </div>
-         </button>
-         <button onClick={() => setSelections({...selections, life_friction: 'financas'})} className={`p-6 rounded-3xl border-2 transition-all text-left flex items-center gap-6 ${selections.life_friction === 'financas' ? 'border-[#1F2937] bg-white shadow-xl' : 'border-[#E5E7EB] hover:border-[#1F2937]/30'}`}>
-            <div className="h-12 w-12 bg-[#F8F9FA] rounded-2xl flex items-center justify-center shrink-0"><CircleCheck className="text-[#84A59D]" /></div>
-            <div>
-              <h4 className="font-bold text-[#1F2937]">Saúde e Bem-estar</h4>
-              <p className="text-xs text-[#64748B]">Esquecimento de remédios, consultas e autocuidado básico.</p>
-            </div>
-         </button>
+    // 3. Life Friction (Contextos de Vida)
+    <motion.div key="friction" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col items-center text-center max-w-6xl w-full">
+      <span className="text-[#9CA3AF] font-bold tracking-[0.3em] uppercase mb-6 text-[10px]">Módulo 03 — Fricção e Contextos</span>
+      <h2 className="text-4xl font-black text-[#1F2937] tracking-tight mb-8 leading-tight">Qual área da sua vida mais <br/> sofre com a desorganização?</h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+         <OnboardingChoiceCard 
+           active={selections.life_friction === 'trabalho'} 
+           onClick={() => setSelections({...selections, life_friction: 'trabalho'})}
+           title="Carreira e Prazos" 
+           desc="Projetos atrasados, reuniões perdidas e a sensação de nunca estar em dia." 
+         />
+         <OnboardingChoiceCard 
+           active={selections.life_friction === 'casa'} 
+           onClick={() => setSelections({...selections, life_friction: 'casa'})}
+           title="Gestão Doméstica" 
+           desc="A pilha de louça, a roupa para lavar e a manutenção básica do seu espaço." 
+         />
+         <OnboardingChoiceCard 
+           active={selections.life_friction === 'saude'} 
+           onClick={() => setSelections({...selections, life_friction: 'saude'})}
+           title="Saúde e Rotina" 
+           desc="Esquecer remédios, pular refeições e a luta para manter exercícios." 
+         />
+         <OnboardingChoiceCard 
+           active={selections.life_friction === 'financas'} 
+           onClick={() => setSelections({...selections, life_friction: 'financas'})}
+           title="Vida Financeira" 
+           desc="Contas vencidas, impostos acumulados e o caos nas planilhas e e-mails." 
+         />
+         <OnboardingChoiceCard 
+           active={selections.life_friction === 'social'} 
+           onClick={() => setSelections({...selections, life_friction: 'social'})}
+           title="Social e Afetivo" 
+           desc="Vácuos em mensagens, esquecimento de aniversários e exaustão social." 
+         />
+         <OnboardingChoiceCard 
+           active={selections.life_friction === 'projetos'} 
+           onClick={() => setSelections({...selections, life_friction: 'projetos'})}
+           title="Cenários Diários" 
+           desc="Hobbys abandonados, cursos inacabados e ideias que nunca saem do papel." 
+         />
       </div>
-      <button disabled={!selections.life_friction} onClick={nextStep} className="mt-16 bg-[#1F2937] hover:bg-black disabled:opacity-20 text-white px-12 py-5 rounded-2xl font-bold transition-all shadow-xl">
+
+      <button disabled={!selections.life_friction} onClick={nextStep} className="mt-12 bg-[#1F2937] hover:bg-black disabled:opacity-20 text-white px-12 py-5 rounded-2xl font-black transition-all shadow-xl uppercase tracking-widest text-xs">
         Configurar Tom do Assistente
       </button>
     </motion.div>,
@@ -243,5 +267,24 @@ function ChoiceCard({ icon, title, desc, active, onClick }: { icon: any, title: 
       <h3 className={`font-black text-xl mb-4 tracking-tight ${active ? 'text-[#1F2937]' : 'text-[#333333]'}`}>{title}</h3>
       <p className="text-sm font-medium text-[#64748B] leading-relaxed">{desc}</p>
     </div>
+  );
+}
+
+function OnboardingChoiceCard({ title, desc, active, onClick }: { title: string, desc: string, active: boolean, onClick: () => void }) {
+  return (
+    <button 
+      onClick={onClick} 
+      className={`p-6 rounded-[32px] border-2 transition-all text-left flex items-center gap-6 group ${
+        active ? 'border-[#1F2937] bg-white shadow-xl translate-y-[-2px]' : 'border-[#E5E7EB] bg-white/50 hover:border-[#1F2937]/30'
+      }`}
+    >
+      <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 transition-colors ${active ? 'bg-[#1F2937] text-white' : 'bg-[#F8F9FA] text-[#9CA3AF]'}`}>
+        <CircleCheck className={active ? 'text-[#84A59D]' : ''} />
+      </div>
+      <div>
+        <h4 className="font-black text-[#1F2937] uppercase tracking-tight text-sm mb-1">{title}</h4>
+        <p className="text-[11px] text-[#64748B] font-medium leading-tight">{desc}</p>
+      </div>
+    </button>
   );
 }
