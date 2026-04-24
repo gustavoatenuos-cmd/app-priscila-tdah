@@ -93,8 +93,9 @@ export function Hero195() {
           {/* Decorative Elements */}
           <div className="absolute -top-10 -right-10 h-32 w-32 bg-[#84A59D]/20 rounded-full blur-3xl animate-pulse" />
           <div className="absolute -bottom-10 -left-10 h-40 w-40 bg-[#64748B]/10 rounded-full blur-3xl" />
-        </div>
+        </motion.div>
       </div>
     </section>
   );
 }
+
