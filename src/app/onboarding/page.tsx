@@ -245,7 +245,3 @@ function ChoiceCard({ icon, title, desc, active, onClick }: { icon: any, title: 
     </div>
   );
 }
-48B] leading-relaxed">{desc}</p>
-    </div>
-  );
-}
