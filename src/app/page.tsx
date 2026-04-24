@@ -4,6 +4,7 @@ import { Hero195 } from "@/components/ui/hero-195";
 import { Testimonials } from "@/components/ui/testimonials-columns-1";
 import { AppStoreButton, GooglePlayButton } from "@/components/ui/app-store-button";
 import PricingSection from "@/components/ui/pricing-section-4";
+import RuixenFeaturedImageSection from "@/components/ui/ruixen-featured-image-section";
 import { motion } from "framer-motion";
 import { Zap, Target, Brain, ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -27,6 +28,9 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <Hero195 />
+
+      {/* Featured Experience Section */}
+      <RuixenFeaturedImageSection />
 
       {/* Features Grid */}
       <section className="py-24 bg-white">
