@@ -176,11 +176,10 @@ export default function PlannerPage() {
   );
 
   return (
-    <div className="flex bg-[#F5F5F0] min-h-screen text-[#333333] font-sans overflow-hidden">
-      <Sidebar />
+    <div className="w-full flex flex-col min-h-screen relative">
 
-      <main className="flex-1 w-full flex flex-col min-h-screen relative">
-        <header className="h-20 border-b border-[#E5E7EB] flex items-center justify-between px-8 md:px-12 bg-white/60 backdrop-blur-md sticky top-0 z-30">
+        <header className="h-16 md:h-20 border-b border-[#E5E7EB] flex items-center justify-between px-6 md:px-12 bg-white/60 backdrop-blur-md md:sticky top-0 z-30">
+
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-black tracking-tight text-[#1F2937] uppercase text-xs">Planejamento em Etapas</h1>
           </div>
@@ -348,7 +347,6 @@ export default function PlannerPage() {
             )}
           </AnimatePresence>
         </div>
-      </main>
     </div>
   );
 }

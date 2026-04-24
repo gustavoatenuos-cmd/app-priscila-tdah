@@ -199,10 +199,8 @@ export default function FocusPage() {
   );
 
   return (
-    <div className="flex bg-[#F5F5F0] min-h-screen text-[#333333] font-sans overflow-hidden">
-      <Sidebar />
+    <div className="w-full flex flex-col min-h-screen relative">
 
-      <main className="flex-1 w-full flex flex-col min-h-screen relative">
         
         {/* Background Visual Effects (Dynamic based on stage) */}
         <div className="fixed inset-0 pointer-events-none z-0">
@@ -550,7 +548,6 @@ export default function FocusPage() {
           </AnimatePresence>
 
         </div>
-      </main>
     </div>
   );
 }

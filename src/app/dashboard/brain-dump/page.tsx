@@ -84,10 +84,8 @@ export default function BrainDumpPage() {
   if (loading) return <div className="flex items-center justify-center min-h-screen bg-[#F5F5F0]">Libertando sua mente...</div>;
 
   return (
-    <div className="flex bg-[#F5F5F0] min-h-screen text-[#333333] font-sans">
-      <Sidebar />
+    <div className="px-8 py-10 md:px-14 lg:max-w-4xl mx-auto">
 
-      <main className="flex-1 px-8 py-10 md:px-14 lg:max-w-4xl mx-auto overflow-y-auto">
         <header className="mb-12 text-center">
           <h1 className="text-3xl font-extrabold text-[#1F2937] uppercase tracking-tight">Descarrego Mental</h1>
           <p className="text-[#64748B] font-medium text-lg mt-2">Tire da cabeça, coloque no papel. Sem ordem, sem pressão.</p>
@@ -164,7 +162,6 @@ export default function BrainDumpPage() {
             </div>
           )}
         </div>
-      </main>
     </div>
   );
 }

@@ -140,12 +140,8 @@ export default function NeumorphicDashboard() {
   );
 
   return (
-    <div className="flex bg-[#F5F5F0] min-h-screen text-[#333333] font-sans selection:bg-[#64748B]/20">
-      
-      <Sidebar />
+    <div className="px-6 py-8 md:px-14 lg:max-w-7xl mx-auto">
 
-      {/* MAIN CONTENT DASHBOARD */}
-      <main className="flex-1 px-8 py-10 md:px-14 lg:max-w-7xl mx-auto overflow-y-auto">
          
          <header className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
            <div>
@@ -172,11 +168,12 @@ export default function NeumorphicDashboard() {
          </header>
 
          {/* CAMINHO DO DIA (ETAPAS VISUAIS) */}
-         <div className="grid grid-cols-3 gap-4 mb-10">
+         <div className="grid grid-cols-3 gap-2 md:gap-4 mb-8 md:mb-10">
             <StageCard step={1} label="Planejar" active={stats.totalTasks > 0} current={stats.totalTasks === 0} />
             <StageCard step={2} label="Executar" active={stats.completedTasks > 0} current={stats.totalTasks > 0 && stats.completedTasks < stats.totalTasks} />
             <StageCard step={3} label="Celebrar" active={stats.progress === 100} current={stats.progress === 100} />
          </div>
+
 
          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
@@ -184,22 +181,23 @@ export default function NeumorphicDashboard() {
             <div className="lg:col-span-8 flex flex-col gap-8">
                
                 {/* SEU MELHOR PRÓXIMO PASSO (DYNAMIC) */}
-                <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-[#FFFFFF] rounded-[40px] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-[#84A59D]/20 border-l-[16px] border-l-[#84A59D] relative overflow-hidden group">
+                <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-[#FFFFFF] rounded-[32px] md:rounded-[40px] p-6 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-[#84A59D]/20 border-l-[12px] md:border-l-[16px] border-l-[#84A59D] relative overflow-hidden group">
                    <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                      <Brain className="h-32 w-32" />
+                      <Brain className="h-24 w-24 md:h-32 md:w-32" />
                    </div>
                    
                    <div className="flex items-center gap-3 mb-6">
-                      <div className="h-8 w-14 rounded-xl bg-[#84A59D]/10 flex items-center justify-center text-[#84A59D]">
-                         <Zap className="h-4 w-4" />
+                      <div className="h-6 w-10 md:h-8 md:w-14 rounded-xl bg-[#84A59D]/10 flex items-center justify-center text-[#84A59D]">
+                         <Zap className="h-3 w-3 md:h-4 md:w-4" />
                       </div>
-                      <span className="text-[11px] font-black text-[#84A59D] uppercase tracking-widest">Decisão Inteligente</span>
+                      <span className="text-[10px] md:text-[11px] font-black text-[#84A59D] uppercase tracking-widest">Decisão Inteligente</span>
                    </div>
-
-                   <h2 className="text-3xl font-black text-[#1F2937] mb-3 leading-tight">
+ 
+                   <h2 className="text-2xl md:text-3xl font-black text-[#1F2937] mb-3 leading-tight">
                      {profile?.mindset_profile === 'sobrecarga' ? 'Apenas respire e faça isto:' : 
                       'Seu melhor próximo passo'}
                    </h2>
+
 
                    <div className="flex flex-col sm:flex-row items-center gap-3 mt-8 mb-6 max-w-2xl">
                       <div className="flex items-center gap-3 bg-[#F9FAFB] p-5 rounded-2xl border border-[#E5E7EB] flex-1 w-full">
@@ -420,7 +418,6 @@ export default function NeumorphicDashboard() {
 
             </div>
          </div>
-      </main>
     </div>
   );
 }
@@ -442,13 +439,13 @@ function WellnessBar({ label, value, desc }: { label: string, value: string, des
 
 function PrioridadeItem({ index, label, title, completed }: { index: number, label: string, title: string, completed: boolean }) {
   return (
-    <div className={`flex items-center gap-5 p-5 rounded-[24px] transition-all border ${completed ? 'bg-[#F9FAFB] border-transparent opacity-60' : 'bg-white border-[#E5E7EB]/30 shadow-sm'}`}>
-       <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-black border-2 shrink-0 ${completed ? 'bg-[#84A59D] border-[#84A59D] text-white' : 'border-[#E5E7EB] text-[#9CA3AF]'}`}>
-          {completed ? <CircleCheck className="h-5 w-5" /> : index}
+    <div className={`flex items-center gap-3 md:gap-5 p-4 md:p-5 rounded-[20px] md:rounded-[24px] transition-all border ${completed ? 'bg-[#F9FAFB] border-transparent opacity-60' : 'bg-white border-[#E5E7EB]/30 shadow-sm'}`}>
+       <div className={`h-8 w-8 md:h-10 md:w-10 rounded-full flex items-center justify-center text-xs md:text-sm font-black border-2 shrink-0 ${completed ? 'bg-[#84A59D] border-[#84A59D] text-white' : 'border-[#E5E7EB] text-[#9CA3AF]'}`}>
+          {completed ? <CircleCheck className="h-4 w-4 md:h-5 md:w-5" /> : index}
        </div>
        <div className="flex-1">
-         <span className="text-[9px] font-black uppercase tracking-widest text-[#9CA3AF] block mb-1">{label}</span>
-         <span className={`text-[16px] font-bold ${completed ? 'text-[#9CA3AF] line-through' : 'text-[#333333]'}`}>
+         <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-[#9CA3AF] block mb-0.5 md:mb-1">{label}</span>
+         <span className={`text-sm md:text-[16px] font-bold ${completed ? 'text-[#9CA3AF] line-through' : 'text-[#333333]'}`}>
            {title}
          </span>
        </div>
@@ -456,21 +453,23 @@ function PrioridadeItem({ index, label, title, completed }: { index: number, lab
   );
 }
 
+
 function StageCard({ step, label, active, current }: { step: number, label: string, active: boolean, current: boolean }) {
   return (
-    <div className={`p-4 rounded-[24px] border-2 transition-all flex items-center gap-3 ${
+    <div className={`p-2 md:p-4 rounded-[16px] md:rounded-[24px] border-2 transition-all flex flex-col md:flex-row items-center gap-2 md:gap-3 ${
       current ? 'bg-white border-[#1F2937] shadow-lg' : 
       active ? 'bg-[#84A59D]/10 border-transparent' : 
       'bg-white/40 border-transparent opacity-40'
     }`}>
-       <div className={`h-6 w-6 rounded-lg flex items-center justify-center text-[10px] font-black ${
+       <div className={`h-5 w-5 md:h-6 md:w-6 rounded-lg flex items-center justify-center text-[8px] md:text-[10px] font-black ${
          active || current ? 'bg-[#1F2937] text-white' : 'bg-[#E5E7EB] text-[#9CA3AF]'
        }`}>
          {step}
        </div>
-       <span className={`text-[11px] font-black uppercase tracking-widest ${
+       <span className={`text-[8px] md:text-[11px] font-black uppercase tracking-widest ${
          active || current ? 'text-[#1F2937]' : 'text-[#9CA3AF]'
        }`}>
+
          {label}
        </span>
     </div>

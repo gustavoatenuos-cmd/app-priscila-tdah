@@ -62,18 +62,17 @@ export default function JournalPage() {
   if (loading) return <div className="flex items-center justify-center min-h-screen bg-[#F5F5F0]">Abrindo seu diário...</div>;
 
   return (
-    <div className="flex bg-[#F5F5F0] min-h-screen text-[#333333] font-sans">
-      <Sidebar />
+    <div className="w-full flex flex-col min-h-screen">
 
-      <main className="flex-1 w-full flex flex-col min-h-screen overflow-y-auto">
-        <header className="h-20 border-b border-[#E5E7EB] flex items-center justify-between px-8 md:px-12 bg-white/60 backdrop-blur-md sticky top-0 z-30">
-          <h1 className="text-2xl font-bold tracking-tight text-[#1F2937]">Journal & Gratidão</h1>
+        <header className="h-auto py-4 md:h-20 border-b border-[#E5E7EB] flex flex-col md:flex-row items-center justify-between px-6 md:px-12 bg-white/60 backdrop-blur-md md:sticky top-0 z-30 gap-4">
+          <h1 className="text-xl md:text-2xl font-bold tracking-tight text-[#1F2937]">Journal & Gratidão</h1>
           <button 
             onClick={handleSave}
-            className="bg-[#1F2937] text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-black/10 flex items-center gap-2"
+            className="w-full md:w-auto bg-[#1F2937] text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-black/10 flex items-center justify-center gap-2"
           >
              <Save className="h-4 w-4" /> Salvar Reflexão
           </button>
+
         </header>
 
         <div className="p-8 md:p-12 max-w-5xl mx-auto w-full space-y-12 pb-24">
@@ -156,7 +155,6 @@ export default function JournalPage() {
            </motion.div>
 
         </div>
-      </main>
     </div>
   );
 }

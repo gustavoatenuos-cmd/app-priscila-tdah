@@ -98,13 +98,12 @@ export default function AnalyticsPage() {
   if (loading) return <div className="flex items-center justify-center min-h-screen bg-[#F5F5F0]">Analisando seus padrões...</div>;
 
   return (
-    <div className="flex bg-[#F5F5F0] min-h-screen text-[#333333] font-sans">
-      <Sidebar />
+    <div className="w-full flex flex-col min-h-screen">
 
-      <main className="flex-1 w-full flex flex-col min-h-screen overflow-y-auto">
-        <header className="h-20 border-b border-[#E5E7EB] flex items-center px-8 md:px-12 bg-white/60 backdrop-blur-md sticky top-0 z-30">
-          <h1 className="text-2xl font-bold tracking-tight text-[#1F2937]">Métricas que Fazem Sentido</h1>
+        <header className="h-auto py-4 md:h-20 border-b border-[#E5E7EB] flex items-center px-6 md:px-12 bg-white/60 backdrop-blur-md md:sticky top-0 z-30">
+          <h1 className="text-xl md:text-2xl font-bold tracking-tight text-[#1F2937]">Métricas que Fazem Sentido</h1>
         </header>
+
 
         <div className="p-8 md:p-12 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
           
@@ -199,7 +198,6 @@ export default function AnalyticsPage() {
           </div>
 
         </div>
-      </main>
     </div>
   );
 }

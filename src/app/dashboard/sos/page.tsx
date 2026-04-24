@@ -83,13 +83,11 @@ export default function SOSPage() {
   ];
 
   return (
-    <div className="flex bg-[#F5F5F0] min-h-screen text-[#333333] font-sans">
-      <Sidebar />
-      <main className="flex-1 flex flex-col items-center justify-center p-8">
+    <div className="flex-1 flex flex-col items-center justify-center p-8">
+
         <AnimatePresence mode="wait">
           {steps[step]}
         </AnimatePresence>
-      </main>
     </div>
   );
 }

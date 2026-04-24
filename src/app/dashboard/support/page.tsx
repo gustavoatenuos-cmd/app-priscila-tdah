@@ -89,10 +89,8 @@ export default function SupportPage() {
   };
 
   return (
-    <div className="flex bg-[#F5F5F0] min-h-screen text-[#333333] font-sans overflow-hidden">
-      <Sidebar />
+    <div className="flex-1 w-full flex flex-col h-screen relative">
 
-      <main className="flex-1 w-full flex flex-col h-screen relative">
         
         <header className="h-20 border-b border-[#E5E7EB] flex items-center justify-between px-8 md:px-12 bg-white/60 backdrop-blur-md z-30">
           <div className="flex items-center gap-4">
@@ -197,7 +195,6 @@ export default function SupportPage() {
           </div>
         </div>
 
-      </main>
     </div>
   );
 }
