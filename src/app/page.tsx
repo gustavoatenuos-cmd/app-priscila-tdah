@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Brain, CheckCircle, Sparkles, Zap, Shield, Target, Clock, MessageSquare, Activity } from "lucide-react";
+import { ArrowRight, Brain, CircleCheck, Sparkles, Zap, Shield, Target, Clock, MessageSquare, Activity } from "lucide-react";
 import Link from "next/link";
 
 export default function Home() {

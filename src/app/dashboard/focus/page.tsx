@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Target, Play, Square, Droplet, Wind, Music, Sparkles, CheckCircle2, Sidebar as SidebarIcon } from "lucide-react";
+import { Target, Play, Square, Droplet, Wind, Music, Sparkles, CircleCheck, Sidebar as SidebarIcon } from "lucide-react";
 import { Sidebar } from "@/components/sidebar";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -145,7 +145,7 @@ export default function FocusPage() {
                 className="bg-white rounded-[40px] p-12 shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-[#E5E7EB]/50 w-full max-w-xl text-center"
               >
                 <div className="h-20 w-20 bg-[#84A59D]/10 rounded-full flex items-center justify-center mx-auto mb-8 text-[#84A59D]">
-                  <CheckCircle2 className="h-10 w-10" />
+                  <CircleCheck className="h-10 w-10" />
                 </div>
                 <h2 className="text-3xl font-black text-[#1F2937] mb-2">Sessão Finalizada!</h2>
                 <p className="text-[#64748B] font-medium mb-10 text-lg">Como você se sentiu saindo dessa sessão?</p>

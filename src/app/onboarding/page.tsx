@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Check, Heart, Battery, Brain, Sparkles, Sunset, Moon, Sun, Shield, Target, Zap, Clock, CheckCircle } from "lucide-react";
+import { ArrowRight, Check, Heart, Battery, Brain, Sparkles, Sunset, Moon, Sun, Shield, Target, Zap, Clock, CircleCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -132,14 +132,14 @@ export default function OnboardingPage() {
       <h2 className="text-4xl font-black text-[#1F2937] tracking-tight mb-8">Qual área pessoal mais sofre com a desorganização?</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
          <button onClick={() => setSelections({...selections, life_friction: 'casa'})} className={`p-6 rounded-3xl border-2 transition-all text-left flex items-center gap-6 ${selections.life_friction === 'casa' ? 'border-[#1F2937] bg-white shadow-xl' : 'border-[#E5E7EB] hover:border-[#1F2937]/30'}`}>
-            <div className="h-12 w-12 bg-[#F8F9FA] rounded-2xl flex items-center justify-center shrink-0"><CheckCircle className="text-[#84A59D]" /></div>
+            <div className="h-12 w-12 bg-[#F8F9FA] rounded-2xl flex items-center justify-center shrink-0"><CircleCheck className="text-[#84A59D]" /></div>
             <div>
               <h4 className="font-bold text-[#1F2937]">Gestão Doméstica</h4>
               <p className="text-xs text-[#64748B]">Manutenção da casa, alimentação e higiene do ambiente.</p>
             </div>
          </button>
          <button onClick={() => setSelections({...selections, life_friction: 'financas'})} className={`p-6 rounded-3xl border-2 transition-all text-left flex items-center gap-6 ${selections.life_friction === 'financas' ? 'border-[#1F2937] bg-white shadow-xl' : 'border-[#E5E7EB] hover:border-[#1F2937]/30'}`}>
-            <div className="h-12 w-12 bg-[#F8F9FA] rounded-2xl flex items-center justify-center shrink-0"><CheckCircle className="text-[#84A59D]" /></div>
+            <div className="h-12 w-12 bg-[#F8F9FA] rounded-2xl flex items-center justify-center shrink-0"><CircleCheck className="text-[#84A59D]" /></div>
             <div>
               <h4 className="font-bold text-[#1F2937]">Saúde e Bem-estar</h4>
               <p className="text-xs text-[#64748B]">Esquecimento de remédios, consultas e autocuidado básico.</p>

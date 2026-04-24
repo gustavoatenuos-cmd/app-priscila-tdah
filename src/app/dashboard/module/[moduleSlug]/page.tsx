@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowLeft, BookOpen, BrainCircuit, CheckCircle2, FileText, Target } from "lucide-react";
+import { ArrowLeft, BookOpen, BrainCircuit, CircleCheck, FileText, Target } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -102,7 +102,7 @@ export default function DynamicModulePage({ params }: { params: Promise<{ module
                 onChange={(e) => setNotes(e.target.value)}
               />
               <div className="flex justify-between items-center pt-4">
-                <span className="text-xs text-muted-foreground flex items-center"><CheckCircle2 className="h-3 w-3 mr-1"/> Salvo automaticamente</span>
+                <span className="text-xs text-muted-foreground flex items-center"><CircleCheck className="h-3 w-3 mr-1"/> Salvo automaticamente</span>
                 <Button size="lg" variant="secondary" className="rounded-full" onClick={() => setActiveTab("quiz")}>
                   Ir para a Prática
                 </Button>

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle2, Clock, Brain, Zap, ArrowRight, Sparkles } from "lucide-react";
+import { CircleCheck, Clock, Brain, Zap, ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -426,7 +426,7 @@ function PrioridadeItem({ index, label, title, completed }: { index: number, lab
   return (
     <div className={`flex items-center gap-5 p-5 rounded-[24px] transition-all border ${completed ? 'bg-[#F9FAFB] border-transparent opacity-60' : 'bg-white border-[#E5E7EB]/30 shadow-sm'}`}>
        <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-black border-2 shrink-0 ${completed ? 'bg-[#84A59D] border-[#84A59D] text-white' : 'border-[#E5E7EB] text-[#9CA3AF]'}`}>
-          {completed ? <CheckCircle2 className="h-5 w-5" /> : index}
+          {completed ? <CircleCheck className="h-5 w-5" /> : index}
        </div>
        <div className="flex-1">
          <span className="text-[9px] font-black uppercase tracking-widest text-[#9CA3AF] block mb-1">{label}</span>

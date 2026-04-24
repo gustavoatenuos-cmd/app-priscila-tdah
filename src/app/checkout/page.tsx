@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle2, Sparkles, ArrowRight } from "lucide-react";
+import { CircleCheck, Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
@@ -44,7 +44,7 @@ function CheckoutSuccessContent() {
           transition={{ type: "spring", delay: 0.2 }}
           className="h-24 w-24 bg-[#84A59D]/10 rounded-full flex items-center justify-center mx-auto mb-10 text-[#84A59D]"
         >
-          <CheckCircle2 className="h-12 w-12" />
+          <CircleCheck className="h-12 w-12" />
         </motion.div>
 
         <span className="text-[10px] font-black text-[#84A59D] uppercase tracking-[0.3em] mb-4 block">
