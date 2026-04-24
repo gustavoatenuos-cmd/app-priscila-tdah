@@ -13,15 +13,19 @@ export function SosModal() {
   // Controle do Timer
   useEffect(() => {
     let timerId: NodeJS.Timeout;
-    if (step === "timer" && timeLeft > 0) {
+    if (step === "timer") {
       timerId = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            setStep("success");
+            return 0;
+          }
+          return prev - 1;
+        });
       }, 1000);
-    } else if (step === "timer" && timeLeft === 0) {
-      setStep("success");
     }
     return () => clearInterval(timerId);
-  }, [step, timeLeft]);
+  }, [step]);
 
   const handleOpen = () => {
     setIsOpen(true);
@@ -121,7 +125,7 @@ export function SosModal() {
                   </div>
                   <h2 className="text-3xl font-extrabold text-[#1F2937] tracking-tight mb-4">A Pedra, não a Montanha.</h2>
                   <p className="text-[#64748B] text-lg font-medium mb-8 max-w-md mx-auto">
-                    Esqueça o resto. Qual é o primeiro micro passo absoluto que pode ser feito em 2 minutos? (Ex: "Abrir o Word", "Pegar um copo d'água", "Ler 1 parágrafo").
+                    Esqueça o resto. Qual é o primeiro micro passo absoluto que pode ser feito em 2 minutos? (Ex: &quot;Abrir o Word&quot;, &quot;Pegar um copo d&apos;água&quot;, &quot;Ler 1 parágrafo&quot;).
                   </p>
                   
                   <div className="w-full relative">
@@ -149,7 +153,7 @@ export function SosModal() {
                 <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center w-full">
                   <span className="text-[#9CA3AF] font-bold tracking-widest uppercase mb-4 text-sm">Apenas isso importa agora</span>
                   <h2 className="text-2xl font-extrabold text-[#333333] mb-12 bg-white px-6 py-4 rounded-xl shadow-sm border border-[#E5E7EB] w-full text-center">
-                    "{taskName}"
+                    &quot;{taskName}&quot;
                   </h2>
                   
                   <div className="text-9xl font-black text-[#1F2937] font-mono tracking-tighter mb-12 tabular-nums">

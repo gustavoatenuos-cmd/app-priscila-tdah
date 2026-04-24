@@ -1,122 +1,103 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { CheckCircle2, CreditCard, Lock } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { CheckCircle2, Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { supabase } from "@/lib/supabase";
 
-export default function CheckoutPage() {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const router = useRouter();
+function CheckoutSuccessContent() {
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get("session_id");
+  const [userName, setUserName] = useState("");
 
-  const handlePayment = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsProcessing(true);
-    
-    // Simulação de gateway de pagamento (ex: Mercado Pago / Stripe)
-    setTimeout(() => {
-      setIsProcessing(false);
-      toast.success("Pagamento Aprovado!", {
-        description: "Seu acesso completo ao app foi liberado."
-      });
-      router.push("/dashboard");
-    }, 2000);
-  };
+  useEffect(() => {
+    async function loadUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", user.id)
+          .single();
+        if (data?.full_name) {
+          setUserName(data.full_name.split(" ")[0]);
+        }
+      }
+    }
+    loadUser();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-muted/20 flex items-center justify-center p-4">
-      <div className="max-w-4xl w-full grid md:grid-cols-2 gap-8 items-start">
-        
-        {/* Product Info */}
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="space-y-6"
-        >
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Desbloqueie sua Mente</h1>
-            <p className="text-muted-foreground">O acesso vitalício a todo o ecossistema NeuroMente.</p>
-          </div>
-
-          <Card className="border-primary/20 bg-primary/5 shadow-none pb-2">
-            <CardHeader>
-              <CardTitle className="text-lg">Plano Premium (Acesso Total)</CardTitle>
-              <div className="text-3xl font-bold mt-2">R$ 97,00<span className="text-sm text-muted-foreground font-normal"> / único</span></div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {[
-                "Planner do TDAH Completo",
-                "Desafio de 365 Dias",
-                "A Mágica da Neuroplasticidade",
-                "Notificações diárias no WhatsApp",
-                "Suporte prioritário"
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium">{item}</span>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Payment Form */}
+    <div className="min-h-screen bg-[#F5F5F0] flex items-center justify-center p-6">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="bg-white rounded-[48px] p-16 shadow-[0_30px_80px_rgba(0,0,0,0.05)] border border-[#E5E7EB]/50 max-w-xl w-full text-center"
+      >
+        {/* Ícone de sucesso */}
         <motion.div
-           initial={{ opacity: 0, x: 20 }}
-           animate={{ opacity: 1, x: 0 }}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", delay: 0.2 }}
+          className="h-24 w-24 bg-[#84A59D]/10 rounded-full flex items-center justify-center mx-auto mb-10 text-[#84A59D]"
         >
-          <Card className="shadow-lg border-muted">
-            <CardHeader className="text-center">
-              <div className="flex justify-center mb-4 text-primary">
-                <Lock className="h-8 w-8" />
-              </div>
-              <CardTitle>Pagamento Seguro</CardTitle>
-              <CardDescription>Criptografia de ponta a ponta</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handlePayment} className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Nome no Cartão</Label>
-                  <Input required placeholder="Ex: PRISCILA M" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Número do Cartão</Label>
-                  <div className="relative">
-                    <CreditCard className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input required className="pl-9" placeholder="0000 0000 0000 0000" maxLength={19} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Validade</Label>
-                    <Input required placeholder="MM/AA" maxLength={5} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>CVC</Label>
-                    <Input required placeholder="123" maxLength={4} type="password" />
-                  </div>
-                </div>
-
-                <Button className="w-full mt-6 h-12 text-base font-bold shadow-md hover:shadow-lg transition-all" disabled={isProcessing}>
-                  {isProcessing ? "Processando..." : "Confirmar Pagamento Seguro"}
-                </Button>
-              </form>
-            </CardContent>
-            <CardFooter className="justify-center pt-2 pb-6">
-              <span className="text-xs text-muted-foreground text-center">
-                Pagamento processado via ambiente seguro (Stripe/Mercado Pago)
-              </span>
-            </CardFooter>
-          </Card>
+          <CheckCircle2 className="h-12 w-12" />
         </motion.div>
 
-      </div>
+        <span className="text-[10px] font-black text-[#84A59D] uppercase tracking-[0.3em] mb-4 block">
+          Pagamento Confirmado
+        </span>
+
+        <h1 className="text-4xl font-black text-[#1F2937] tracking-tight mb-4 leading-tight">
+          {userName ? `${userName}, você é Premium!` : "Você é Premium!"}
+        </h1>
+
+        <p className="text-[#64748B] text-lg font-medium leading-relaxed mb-12">
+          Seu acesso completo ao TDAH Constante foi liberado. Todos os recursos estão disponíveis agora — sem limites, sem fricção.
+        </p>
+
+        {/* O que foi desbloqueado */}
+        <div className="bg-[#F9FAFB] rounded-[28px] p-8 text-left mb-12 space-y-4">
+          {[
+            "Sincronização com Google Agenda",
+            "Analytics de Humor e Energia",
+            "Sessões de Foco Ilimitadas",
+            "Novos Módulos SOS Destravar",
+            "Suporte Prioritário por E-mail",
+          ].map((item) => (
+            <div key={item} className="flex items-center gap-3">
+              <div className="h-5 w-5 rounded-full bg-[#84A59D]/10 flex items-center justify-center shrink-0">
+                <Sparkles className="h-3 w-3 text-[#84A59D]" />
+              </div>
+              <span className="text-sm font-bold text-[#333333]">{item}</span>
+            </div>
+          ))}
+        </div>
+
+        <Link
+          href="/dashboard"
+          className="w-full bg-[#1F2937] hover:bg-black text-white py-5 rounded-[20px] font-bold text-lg transition-all shadow-xl shadow-black/10 flex items-center justify-center gap-3"
+        >
+          Ir para o Dashboard <ArrowRight className="h-5 w-5" />
+        </Link>
+
+        {sessionId && (
+          <p className="mt-6 text-[10px] text-[#9CA3AF] font-mono">
+            Ref: {sessionId.slice(0, 20)}...
+          </p>
+        )}
+      </motion.div>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#F5F5F0] text-[#64748B] font-bold">Confirmando pagamento...</div>}>
+      <CheckoutSuccessContent />
+    </Suspense>
   );
 }

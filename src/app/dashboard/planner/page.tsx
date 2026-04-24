@@ -1,8 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowLeft, BookOpen, Calendar, CheckSquare, LayoutDashboard, Target, Plus, Check, Brain, Sparkles, Inbox } from "lucide-react";
-import Link from "next/link";
+import { Target, Plus, Check, Sparkles, Inbox } from "lucide-react";
+
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { supabase } from "@/lib/supabase";
@@ -51,23 +51,25 @@ export default function PlannerPage() {
     }
   };
 
+  const [newTaskInput, setNewTaskInput] = useState<{ [key: string]: string }>({ essencial: "", importante: "", opcional: "" });
+
   const addQuickTask = async (level: string) => {
     const { data: { user } } = await supabase.auth.getUser();
-    const title = window.prompt(`Nova tarefa ${level}:`);
-    if (!title || !user) return;
+    const title = newTaskInput[level];
+    if (!title?.trim() || !user) return;
 
-    const { data, error } = await supabase.from('tasks').insert({
+    const { error } = await supabase.from('tasks').insert({
       user_id: user.id,
-      title,
+      title: title.trim(),
       priority_level: level
-    }).select().single();
+    });
 
     if (error) {
       toast.error("Erro ao adicionar");
     } else {
+      setNewTaskInput({ ...newTaskInput, [level]: "" });
       loadTasks();
       
-      // Automação Google Calendar para tarefas Essenciais
       if (level === 'essencial') {
          const synced = await syncTaskToGoogleCalendar({ title });
          if (synced) toast.success("Sincronizado com seu Google Agenda!");
@@ -75,7 +77,7 @@ export default function PlannerPage() {
     }
   };
 
-  if (loading) return <div className="flex items-center justify-center min-h-screen bg-[#F5F5F0]">Carregando seu plano...</div>;
+  if (loading) return <div className="flex items-center justify-center min-h-screen bg-[#F5F5F0] text-[#64748B] font-bold">Carregando seu plano...</div>;
 
   return (
     <div className="flex bg-[#F5F5F0] min-h-screen text-[#333333] font-sans">
@@ -110,23 +112,47 @@ export default function PlannerPage() {
                     <section>
                        <div className="flex justify-between items-center mb-4">
                           <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-[0.2em]">1. A Essencial (Obrigatório completar hoje)</label>
-                          <button onClick={() => addQuickTask('essencial')} className="text-[#84A59D] hover:text-[#6c8c84]"><Plus className="h-4 w-4" /></button>
                        </div>
-                       {essencial.length > 0 ? essencial.map(task => (
-                          <PlannerItem key={task.id} task={task} onToggle={() => toggleTask(task.id, task.completed)} />
-                       )) : <p className="text-[11px] text-[#9CA3AF] italic">Nada definido ainda.</p>}
+                       <div className="space-y-3">
+                          {essencial.map(task => (
+                             <PlannerItem key={task.id} task={task} onToggle={() => toggleTask(task.id, task.completed)} />
+                          ))}
+                          <div className="flex gap-3">
+                             <input 
+                                value={newTaskInput.essencial}
+                                onChange={(e) => setNewTaskInput({...newTaskInput, essencial: e.target.value})}
+                                onKeyDown={(e) => e.key === 'Enter' && addQuickTask('essencial')}
+                                placeholder="Adicionar tarefa essencial..."
+                                className="flex-1 bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-5 py-4 text-sm font-bold text-[#1F2937] focus:outline-none focus:border-[#84A59D] transition-all"
+                             />
+                             <button onClick={() => addQuickTask('essencial')} className="bg-[#84A59D] text-white p-4 rounded-2xl hover:bg-[#6c8c84] transition-all shadow-sm">
+                                <Plus className="h-5 w-5" />
+                             </button>
+                          </div>
+                       </div>
                     </section>
 
                     {/* 2 IMPORTANTES */}
                     <section>
                        <div className="flex justify-between items-center mb-4">
                           <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-[0.2em]">2. As Importantes (Dão ritmo ao dia)</label>
-                          <button onClick={() => addQuickTask('importante')} className="text-[#84A59D] hover:text-[#6c8c84]"><Plus className="h-4 w-4" /></button>
                        </div>
                        <div className="space-y-3">
-                          {importantes.length > 0 ? importantes.map(task => (
+                          {importantes.map(task => (
                              <PlannerItem key={task.id} task={task} onToggle={() => toggleTask(task.id, task.completed)} />
-                          )) : <p className="text-[11px] text-[#9CA3AF] italic">Nenhuma importante definida.</p>}
+                          ))}
+                          <div className="flex gap-3">
+                             <input 
+                                value={newTaskInput.importante}
+                                onChange={(e) => setNewTaskInput({...newTaskInput, importante: e.target.value})}
+                                onKeyDown={(e) => e.key === 'Enter' && addQuickTask('importante')}
+                                placeholder="Adicionar tarefa importante..."
+                                className="flex-1 bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-5 py-4 text-sm font-bold text-[#1F2937] focus:outline-none focus:border-[#84A59D] transition-all"
+                             />
+                             <button onClick={() => addQuickTask('importante')} className="bg-[#64748B] text-white p-4 rounded-2xl hover:bg-[#475569] transition-all shadow-sm">
+                                <Plus className="h-5 w-5" />
+                             </button>
+                          </div>
                        </div>
                     </section>
 
@@ -134,12 +160,23 @@ export default function PlannerPage() {
                     <section>
                        <div className="flex justify-between items-center mb-4">
                           <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-[0.2em]">3. As Opcionais (Se sobrar energia)</label>
-                          <button onClick={() => addQuickTask('opcional')} className="text-[#84A59D] hover:text-[#6c8c84]"><Plus className="h-4 w-4" /></button>
                        </div>
                        <div className="space-y-3">
-                          {opcionais.length > 0 ? opcionais.map(task => (
+                          {opcionais.map(task => (
                              <PlannerItem key={task.id} task={task} onToggle={() => toggleTask(task.id, task.completed)} />
-                          )) : <p className="text-[11px] text-[#9CA3AF] italic">Opcionais vazias por enquanto.</p>}
+                          ))}
+                          <div className="flex gap-3">
+                             <input 
+                                value={newTaskInput.opcional}
+                                onChange={(e) => setNewTaskInput({...newTaskInput, opcional: e.target.value})}
+                                onKeyDown={(e) => e.key === 'Enter' && addQuickTask('opcional')}
+                                placeholder="Adicionar tarefa opcional..."
+                                className="flex-1 bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-5 py-4 text-sm font-bold text-[#1F2937] focus:outline-none focus:border-[#84A59D] transition-all"
+                             />
+                             <button onClick={() => addQuickTask('opcional')} className="bg-[#9CA3AF] text-white p-4 rounded-2xl hover:bg-[#64748B] transition-all shadow-sm">
+                                <Plus className="h-5 w-5" />
+                             </button>
+                          </div>
                        </div>
                     </section>
                  </div>

@@ -3,9 +3,26 @@
 import { Home, CheckSquare, Target, BarChart2, BookOpen, Brain, Crown, Zap } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const [streak, setStreak] = useState<number | null>(null);
+
+  useEffect(() => {
+    async function loadStreak() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from('profiles')
+        .select('streak_count')
+        .eq('id', user.id)
+        .single();
+      if (data) setStreak(data.streak_count ?? 0);
+    }
+    loadStreak();
+  }, []);
 
   const navItems = [
     { href: "/dashboard", icon: Home, label: "Início" },
@@ -28,9 +45,9 @@ export function Sidebar() {
               {isActive && (
                 <div className="bg-[#64748B] w-2 h-8 rounded-r-lg absolute -left-10 transition-all"></div>
               )}
-              <item.icon 
-                className={`h-6 w-6 transition-colors ${isActive ? 'text-[#64748B]' : 'text-[#9CA3AF] group-hover:text-[#64748B]'}`} 
-                strokeWidth={isActive ? 2.5 : 2} 
+              <item.icon
+                className={`h-6 w-6 transition-colors ${isActive ? 'text-[#64748B]' : 'text-[#9CA3AF] group-hover:text-[#64748B]'}`}
+                strokeWidth={isActive ? 2.5 : 2}
               />
               <span className={`text-[10px] font-bold transition-colors ${isActive ? 'text-[#64748B]' : 'text-[#9CA3AF] group-hover:text-[#64748B]'}`}>
                 {item.label}
@@ -40,10 +57,12 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Streak Block - Mocked for now */}
+      {/* Streak Block — Dinâmico */}
       <div className="bg-[#FFFFFF] border border-[#E5E7EB] rounded-2xl flex flex-col items-center justify-center p-3 shadow-[0_4px_15_rgba(0,0,0,0.02)]">
         <span className="text-[7.5px] font-bold text-[#9CA3AF] uppercase text-center leading-tight tracking-wider">Sequência<br/>Atual</span>
-        <span className="text-2xl font-black text-[#333333] font-mono mt-1">14</span>
+        <span className="text-2xl font-black text-[#333333] font-mono mt-1">
+          {streak === null ? "—" : streak}
+        </span>
         <span className="text-[9px] font-bold text-[#9CA3AF] uppercase">Dias</span>
       </div>
     </aside>

@@ -23,7 +23,7 @@ export default function BrainDumpPage() {
 
     const { data } = await supabase
       .from('brain_dump')
-      .select('*')
+      .select('id, content, category, processed, created_at')
       .eq('user_id', user.id)
       .eq('processed', false)
       .order('created_at', { ascending: false });

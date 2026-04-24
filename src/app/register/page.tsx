@@ -56,20 +56,29 @@ export default function RegisterPage() {
       return;
     }
 
-    // In Next.js App Router, signUp might auto-login or require confirmation
-    toast.success("Conta criada! Verifique seu e-mail.");
-    
-    // Create initial profile
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .insert([
-        { id: data.user?.id, full_name: name }
-      ]);
+    // Create a complete initial profile with all required fields
+    if (data.user) {
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: data.user.id,
+          full_name: name,
+          whatsapp: whatsapp,
+          email: email,
+          streak_count: 0,
+          is_premium: false,
+          energy_level: 'alta',
+          mindset_profile: 'hiperfoco',
+          peak_time: 'manha',
+          interaction_tone: 'acolhedor',
+        });
 
-    if (profileError) {
-       console.error("Erro ao criar perfil:", profileError);
+      if (profileError) {
+        console.error("Erro ao criar perfil:", profileError);
+      }
     }
 
+    toast.success("Conta criada! Agora vamos personalizar sua experiência.");
     setIsLoading(false);
     router.push("/onboarding");
   }
@@ -163,7 +172,7 @@ export default function RegisterPage() {
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="flex flex-col items-center justify-center border-t border-border/40 p-6 bg-muted/20">
+          <CardFooter className="flex flex-col items-center justify-center border-t border-border/40 p-6 bg-muted/20 gap-4">
             <p className="text-xs text-muted-foreground text-center">
               Ao se cadastrar, você concorda com nossos{" "}
               <Link href="#" className="underline hover:text-primary">
@@ -173,6 +182,12 @@ export default function RegisterPage() {
               <Link href="#" className="underline hover:text-primary">
                 Política de Privacidade
               </Link>.
+            </p>
+            <p className="text-sm font-medium text-muted-foreground">
+              Já tem conta?{" "}
+              <Link href="/dashboard" className="text-primary font-bold underline hover:no-underline">
+                Entrar
+              </Link>
             </p>
           </CardFooter>
         </Card>

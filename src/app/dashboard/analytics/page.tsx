@@ -1,45 +1,101 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowLeft, Target, TrendingUp, Zap, Clock, Brain, Heart, Battery, Sparkles, Sidebar as SidebarIcon } from "lucide-react";
-import Link from "next/link";
+import { Target, Clock, Heart, Battery, Sparkles, Sidebar as SidebarIcon } from "lucide-react";
 import { 
   Radar, 
   RadarChart, 
   PolarGrid, 
   PolarAngleAxis, 
-  PolarRadiusAxis, 
   ResponsiveContainer,
   Tooltip,
   BarChart,
   Bar,
-  XAxis,
-  YAxis,
   CartesianGrid,
   Cell
 } from "recharts";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/sidebar";
+import { supabase } from "@/lib/supabase";
 
 export default function AnalyticsPage() {
-  const [radarData] = useState([
-    { subject: "Foco", A: 80, fullMark: 100 },
-    { subject: "Rotina", A: 65, fullMark: 100 },
-    { subject: "Saúde", A: 90, fullMark: 100 },
-    { subject: "Lazer", A: 50, fullMark: 100 },
-    { subject: "Mindset", A: 75, fullMark: 100 },
-    { subject: "Estudos", A: 85, fullMark: 100 },
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    focusEfficiency: 0,
+    concluionRate: 0,
+    totalMinutes: 0,
+    streak: 0
+  });
+
+  const [radarData, setRadarData] = useState([
+    { subject: "Foco", A: 0, fullMark: 100 },
+    { subject: "Rotina", A: 0, fullMark: 100 },
+    { subject: "Saúde", A: 0, fullMark: 100 },
+    { subject: "Lazer", A: 0, fullMark: 100 },
+    { subject: "Mindset", A: 0, fullMark: 100 },
+    { subject: "Estudos", A: 0, fullMark: 100 },
   ]);
 
-  const energyData = [
-    { hour: "8h", level: 80 },
-    { hour: "10h", level: 95 },
-    { hour: "12h", level: 60 },
-    { hour: "14h", level: 40 },
-    { hour: "16h", level: 75 },
-    { hour: "18h", level: 85 },
-    { hour: "20h", level: 50 },
-  ];
+  const [energyData, setEnergyData] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function loadAnalytics() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // 1. Fetch Profile for streak
+      const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+
+      // 2. Fetch Tasks for completion rate
+      const { data: tasks } = await supabase.from('tasks').select('*').eq('user_id', user.id);
+      const totalTasks = tasks?.length || 0;
+      const completedTasks = tasks?.filter(t => t.completed).length || 0;
+      const rate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+      // 3. Fetch Focus Sessions
+      const { data: sessions } = await supabase.from('focus_sessions').select('*').eq('user_id', user.id);
+      const totalMins = sessions?.reduce((acc, curr) => acc + (curr.duration_minutes || 0), 0) || 0;
+      
+      // Calculate efficiency: (duration / (duration + distractions*5)) - just a mock logic
+      const totalDistractions = sessions?.reduce((acc, curr) => acc + (curr.distractions_count || 0), 0) || 0;
+      const efficiency = totalMins > 0 ? Math.max(0, 100 - (totalDistractions * 10)) : 0;
+
+      setStats({
+        focusEfficiency: efficiency,
+        concluionRate: rate,
+        totalMinutes: totalMins,
+        streak: profile?.streak_count || 0
+      });
+
+      // Update Radar Data (Simulated based on categories or just randomizing for now based on real rate)
+      setRadarData([
+        { subject: "Foco", A: efficiency, fullMark: 100 },
+        { subject: "Rotina", A: rate, fullMark: 100 },
+        { subject: "Saúde", A: 70, fullMark: 100 },
+        { subject: "Lazer", A: 40, fullMark: 100 },
+        { subject: "Mindset", A: 75, fullMark: 100 },
+        { subject: "Estudos", A: 85, fullMark: 100 },
+      ]);
+
+      // Energy Data (Mocking a curve based on user's peak_time)
+      const peak = profile?.peak_time || 'manha';
+      const baseEnergy = [
+        { hour: "8h", level: peak === 'manha' ? 90 : 60 },
+        { hour: "10h", level: peak === 'manha' ? 95 : 70 },
+        { hour: "12h", level: 60 },
+        { hour: "14h", level: 40 },
+        { hour: "16h", level: peak === 'tarde' ? 90 : 70 },
+        { hour: "18h", level: peak === 'noite' ? 80 : 85 },
+        { hour: "20h", level: peak === 'noite' ? 95 : 50 },
+      ];
+      setEnergyData(baseEnergy);
+
+      setLoading(false);
+    }
+    loadAnalytics();
+  }, []);
+
+  if (loading) return <div className="flex items-center justify-center min-h-screen bg-[#F5F5F0]">Analisando seus padrões...</div>;
 
   return (
     <div className="flex bg-[#F5F5F0] min-h-screen text-[#333333] font-sans">
@@ -58,11 +114,13 @@ export default function AnalyticsPage() {
                <Sparkles className="h-10 w-10" />
             </div>
             <div>
-               <h2 className="text-2xl font-black text-[#1F2937] mb-2 leading-tight">Você é uma máquina de foco matinal! ☀️</h2>
+               <h2 className="text-2xl font-black text-[#1F2937] mb-2 leading-tight">
+                 {stats.concluionRate > 70 ? "Sua consistência está incrível! 🚀" : "Cada micro-passo é uma vitória. 🌿"}
+               </h2>
                <p className="text-[#64748B] font-medium text-lg leading-relaxed">
-                 Percebemos que sua frequência de conclusão é <span className="text-[#84A59D] font-bold">45% maior entre 8h e 11h</span>. 
-                 Nos dias que você usou o **Plano B**, sua ansiedade caiu e você terminou a semana com mais energia acumulada do que na semana passada. 
-                 Continue assim: a constância vence a velocidade.
+                 Sua taxa de conclusão atual é de <span className="text-[#84A59D] font-bold">{stats.concluionRate}%</span>. 
+                 Você já acumulou <span className="text-[#84A59D] font-bold">{stats.totalMinutes} minutos</span> de foco profundo.
+                 {stats.streak > 0 ? ` Sua sequência de ${stats.streak} dias mostra que você está construindo novos caminhos neurais.` : " Comece hoje sua nova sequência!"}
                </p>
             </div>
           </motion.div>

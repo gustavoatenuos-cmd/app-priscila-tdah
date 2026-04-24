@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle2, Circle, Clock, Home, CheckSquare, Target, BarChart2, BookOpen, Search, Pause, Brain, Zap, ArrowRight, Sparkles } from "lucide-react";
+import { CheckCircle2, Clock, Brain, Zap, ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -12,19 +12,29 @@ import { useRouter } from "next/navigation";
 
 export default function NeumorphicDashboard() {
   const router = useRouter();
-  const currentDate = format(new Date(), "EEEE, MMM dd, yyyy | hh:mm a", { locale: ptBR });
+  const [currentDate, setCurrentDate] = useState("");
   const [planoB, setPlanoB] = useState(false);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [tasks, setTasks] = useState<any[]>([]);
+  const [stats, setStats] = useState({
+    completedTasks: 0,
+    totalTasks: 0,
+    focusMinutes: 0,
+    progress: 0
+  });
 
   useEffect(() => {
+    setCurrentDate(format(new Date(), "EEEE, MMM dd, yyyy | hh:mm a", { locale: ptBR }));
+    
     async function loadData() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         router.push("/register");
         return;
       }
+
+      const today = new Date().toISOString().split('T')[0];
 
       // Load Profile
       const { data: profileData } = await supabase
@@ -35,44 +45,99 @@ export default function NeumorphicDashboard() {
       
       setProfile(profileData);
 
-      // Load Tasks
-      const { data: tasksData } = await supabase
+      // Check if onboarding is complete
+      if (profileData && !profileData.energy_level) {
+        router.push("/onboarding");
+        return;
+      }
+
+      // Load All Today's Tasks for stats
+      const { data: allTasks } = await supabase
         .from('tasks')
         .select('*')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(3);
+        .gte('created_at', today);
       
-      setTasks(tasksData || []);
+      const completedCount = allTasks?.filter(t => t.completed).length || 0;
+      const totalCount = allTasks?.length || 0;
+      const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+      // Load Today's Focus Sessions
+      const { data: focusData } = await supabase
+        .from('focus_sessions')
+        .select('duration_minutes')
+        .eq('user_id', user.id)
+        .gte('created_at', today);
+      
+      const totalMinutes = focusData?.reduce((acc, curr) => acc + (curr.duration_minutes || 0), 0) || 0;
+
+      setStats({
+        completedTasks: completedCount,
+        totalTasks: totalCount,
+        focusMinutes: totalMinutes,
+        progress: progressPercent
+      });
+
+      // Load Latest 3 Tasks for the list
+      setTasks(allTasks?.slice(0, 3) || []);
       setLoading(false);
     }
     loadData();
   }, [router]);
 
   const getGreeting = () => {
-    const name = profile?.full_name?.split(' ')[0] || "Priscila";
-    return `Bom dia, ${name} 🌿`;
+    const hour = new Date().getHours();
+    const name = profile?.full_name?.split(' ')[0] || "Bem-vindo(a)";
+    let salute = "Bom dia";
+    if (hour >= 12 && hour < 18) salute = "Boa tarde";
+    if (hour >= 18 || hour < 5) salute = "Boa noite";
+    return `${salute}, ${name} 🌿`;
   };
 
   const getDecisionText = () => {
-    if (planoB) return "Sua energia está baixa, então não force. Um micro-passo agora é melhor do que a paralisia total.";
+    if (planoB) return "Sua energia está reduzida, então não force. Um micro-passo agora é melhor do que a paralisia total.";
     
+    const hour = new Date().getHours();
+    const isMorning = hour < 12;
+    const isAfternoon = hour >= 12 && hour < 18;
+
     if (profile?.mindset_profile === 'sobrecarga') {
-      return "Tudo bem se sentir assim. Vamos focar em UM micro-passo agora. Nada mais importa.";
+      return "Tudo bem se sentir assim. Vamos focar em UM micro-passo agora. Sua mente precisa de simplicidade.";
     }
 
     if (profile?.mindset_profile === 'criativa') {
-      return "Sua mente está cheia de brilho. Que tal descarregar o que está flutuando e escolher uma única âncora?";
+      return "Sua mente está cheia de conexões. Que tal descarregar o que está flutuando e escolher uma única âncora?";
+    }
+
+    if (profile?.mindset_profile === 'hiperfoco') {
+       return "Você está em estado de fluxo. Canalize essa energia para o que realmente importa antes da bateria baixar.";
     }
 
     if (profile?.energy_level === 'baixa') {
-      return "Sugerimos focar apenas na tarefa essencial agora. Respeite o seu tempo.";
+      return "Sugerimos focar apenas na tarefa essencial agora. Respeite o seu limite biológico.";
     }
     
-    return "Você está em uma boa janela de energia. Este é um bom momento para avançar no que mais importa.";
+    if (isMorning) return "Você está em uma excelente janela de energia matinal. Ótimo momento para resolver pendências cognitivas.";
+    if (isAfternoon) return "A tarde pede ritmo constante. Avance na sua prioridade e mantenha o foco no essencial.";
+    return "O dia está terminando. Que tal um último esforço focado ou apenas organizar o descarrego para amanhã?";
   };
 
-  if (loading) return <div className="flex items-center justify-center min-h-screen bg-[#F5F5F0]">Carregando seu refúgio...</div>;
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#F5F5F0] text-[#1F2937]">
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.1, 1],
+          rotate: [0, 5, -5, 0]
+        }}
+        transition={{ duration: 2, repeat: Infinity }}
+        className="mb-8"
+      >
+        <Brain className="h-16 w-16 text-[#84A59D]" />
+      </motion.div>
+      <h2 className="text-xl font-black uppercase tracking-[0.2em] animate-pulse text-center px-4">Calibrando seu Ecossistema Cognitivo...</h2>
+      <p className="text-[#64748B] font-medium mt-2">Personalizando sua interface de foco.</p>
+    </div>
+  );
 
   return (
     <div className="flex bg-[#F5F5F0] min-h-screen text-[#333333] font-sans selection:bg-[#64748B]/20">
@@ -85,7 +150,7 @@ export default function NeumorphicDashboard() {
          <header className="mb-10 flex justify-between items-end">
            <div>
              <h1 className="text-3xl font-extrabold tracking-tight text-[#1F2937] uppercase">{getGreeting()}</h1>
-             <p className="text-[#64748B] font-medium text-sm mt-1">Sua mente está {profile?.energy_level === 'alta' ? 'vibrante' : 'calma'}. {currentDate}</p>
+             <p className="text-[#64748B] font-medium text-sm mt-1">Sua mente está {profile?.mindset_profile === 'hiperfoco' ? 'em foco' : profile?.energy_level === 'alta' ? 'vibrante' : 'calma'}. {currentDate}</p>
            </div>
            <div className="flex gap-4">
               <div className="bg-white border border-[#E5E7EB] rounded-2xl p-3 shadow-sm flex flex-col items-center min-w-[80px]">
@@ -110,13 +175,12 @@ export default function NeumorphicDashboard() {
                       <div className="h-8 w-14 rounded-xl bg-[#84A59D]/10 flex items-center justify-center text-[#84A59D]">
                          <Zap className="h-4 w-4" />
                       </div>
-                      <span className="text-[11px] font-black text-[#84A59D] uppercase tracking-widest">Recomendação Personalizada</span>
+                      <span className="text-[11px] font-black text-[#84A59D] uppercase tracking-widest">Decisão Inteligente</span>
                    </div>
 
                    <h2 className="text-3xl font-black text-[#1F2937] mb-3 leading-tight">
                      {profile?.mindset_profile === 'sobrecarga' ? 'Apenas respire e faça isto:' : 
-                      profile?.mindset_profile === 'criativa' ? 'Capture o brilho, mas foque nisto:' :
-                      'Aproveite o fluxo e avance nisto:'}
+                      'Seu melhor próximo passo'}
                    </h2>
 
                    <div className="flex flex-col sm:flex-row items-center gap-3 mt-8 mb-6 max-w-2xl">
@@ -149,9 +213,9 @@ export default function NeumorphicDashboard() {
                    </p>
 
                    <div className="mt-10 flex gap-4">
-                     <Link href="/dashboard/focus" className="bg-[#333333] hover:bg-black text-white px-8 py-5 rounded-[20px] font-bold text-sm uppercase tracking-widest transition-all shadow-xl shadow-black/10 flex items-center gap-3">
-                       {profile?.mindset_profile === 'sobrecarga' ? 'Fazer só isto' : 'Entrar em Fluxo'} <ArrowRight className="h-4 w-4" />
-                     </Link>
+                      <Link href="/dashboard/focus" className="bg-[#333333] hover:bg-black text-white px-8 py-5 rounded-[20px] font-bold text-sm uppercase tracking-widest transition-all shadow-xl shadow-black/10 flex items-center gap-3">
+                        {profile?.mindset_profile === 'sobrecarga' ? 'Fazer só isto' : 'Aceitar Sugestão'} <ArrowRight className="h-4 w-4" />
+                      </Link>
                      {profile?.mindset_profile === 'sobrecarga' && (
                         <button onClick={() => setPlanoB(true)} className="px-8 py-5 rounded-[20px] font-bold text-sm uppercase tracking-widest text-[#64748B] hover:text-[#333333] transition-all">
                            Ativar Plano B
@@ -166,26 +230,39 @@ export default function NeumorphicDashboard() {
                   <div className="relative w-36 h-36 flex items-center justify-center shrink-0">
                      <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                        <circle cx="50" cy="50" r="42" stroke="#F1F5F9" strokeWidth="10" fill="none" />
-                       <circle cx="50" cy="50" r="42" stroke="#64748B" strokeWidth="10" fill="none" strokeDasharray="264" strokeDashoffset="66" strokeLinecap="round" />
+                       <circle 
+                         cx="50" cy="50" r="42" 
+                         stroke="#64748B" 
+                         strokeWidth="10" 
+                         fill="none" 
+                         strokeDasharray="264" 
+                         strokeDashoffset={264 - (264 * stats.progress) / 100} 
+                         strokeLinecap="round" 
+                         className="transition-all duration-1000 ease-out"
+                       />
                      </svg>
                      <div className="absolute flex flex-col items-center">
-                       <span className="text-3xl font-black text-[#333333] font-mono tracking-tighter">75%</span>
+                       <span className="text-3xl font-black text-[#333333] font-mono tracking-tighter">{stats.progress}%</span>
                        <span className="text-[9px] uppercase font-black text-[#64748B] tracking-widest mt-1">Feito</span>
                      </div>
                   </div>
-
+ 
                   <div className="grid grid-cols-2 gap-8 w-full">
                      <div>
                        <h3 className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1">Tarefas</h3>
-                       <span className="text-2xl font-black text-[#333333] font-mono tracking-tighter">12/16</span>
+                       <span className="text-2xl font-black text-[#333333] font-mono tracking-tighter">{stats.completedTasks}/{stats.totalTasks}</span>
                      </div>
                      <div>
                        <h3 className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1">Foco Real</h3>
-                       <span className="text-2xl font-black text-[#333333] font-mono tracking-tighter">180m</span>
+                       <span className="text-2xl font-black text-[#333333] font-mono tracking-tighter">{stats.focusMinutes}m</span>
                      </div>
-                     <div className="col-span-2 pt-4 border-t border-dashed border-[#F1F5F9]">
-                        <p className="text-[11px] text-[#64748B] font-medium italic">&quot;Você está acima da média para uma manhã de quarta-feira.&quot;</p>
-                     </div>
+                      <div className="col-span-2 pt-4 border-t border-dashed border-[#F1F5F9]">
+                         <p className="text-[11px] text-[#64748B] font-medium italic">
+                           {stats.progress === 100 ? "&quot;Você completou tudo o que se propôs! Orgulhe-se.&quot;" : 
+                            stats.progress > 50 ? "&quot;Você está com ótimo ritmo hoje. Mantenha a constância.&quot;" :
+                            "&quot;Cada micro-passo conta. O importante é não parar.&quot;"}
+                         </p>
+                      </div>
                   </div>
                </motion.div>
 
@@ -197,31 +274,30 @@ export default function NeumorphicDashboard() {
                   </div>
                   
                   <div className="relative pl-8 border-l-2 border-[#F1F5F9] space-y-12 ml-4">
-                     {/* Item 1 */}
-                     <div className="relative group">
-                        <div className="absolute w-5 h-5 rounded-full bg-[#84A59D] -left-[42px] top-1 border-[4px] border-[#FFFFFF] shadow-sm group-hover:scale-125 transition-transform"></div>
-                        <div className="flex flex-col gap-1">
-                           <span className="text-[10px] font-black text-[#9CA3AF] font-mono uppercase tracking-widest leading-none">09:00 - 10:00</span>
-                           <span className="text-[16px] font-bold text-[#333333]">Revisar Projeto</span>
+                     {tasks.length > 0 ? (
+                        tasks.slice(0, 2).map((task, idx) => (
+                           <div key={task.id} className="relative group">
+                              <div className="absolute w-5 h-5 rounded-full bg-[#84A59D] -left-[42px] top-1 border-[4px] border-[#FFFFFF] shadow-sm group-hover:scale-125 transition-transform"></div>
+                              <div className="flex flex-col gap-1">
+                                 <span className="text-[10px] font-black text-[#9CA3AF] font-mono uppercase tracking-widest leading-none">Fluxo Atual</span>
+                                 <span className={`text-[16px] font-bold ${task.completed ? 'text-[#9CA3AF] line-through' : 'text-[#333333]'}`}>{task.title}</span>
+                              </div>
+                           </div>
+                        ))
+                     ) : (
+                        <div className="relative group">
+                           <div className="absolute w-5 h-5 rounded-full bg-[#E5E7EB] -left-[42px] top-1 border-[4px] border-[#FFFFFF] shadow-sm"></div>
+                           <p className="text-[14px] text-[#9CA3AF] italic">Nenhuma atividade planejada.</p>
                         </div>
-                     </div>
+                     )}
 
                      {/* SUGGESTED WINDOW */}
                      <div className="relative group">
                         <div className="absolute w-5 h-5 rounded-full bg-[#64748B] -left-[42px] top-1 border-[4px] border-[#FFFFFF] shadow-sm ring-4 ring-[#64748B]/10 group-hover:scale-125 transition-transform"></div>
                         <div className="bg-[#F8FAFC] p-4 rounded-2xl border border-[#64748B]/10">
-                           <span className="text-[10px] font-black text-[#64748B] font-mono uppercase tracking-widest block mb-1">Janela Sugerida (60m)</span>
-                           <span className="text-[16px] font-bold text-[#1F2937]">Melhor momento para Focar</span>
-                           <p className="text-[11px] text-[#64748B] mt-1">Nenhum compromisso detectado até as 12:00.</p>
-                        </div>
-                     </div>
-
-                     {/* Item 2 */}
-                     <div className="relative group opacity-50">
-                        <div className="absolute w-5 h-5 rounded-full bg-[#84A59D] -left-[42px] top-1 border-[4px] border-[#FFFFFF] shadow-sm"></div>
-                        <div className="flex flex-col gap-1">
-                           <span className="text-[10px] font-black text-[#9CA3AF] font-mono uppercase tracking-widest leading-none">12:00 - 13:00</span>
-                           <span className="text-[16px] font-bold text-[#333333]">Almoço & Descanso</span>
+                           <span className="text-[10px] font-black text-[#64748B] font-mono uppercase tracking-widest block mb-1">Janela de Foco</span>
+                           <span className="text-[16px] font-bold text-[#1F2937]">Melhor momento para Deep Work</span>
+                           <p className="text-[11px] text-[#64748B] mt-1">Sua energia está {profile?.energy_level === 'alta' ? 'no pico' : 'estável'}. Aproveite.</p>
                         </div>
                      </div>
                   </div>
@@ -306,9 +382,21 @@ export default function NeumorphicDashboard() {
                   </div>
 
                   <div className="space-y-6">
-                     <WellnessBar label="Hidratação" value="80%" desc="Você está quase na meta de hoje." />
-                     <WellnessBar label="Descanso" value="65%" desc="A qualidade do sono foi moderada." />
-                     <WellnessBar label="Humor" value="40%" desc="Detectamos sinais de sobrecarga." />
+                     <WellnessBar 
+                        label="Hidratação" 
+                        value={profile?.energy_level === 'alta' ? "85%" : "60%"} 
+                        desc={profile?.energy_level === 'alta' ? "Excelente! Hidratação em dia." : "Lembre-se de beber água para manter o foco."} 
+                     />
+                     <WellnessBar 
+                        label="Descanso" 
+                        value={profile?.energy_level === 'alta' ? "90%" : "50%"} 
+                        desc={profile?.energy_level === 'alta' ? "Seu sono foi restaurador." : "Sentindo cansaço? Uma pausa curta pode ajudar."} 
+                     />
+                     <WellnessBar 
+                        label="Humor" 
+                        value={profile?.mindset_profile === 'sobrecarga' ? "30%" : "75%"} 
+                        desc={profile?.mindset_profile === 'sobrecarga' ? "Detectamos sinais de estresse." : "Você parece em equilíbrio hoje."} 
+                     />
                   </div>
                </motion.div>
 

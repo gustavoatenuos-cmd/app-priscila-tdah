@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Check, Sparkles, Zap, Shield, Heart } from "lucide-react";
 import Link from "next/link";
 import { Sidebar } from "@/components/sidebar";
+import { toast } from "sonner";
 
 export default function PricingPage() {
   return (
@@ -110,4 +111,3 @@ function FeatureItem({ text, active = false }: { text: string; active?: boolean 
   );
 }
 
-import { toast } from "sonner";

@@ -1,148 +1,232 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ArrowRight, Brain, CheckCircle, Sparkles, Zap } from "lucide-react";
+import { ArrowRight, Brain, CheckCircle, Sparkles, Zap, Shield, Target, Clock, MessageSquare, Activity } from "lucide-react";
 import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#F5F5F0] text-[#333333] font-sans selection:bg-[#84A59D]/30">
+    <main className="min-h-screen bg-[#F8F9FA] text-[#1F2937] font-sans selection:bg-[#1F2937]/10 overflow-x-hidden">
       
-      {/* PERSUASIVE HERO SECTION */}
-      <section className="relative px-6 pt-32 pb-20 md:pt-48 md:pb-32 max-w-7xl mx-auto flex flex-col items-center text-center">
-        <div className="absolute inset-x-0 top-0 -z-10 h-[600px] bg-[radial-gradient(circle_at_top,_#84A59D20_0%,_transparent_70%)]"></div>
-        
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="inline-flex items-center rounded-full border border-[#84A59D]/30 bg-white/50 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-[#84A59D] mb-10 shadow-sm"
-        >
-          <Sparkles className="mr-2 h-3 w-3" />
-          <span>Onde a constância encontra a leveza</span>
-        </motion.div>
-
-        <motion.h1
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-          className="text-5xl md:text-[84px] font-black tracking-tight leading-[0.95] mb-8 text-[#1F2937]"
-        >
-          Pare de lutar contra<br /> o seu cérebro. <span className="text-[#84A59D]">Colabore</span>.
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="max-w-2xl text-xl md:text-2xl text-[#64748B] font-medium leading-relaxed mb-14"
-        >
-          Você não precisa de mais disciplina. Você precisa de um sistema que te entenda. O <strong className="text-[#1F2937]">TDAH Constante</strong> remove a culpa e organiza seus dias com suavidade.
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="flex flex-col sm:flex-row gap-6"
-        >
-          <Link href="/onboarding">
-            <button className="bg-[#1F2937] hover:bg-black text-white px-10 py-5 rounded-[24px] font-bold text-lg shadow-2xl shadow-black/20 transition-all transform hover:-translate-y-1 flex items-center gap-3">
-              Fazer a minha triagem <ArrowRight className="h-5 w-5" />
-            </button>
-          </Link>
-          <Link href="/dashboard">
-            <button className="bg-white hover:bg-[#F9FAFB] text-[#64748B] px-10 py-5 rounded-[24px] font-bold text-lg border border-[#E5E7EB] transition-all flex items-center gap-3 group">
-              <Brain className="h-5 w-5 group-hover:scale-110 transition-transform" />
-              Ver Dashboard
-            </button>
-          </Link>
-        </motion.div>
-      </section>
-
-      {/* THE PROBLEM SECTION */}
-      <section className="py-32 px-6">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-20 items-center">
-           <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-              <h2 className="text-4xl font-black text-[#1F2937] mb-8 leading-tight">O Ciclo de Hiperfoco <br />e Colapso termina aqui.</h2>
-              <div className="space-y-8">
-                 <PainPoint title="Inércia Paralisante" desc="Aquele sentimento de ter tanto para fazer que você acaba não fazendo nada." />
-                 <PainPoint title="A Ressaca da Culpa" desc="Quando um dia não sai como planejado e você desiste da semana inteira." />
-                 <PainPoint title="Sistemas Rígidos" desc="Planners que funcionam por 3 dias e depois viram peso de papel." />
-              </div>
-           </motion.div>
-           <div className="bg-white rounded-[48px] p-12 shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-[#E5E7EB]/50 aspect-square flex items-center justify-center relative overflow-hidden">
-             <div className="absolute inset-0 bg-[#84A59D]/5 animate-pulse"></div>
-             <Brain className="h-40 w-40 text-[#84A59D] opacity-20" strokeWidth={1} />
-             <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-sm font-black uppercase text-[#84A59D] tracking-widest text-center">Espaço Seguro <br/> Neurodivergente</span>
+      {/* NAVIGATION BAR (PREMIUM) */}
+      <nav className="fixed top-0 w-full z-50 px-6 py-8">
+        <div className="max-w-7xl mx-auto flex justify-between items-center bg-white/70 backdrop-blur-xl border border-white/20 px-8 py-4 rounded-[32px] shadow-[0_8px_32px_rgba(0,0,0,0.05)]">
+           <div className="flex items-center gap-2">
+             <div className="h-8 w-8 bg-[#1F2937] rounded-lg flex items-center justify-center">
+               <Brain className="h-5 w-5 text-white" />
              </div>
+             <span className="font-black tracking-tighter text-xl">TDAH <span className="text-[#84A59D]">Constante</span></span>
            </div>
+           <div className="hidden md:flex gap-8 text-[11px] font-black uppercase tracking-widest text-[#64748B]">
+             <a href="#metodo" className="hover:text-[#1F2937] transition-colors">O Método</a>
+             <a href="#inteligencia" className="hover:text-[#1F2937] transition-colors">Inteligência AI</a>
+             <a href="#planos" className="hover:text-[#1F2937] transition-colors">Planos</a>
+           </div>
+           <Link href="/register">
+             <button className="bg-[#1F2937] hover:bg-black text-white px-6 py-3 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all">Começar Agora</button>
+           </Link>
+        </div>
+      </nav>
+
+      {/* HERO SECTION (EDITORIAL STYLE) */}
+      <section className="relative px-6 pt-56 pb-32 max-w-7xl mx-auto">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -z-10 w-full max-w-5xl h-[800px] bg-[radial-gradient(circle_at_center,_#84A59D15_0%,_transparent_70%)]"></div>
+        
+        <div className="grid lg:grid-cols-2 gap-20 items-center">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="inline-flex items-center gap-3 px-4 py-2 bg-[#84A59D]/10 rounded-full mb-8">
+              <Sparkles className="h-4 w-4 text-[#84A59D]" />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#84A59D]">O Futuro da Neuro-Organização</span>
+            </div>
+            
+            <h1 className="text-6xl md:text-[88px] font-black tracking-tight leading-[0.9] mb-10 text-[#1F2937]">
+              Seu Assistente <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1F2937] to-[#84A59D]">Cognitivo</span> Pessoal.
+            </h1>
+            
+            <p className="text-xl md:text-2xl text-[#64748B] font-medium leading-relaxed mb-12 max-w-xl">
+              Não é apenas um planner. É um ecossistema inteligente desenhado para externalizar sua mente e converter paralisia em fluxo contínuo.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-6">
+              <Link href="/register">
+                <button className="bg-[#1F2937] hover:bg-black text-white px-10 py-6 rounded-[28px] font-bold text-lg shadow-2xl shadow-black/10 transition-all flex items-center gap-4 group">
+                  Iniciar Mapeamento <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </Link>
+              <div className="flex items-center gap-4 px-6 py-4 bg-white rounded-[28px] border border-[#E5E7EB]">
+                <div className="flex -space-x-3">
+                  {[1,2,3].map(i => <div key={i} className="h-8 w-8 rounded-full border-2 border-white bg-[#F5F5F0]" />)}
+                </div>
+                <span className="text-xs font-bold text-[#64748B]">+2.400 Mentes Ativadas</span>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* APP PREVIEW (VISUAL LIFE) */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.2, delay: 0.2 }}
+            className="relative"
+          >
+            <div className="aspect-[4/5] bg-white rounded-[64px] shadow-[0_40px_100px_rgba(0,0,0,0.08)] border border-[#E5E7EB] p-10 relative overflow-hidden group">
+               <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
+                 <Brain className="h-64 w-64" />
+               </div>
+               
+               {/* UI Elements simulation */}
+               <div className="space-y-8 relative z-10">
+                  <div className="h-12 w-48 bg-[#F8F9FA] rounded-2xl animate-pulse" />
+                  <div className="h-40 w-full bg-[#1F2937]/5 rounded-[40px] p-8">
+                     <div className="h-4 w-32 bg-[#1F2937]/20 rounded-full mb-4" />
+                     <div className="h-8 w-64 bg-[#1F2937]/10 rounded-full" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="h-32 bg-[#84A59D]/10 rounded-[32px]" />
+                    <div className="h-32 bg-[#F8F9FA] rounded-[32px] border border-dashed border-[#E5E7EB]" />
+                  </div>
+               </div>
+            </div>
+
+            {/* Floating Badges */}
+            <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 4, repeat: Infinity }} className="absolute -top-10 -right-10 bg-[#84A59D] text-white p-6 rounded-[32px] shadow-2xl flex items-center gap-4">
+              <Zap className="h-6 w-6" />
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black uppercase tracking-widest opacity-70">Status Atual</span>
+                <span className="text-sm font-bold">Hiperfoco Ativado</span>
+              </div>
+            </motion.div>
+
+            <motion.div animate={{ y: [0, 10, 0] }} transition={{ duration: 5, repeat: Infinity, delay: 0.5 }} className="absolute -bottom-10 -left-10 bg-white p-6 rounded-[32px] shadow-2xl border border-[#E5E7EB] flex items-center gap-4">
+              <Shield className="h-6 w-6 text-[#1F2937]" />
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#64748B]">Segurança</span>
+                <span className="text-sm font-bold text-[#1F2937]">Zero Culpa</span>
+              </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
-      {/* THREE PILLARS */}
-      <section className="py-32 bg-white/50 border-t border-b border-[#E5E7EB]/50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-24">
-            <span className="text-[10px] font-black text-[#84A59D] uppercase tracking-[0.3em]">Nossos Pilares</span>
-            <h2 className="text-4xl font-black text-[#1F2937] mt-4">Desenhado para como você funciona.</h2>
-          </div>
+      {/* HOW IT WORKS (THE NEURO-PROCESS) */}
+      <section id="metodo" className="py-40 px-6 bg-[#1F2937] text-white rounded-[80px] -mt-10 relative z-20">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-20 items-center">
+            <div>
+              <h2 className="text-5xl font-black tracking-tight leading-[1.1] mb-8">
+                Um sistema que evolui <br/> com a sua neuroplasticidade.
+              </h2>
+              <p className="text-xl text-white/60 font-medium leading-relaxed mb-12">
+                Nossa IA não apenas lista tarefas; ela analisa seu comportamento, picos de energia e pontos de fricção para criar uma nova realidade de organização pessoal.
+              </p>
+              
+              <div className="space-y-10">
+                <StepItem 
+                  num="01" 
+                  title="Análise Comportamental" 
+                  desc="Mapeamos como seu cérebro inicia e termina processos, identificando gatilhos de inércia e janelas de poder."
+                />
+                <StepItem 
+                  num="02" 
+                  title="Configuração do Ecossistema" 
+                  desc="O sistema se molda à sua persona. Se você está sobrecarregado, ele simplifica; se está em foco, ele acelera."
+                />
+                <StepItem 
+                  num="03" 
+                  title="Acompanhamento Ativo" 
+                  desc="Seu assistente pessoal intervém nos momentos de travamento, trazendo você de volta ao fluxo sem julgamentos."
+                />
+              </div>
+            </div>
 
-          <div className="grid md:grid-cols-3 gap-12">
-            <PillarCard 
-              icon={<Zap />} 
-              title="Ação por Energia" 
-              desc="O sistema reorganiza seu dia baseado no seu nível de bateria mental. Sem esgotamento." 
-            />
-            <PillarCard 
-              icon={<CheckCircle />} 
-              title="SOS Destravar" 
-              desc="Um botão de pânico terapêutico que te conduz do travamento à primeira micro-vitória." 
-            />
-            <PillarCard 
-              icon={<Sparkles />} 
-              title="Resiliência Ativa" 
-              desc="Nossos analytics celebram o recomeço, o dado mais importante para a constância real." 
-            />
+            <div className="grid grid-cols-2 gap-6">
+              <FeatureCard icon={<Activity />} title="Bio-Feedback" desc="Monitoramento de carga mental." />
+              <FeatureCard icon={<MessageSquare />} title="IA Generativa" desc="Criação de micro-passos inteligentes." />
+              <FeatureCard icon={<Target />} title="Foco Seletivo" desc="Blindagem contra distrações." />
+              <FeatureCard icon={<Clock />} title="Tempo Fluido" desc="Gestão de tempo baseada em energia." />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* FINAL CTA */}
-      <footer className="py-32 text-center">
-        <h2 className="text-4xl font-black text-[#1F2937] mb-12">Pronta para o seu primeiro dia leve?</h2>
-        <Link href="/onboarding">
-          <button className="bg-[#84A59D] hover:bg-[#6c8c84] text-white px-12 py-6 rounded-[28px] font-bold text-xl shadow-2xl shadow-[#84A59D]/20 transition-all transform hover:scale-105">
-            Começar Gratuitamente
-          </button>
-        </Link>
-      </footer>
+      {/* PROBLEM SECTION (MORE AGGRESSIVE & DIRECT) */}
+      <section className="py-40 px-6 max-w-7xl mx-auto">
+        <div className="text-center max-w-3xl mx-auto mb-32">
+           <h2 className="text-5xl font-black tracking-tight text-[#1F2937] mb-8 leading-[1.1]">
+             Planners tradicionais foram feitos para mentes lineares.
+           </h2>
+           <p className="text-xl text-[#64748B] font-medium">Você já tentou todos. Nenhum funcionou porque eles ignoram a flutuação da sua bateria mental.</p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+           <ProblemBox 
+             title="Sistemas Rígidos" 
+             desc="Mentes TDAH odeiam rotinas estáticas. Nosso sistema é líquido, mudando conforme seu dia acontece." 
+           />
+           <ProblemBox 
+             title="A Ressaca da Culpa" 
+             desc="Um erro não deve destruir sua semana. Nossa IA recalcula seu trajeto instantaneamente." 
+           />
+           <ProblemBox 
+             title="Decisões Infinitas" 
+             desc="A paralisia de escolha é real. Nós eliminamos o ruído e entregamos apenas o SEU próximo passo." 
+           />
+        </div>
+      </section>
+
+      {/* FINAL CTA (EMPOWERING) */}
+      <section className="py-40 px-6 text-center bg-[#F5F5F0] rounded-t-[100px]">
+        <div className="max-w-4xl mx-auto">
+          <Brain className="h-16 w-16 text-[#84A59D] mx-auto mb-10 opacity-40" />
+          <h2 className="text-5xl md:text-7xl font-black text-[#1F2937] tracking-tight mb-12 leading-[1.1]">
+            Não lute contra você.<br/> Construa com você.
+          </h2>
+          <Link href="/register">
+            <button className="bg-[#1F2937] hover:bg-black text-white px-16 py-8 rounded-[40px] font-black text-2xl shadow-3xl transition-all transform hover:scale-105 active:scale-95">
+              Ativar Meu Assistente Grátis
+            </button>
+          </Link>
+          <p className="mt-10 text-[#9CA3AF] font-bold uppercase tracking-widest text-xs">Comece a sua nova realidade hoje.</p>
+        </div>
+      </section>
     </main>
   );
 }
 
-function PainPoint({ title, desc }: { title: string, desc: string }) {
+function StepItem({ num, title, desc }: { num: string, title: string, desc: string }) {
   return (
-    <div className="flex gap-4">
-      <div className="h-6 w-6 mt-1 rounded-full bg-red-400 flex items-center justify-center text-white text-[10px] shrink-0">✕</div>
+    <div className="flex gap-8 group">
+      <span className="text-4xl font-black text-white/20 group-hover:text-[#84A59D] transition-colors">{num}</span>
       <div>
-        <h4 className="font-bold text-[#1F2937] mb-1">{title}</h4>
-        <p className="text-sm text-[#64748B] font-medium leading-relaxed">{desc}</p>
+        <h4 className="text-xl font-bold mb-2">{title}</h4>
+        <p className="text-white/50 leading-relaxed max-w-md">{desc}</p>
       </div>
     </div>
   );
 }
 
-function PillarCard({ icon, title, desc }: { icon: any, title: string, desc: string }) {
+function FeatureCard({ icon, title, desc }: { icon: any, title: string, desc: string }) {
   return (
-    <div className="p-10 rounded-[40px] bg-white border border-[#E5E7EB]/50 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all">
-      <div className="h-14 w-14 bg-[#F5F5F0] rounded-2xl flex items-center justify-center mb-8 text-[#84A59D]">
+    <div className="p-8 bg-white/5 backdrop-blur-lg border border-white/10 rounded-[40px] hover:bg-white/10 transition-all flex flex-col items-center text-center">
+      <div className="h-14 w-14 bg-white/10 rounded-2xl flex items-center justify-center mb-6 text-[#84A59D]">
         {icon}
       </div>
-      <h3 className="text-2xl font-black text-[#1F2937] mb-4">{title}</h3>
-      <p className="text-[#64748B] font-medium leading-relaxed">{desc}</p>
+      <h5 className="font-bold mb-2">{title}</h5>
+      <p className="text-xs text-white/40 leading-relaxed">{desc}</p>
+    </div>
+  );
+}
+
+function ProblemBox({ title, desc }: { title: string, desc: string }) {
+  return (
+    <div className="p-12 bg-white rounded-[48px] border border-[#E5E7EB] shadow-sm hover:shadow-2xl transition-all">
+       <div className="h-8 w-8 bg-red-50 text-red-400 rounded-full flex items-center justify-center mb-8 font-black">!</div>
+       <h4 className="text-2xl font-black text-[#1F2937] mb-4">{title}</h4>
+       <p className="text-[#64748B] font-medium leading-relaxed">{desc}</p>
     </div>
   );
 }
