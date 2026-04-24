@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS profiles (
   mindset_profile TEXT,        -- Dominant state (criativa, sobrecarga, hiperfoco)
   
   streak_count INTEGER DEFAULT 0,
+  total_points INTEGER DEFAULT 0,
+  current_level INTEGER DEFAULT 1,
   is_premium BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -66,6 +68,8 @@ CREATE TABLE IF NOT EXISTS focus_sessions (
   duration_minutes INTEGER NOT NULL DEFAULT 0,
   distractions_count INTEGER DEFAULT 0,
   emotion_post_focus TEXT, -- 'leve' | 'focada' | 'cansada'
+  session_notes TEXT, -- Pensamentos registrados durante a sessão
+  focus_score INTEGER DEFAULT 0, -- Pontuação baseada em performance
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -96,6 +100,18 @@ CREATE TABLE IF NOT EXISTS journal_entries (
 );
 
 CREATE INDEX IF NOT EXISTS journal_entries_user_id_idx ON journal_entries(user_id);
+
+-- 6. TABELA ACHIEVEMENTS (Conquistas e Medalhas)
+CREATE TABLE IF NOT EXISTS achievements (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  type TEXT NOT NULL, -- 'first_focus', 'seven_day_streak', 'level_up', etc.
+  title TEXT NOT NULL,
+  description TEXT,
+  unlocked_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS achievements_user_id_idx ON achievements(user_id);
 
 -- ============================================================
 -- ROW LEVEL SECURITY (RLS) — Cada usuário só acessa seus dados
@@ -165,7 +181,7 @@ BEGIN
     
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created

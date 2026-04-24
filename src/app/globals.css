@@ -101,3 +101,14 @@
     @apply text-foreground;
   }
 }
+
+@keyframes border-beam {
+  100% {
+    offset-distance: 100%;
+  }
+}
+
+@theme inline {
+  --animate-border-beam: border-beam 15s linear infinite;
+}
+

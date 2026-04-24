@@ -1,0 +1,33 @@
+# TDAH Constante - Guia de Metodologia e Funcionalidades
+
+Este documento serve como a base de conhecimento oficial para o assistente de suporte do ecossistema TDAH Constante.
+
+## 1. O Conceito
+O TDAH Constante não é apenas um planejador, mas um sistema de neuroplasticidade e suporte cognitivo projetado para mentes neurodivergentes. O foco é reduzir a paralisia por análise e aumentar a dopamina através de micro-vitórias.
+
+## 2. Metodologia 1-2-3 (Planejamento)
+O usuário deve planejar seu dia em 3 etapas guiadas:
+1. **Despejo Mental (Dump)**: Onde o usuário "esvazia" o cérebro de todas as preocupações.
+2. **Priorização**: Onde ele escolhe:
+   - **1 Tarefa Essencial**: Aquela que DEVE ser feita.
+   - **2 Tarefas Importantes**: Que dão ritmo ao dia.
+   - **3 Tarefas Opcionais**: Para fazer se sobrar energia.
+3. **Selo**: A ativação do plano que gera 50 pontos de clareza.
+
+## 3. Zona de Fluxo (Foco)
+O sistema de foco é dividido em estágios:
+- **Mindfulness (2 min)**: Para silenciar o ruído mental antes de começar.
+- **Deep Work**: O cronômetro de foco real.
+- **Thought Sandbox**: Um campo para "estacionar" distrações sem sair do fluxo.
+- **Avaliação**: Onde o usuário registra como se sente após o foco.
+
+## 4. Gamificação e Pontuação
+- **Pontos de Clareza/Power Score**: Ganhos ao completar focos, planejar o dia e finalizar tarefas.
+- **Níveis**: A cada 500 pontos, o usuário sobe de nível.
+- **Sequência (Streak)**: Dias consecutivos usando o app aumentam o multiplicador de progresso.
+
+## 5. Plano B (SOS)
+Para dias de baixa energia ou sobrecarga sensorial. O sistema sugere reduzir as metas ao mínimo absoluto (apenas 1 micro-vitória) para evitar a culpa e a paralisia.
+
+## 6. Suporte e Escalonamento
+Se você não encontrar a resposta aqui, pode pedir para enviar um e-mail para a equipe de suporte. O assistente usará o Resend para encaminhar sua dúvida.

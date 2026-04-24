@@ -30,7 +30,7 @@ export default function NeumorphicDashboard() {
     async function loadData() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        router.push("/register");
+        router.push("/login");
         return;
       }
 
@@ -46,7 +46,7 @@ export default function NeumorphicDashboard() {
       setProfile(profileData);
 
       // Check if onboarding is complete
-      if (profileData && !profileData.energy_level) {
+      if (!profileData || !profileData.energy_level) {
         router.push("/onboarding");
         return;
       }
@@ -147,18 +147,36 @@ export default function NeumorphicDashboard() {
       {/* MAIN CONTENT DASHBOARD */}
       <main className="flex-1 px-8 py-10 md:px-14 lg:max-w-7xl mx-auto overflow-y-auto">
          
-         <header className="mb-10 flex justify-between items-end">
+         <header className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
            <div>
              <h1 className="text-3xl font-extrabold tracking-tight text-[#1F2937] uppercase">{getGreeting()}</h1>
              <p className="text-[#64748B] font-medium text-sm mt-1">Sua mente está {profile?.mindset_profile === 'hiperfoco' ? 'em foco' : profile?.energy_level === 'alta' ? 'vibrante' : 'calma'}. {currentDate}</p>
            </div>
-           <div className="flex gap-4">
-              <div className="bg-white border border-[#E5E7EB] rounded-2xl p-3 shadow-sm flex flex-col items-center min-w-[80px]">
-                 <span className="text-[8px] font-black text-[#9CA3AF] uppercase">Sequência</span>
-                 <span className="text-xl font-black text-[#333333]">{profile?.streak_count || 0} 🔥</span>
+           
+           <div className="flex flex-col items-end gap-3 w-full md:w-auto">
+              {/* LEVEL BAR (ADHD REWARD) */}
+              <div className="w-full md:w-64 bg-white p-4 rounded-[28px] border border-[#E5E7EB] shadow-sm">
+                 <div className="flex justify-between items-center mb-2">
+                    <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Nível {profile?.current_level || 1}</span>
+                    <span className="text-[10px] font-black text-[#1F2937] uppercase tracking-widest">{profile?.total_points || 0} PTS</span>
+                 </div>
+                 <div className="w-full h-2 bg-[#F1F5F9] rounded-full overflow-hidden">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${((profile?.total_points || 0) % 500) / 500 * 100}%` }}
+                      className="h-full bg-gradient-to-r from-[#84A59D] to-[#1F2937]"
+                    />
+                 </div>
               </div>
            </div>
          </header>
+
+         {/* CAMINHO DO DIA (ETAPAS VISUAIS) */}
+         <div className="grid grid-cols-3 gap-4 mb-10">
+            <StageCard step={1} label="Planejar" active={stats.totalTasks > 0} current={stats.totalTasks === 0} />
+            <StageCard step={2} label="Executar" active={stats.completedTasks > 0} current={stats.totalTasks > 0 && stats.completedTasks < stats.totalTasks} />
+            <StageCard step={3} label="Celebrar" active={stats.progress === 100} current={stats.progress === 100} />
+         </div>
 
          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
@@ -437,3 +455,25 @@ function PrioridadeItem({ index, label, title, completed }: { index: number, lab
     </div>
   );
 }
+
+function StageCard({ step, label, active, current }: { step: number, label: string, active: boolean, current: boolean }) {
+  return (
+    <div className={`p-4 rounded-[24px] border-2 transition-all flex items-center gap-3 ${
+      current ? 'bg-white border-[#1F2937] shadow-lg' : 
+      active ? 'bg-[#84A59D]/10 border-transparent' : 
+      'bg-white/40 border-transparent opacity-40'
+    }`}>
+       <div className={`h-6 w-6 rounded-lg flex items-center justify-center text-[10px] font-black ${
+         active || current ? 'bg-[#1F2937] text-white' : 'bg-[#E5E7EB] text-[#9CA3AF]'
+       }`}>
+         {step}
+       </div>
+       <span className={`text-[11px] font-black uppercase tracking-widest ${
+         active || current ? 'text-[#1F2937]' : 'text-[#9CA3AF]'
+       }`}>
+         {label}
+       </span>
+    </div>
+  );
+}
+

@@ -12,14 +12,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
-import { ArrowLeft, BrainCircuit } from "lucide-react";
+import { ArrowLeft, BrainCircuit, LogIn } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-export default function RegisterPage() {
+export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -28,37 +28,27 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     const target = event.target as typeof event.target & {
-      name: { value: string };
       email: { value: string };
       password: { value: string };
-      whatsapp: { value: string };
     };
 
-    const name = target.name.value;
     const email = target.email.value;
     const password = target.password.value;
-    const whatsapp = target.whatsapp.value;
 
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
-      options: {
-        data: {
-          full_name: name,
-          whatsapp: whatsapp,
-        }
-      }
     });
 
     if (error) {
-      toast.error("Erro ao cadastrar: " + error.message);
+      toast.error("Erro ao entrar: " + error.message);
       setIsLoading(false);
       return;
     }
 
-    toast.success("Conta criada! Agora vamos personalizar sua experiência.");
+    toast.success("Bem-vindo de volta!");
     setIsLoading(false);
-    router.push("/onboarding");
+    router.push("/dashboard");
   }
 
   return (
@@ -87,24 +77,15 @@ export default function RegisterPage() {
                 <BrainCircuit className="h-6 w-6" />
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold tracking-tight">Criar sua Conta</CardTitle>
+            <CardTitle className="text-2xl font-bold tracking-tight">Entrar no Ecossistema</CardTitle>
             <CardDescription className="text-muted-foreground">
-              Preencha seus dados para acessar o ecossistema de neuroplasticidade.
+              Acesse suas ferramentas de neuroplasticidade e foco.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={onSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Nome Completo</Label>
-                <Input
-                  id="name"
-                  placeholder="Seu nome"
-                  required
-                  className="bg-background/50 h-11"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">E-mail Especial</Label>
+                <Label htmlFor="email">E-mail</Label>
                 <Input
                   id="email"
                   type="email"
@@ -114,21 +95,11 @@ export default function RegisterPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Senha Forte</Label>
+                <Label htmlFor="password">Senha</Label>
                 <Input
                   id="password"
                   type="password"
                   placeholder="••••••••"
-                  required
-                  className="bg-background/50 h-11"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="whatsapp">WhatsApp (com DDD)</Label>
-                <Input
-                  id="whatsapp"
-                  type="tel"
-                  placeholder="(11) 99999-9999"
                   required
                   className="bg-background/50 h-11"
                 />
@@ -142,29 +113,21 @@ export default function RegisterPage() {
                 {isLoading ? (
                   <span className="flex items-center relative">
                     <span className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-                    Validando...
+                    Autenticando...
                   </span>
                 ) : (
-                  "Finalizar Cadastro"
+                  <span className="flex items-center">
+                    Entrar <LogIn className="ml-2 h-4 w-4" />
+                  </span>
                 )}
               </Button>
             </form>
           </CardContent>
           <CardFooter className="flex flex-col items-center justify-center border-t border-border/40 p-6 bg-muted/20 gap-4">
-            <p className="text-xs text-muted-foreground text-center">
-              Ao se cadastrar, você concorda com nossos{" "}
-              <Link href="#" className="underline hover:text-primary">
-                Termos de Uso
-              </Link>{" "}
-              e{" "}
-              <Link href="#" className="underline hover:text-primary">
-                Política de Privacidade
-              </Link>.
-            </p>
             <p className="text-sm font-medium text-muted-foreground">
-              Já tem conta?{" "}
-              <Link href="/login" className="text-primary font-bold underline hover:no-underline">
-                Entrar
+              Não tem uma conta?{" "}
+              <Link href="/register" className="text-primary font-bold underline hover:no-underline">
+                Cadastrar-se
               </Link>
             </p>
           </CardFooter>

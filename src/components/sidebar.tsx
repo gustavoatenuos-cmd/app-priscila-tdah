@@ -1,14 +1,20 @@
 "use client";
 
-import { Home, CheckSquare, Target, BarChart2, BookOpen, Brain, Crown, Zap } from "lucide-react";
+import { Home, CheckSquare, Target, BarChart2, BookOpen, Brain, Crown, Zap, LogOut, HelpCircle } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [streak, setStreak] = useState<number | null>(null);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
 
   useEffect(() => {
     async function loadStreak() {
@@ -32,6 +38,7 @@ export function Sidebar() {
     { href: "/dashboard/journal", icon: BookOpen, label: "Diário" },
     { href: "/dashboard/brain-dump", icon: Brain, label: "Descarrego" },
     { href: "/dashboard/sos", icon: Zap, label: "SOS" },
+    { href: "/dashboard/support", icon: HelpCircle, label: "IA Ajuda" },
     { href: "/pricing", icon: Crown, label: "Assine" },
   ];
 
@@ -58,13 +65,21 @@ export function Sidebar() {
       </nav>
 
       {/* Streak Block — Dinâmico */}
-      <div className="bg-[#FFFFFF] border border-[#E5E7EB] rounded-2xl flex flex-col items-center justify-center p-3 shadow-[0_4px_15_rgba(0,0,0,0.02)]">
+      <div className="bg-[#FFFFFF] border border-[#E5E7EB] rounded-2xl flex flex-col items-center justify-center p-3 shadow-[0_4px_15_rgba(0,0,0,0.02)] mb-6">
         <span className="text-[7.5px] font-bold text-[#9CA3AF] uppercase text-center leading-tight tracking-wider">Sequência<br/>Atual</span>
         <span className="text-2xl font-black text-[#333333] font-mono mt-1">
           {streak === null ? "—" : streak}
         </span>
         <span className="text-[9px] font-bold text-[#9CA3AF] uppercase">Dias</span>
       </div>
+
+      <button
+        onClick={handleLogout}
+        className="flex flex-col items-center gap-1 group mb-8 text-[#9CA3AF] hover:text-red-500 transition-colors"
+      >
+        <LogOut className="h-6 w-6" strokeWidth={2} />
+        <span className="text-[10px] font-bold uppercase tracking-widest">Sair</span>
+      </button>
     </aside>
   );
 }
