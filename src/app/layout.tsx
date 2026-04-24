@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { SosModal } from "@/components/sos-modal";
@@ -9,8 +9,8 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
+const outfit = Outfit({
+  variable: "--font-display",
   subsets: ["latin"],
 });
 
@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased bg-background text-foreground`}
+      className={`${inter.variable} ${outfit.variable} h-full antialiased bg-background text-foreground`}
     >
       <body className="min-h-full flex flex-col font-sans">
         {children}

@@ -11,8 +11,8 @@ import { Check } from "lucide-react";
 
 const plans = [
   {
-    name: "Degustação",
-    description: "Experimente o poder da constância sem compromisso.",
+    name: "Base",
+    description: "Experimente o poder da clareza sem compromisso.",
     price: 0,
     yearlyPrice: 0,
     buttonText: "Iniciar 7 Dias Grátis",
@@ -20,21 +20,21 @@ const plans = [
     includes: [
       "O que está incluso:",
       "7 dias de acesso total",
-      "Planner Guiado (Brain Dump)",
-      "Timer de Foco Básico",
+      "Planner (Esvaziar a Mente)",
+      "Timer de Foco Profundo",
       "Suporte via IA limitado",
     ],
   },
   {
     name: "Constante",
-    description: "O sistema essencial para manter seu cérebro no trilho todos os dias.",
+    description: "O sistema essencial para manter sua rotina no trilho todos os dias.",
     price: 49.90,
     yearlyPrice: 499,
     buttonText: "Assinar Agora",
     buttonVariant: "default" as const,
     popular: true,
     includes: [
-      "Tudo no Grátis, mais:",
+      "Tudo no Base, mais:",
       "Histórico de Evolução Completo",
       "Metas Semanais Assistidas",
       "Suporte SOS IA Ilimitado",
@@ -42,18 +42,18 @@ const plans = [
     ],
   },
   {
-    name: "Robusto",
-    description: "Alta performance com suporte de grupo e ferramentas avançadas.",
+    name: "Pleno",
+    description: "Suporte completo para quem busca acompanhamento contínuo.",
     price: 97.90,
     yearlyPrice: 970,
     buttonText: "Assinar Agora",
     buttonVariant: "outline" as const,
     includes: [
       "Tudo no Constante, mais:",
-      "Acesso à Comunidade VIP",
+      "Suporte Prioritário",
       "Workshops de Foco Mensais",
-      "Relatórios Cognitivos Detalhados",
-      "Prioridade em Novas Funcionalidades",
+      "Relatórios de Evolução Detalhados",
+      "Novas Funcionalidades Antecipadas",
     ],
   },
 ];
@@ -135,7 +135,7 @@ export default function PricingSection() {
 
   return (
     <div
-      className="min-h-screen mx-auto relative bg-[#0a0a0a] overflow-x-hidden py-24"
+      className="min-h-screen mx-auto relative bg-white overflow-x-hidden py-24"
       ref={pricingRef}
     >
       <TimelineContent
@@ -158,7 +158,7 @@ export default function PricingSection() {
         <span className="inline-block px-4 py-1.5 mb-2 text-[9px] font-black uppercase tracking-widest bg-white/10 text-[#84A59D] rounded-full border border-[#84A59D]/20">
           INVESTIMENTO
         </span>
-        <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter">
+        <h2 className="text-4xl md:text-6xl font-black text-[#1F2937] uppercase tracking-tighter">
           <VerticalCutReveal
             splitBy="words"
             staggerDuration={0.15}
@@ -181,9 +181,9 @@ export default function PricingSection() {
           animationNum={0}
           timelineRef={pricingRef}
           customVariants={revealVariants}
-          className="text-gray-400 font-medium max-w-xl mx-auto"
+          className="text-[#64748B] font-medium max-w-xl mx-auto"
         >
-          Junte-se a centenas de usuários que redescobriram o foco e a produtividade com o sistema TDAH Constante.
+          Escolha o nível de suporte que sua mente precisa hoje. Sem letras miúdas, sem pressão.
         </TimelineContent>
 
         <TimelineContent
@@ -207,15 +207,15 @@ export default function PricingSection() {
             customVariants={revealVariants}
           >
             <Card
-              className={`relative text-white border-neutral-800 rounded-[40px] overflow-hidden p-8 ${
+              className={`relative text-[#1F2937] border-[#E5E7EB] rounded-[40px] overflow-hidden p-8 ${
                 plan.popular
-                  ? "bg-gradient-to-b from-[#1F2937] to-black shadow-[0px_-13px_150px_0px_rgba(132,165,157,0.15)] z-20 border-[#84A59D]/30"
-                  : "bg-[#111111] z-10"
+                  ? "bg-white shadow-[0px_20px_80px_-20px_rgba(31,41,55,0.1)] z-20 border-[#84A59D]/30"
+                  : "bg-[#F9FAFB] z-10"
               }`}
             >
               <CardHeader className="text-left p-0 mb-8">
                 <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-2xl font-black uppercase tracking-tight text-white">{plan.name}</h3>
+                  <h3 className="text-2xl font-black uppercase tracking-tight text-[#1F2937]">{plan.name}</h3>
                   {plan.popular && (
                     <span className="bg-[#84A59D] text-white text-[8px] font-black px-2 py-1 rounded-full uppercase tracking-widest">
                       Mais Popular
@@ -223,7 +223,7 @@ export default function PricingSection() {
                   )}
                 </div>
                 <div className="flex items-baseline mb-4">
-                  <span className="text-4xl font-black text-white">
+                  <span className="text-4xl font-black text-[#1F2937]">
                     R$
                     <NumberFlow
                       value={isYearly ? plan.yearlyPrice : plan.price}
