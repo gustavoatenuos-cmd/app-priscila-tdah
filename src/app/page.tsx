@@ -11,18 +11,18 @@ import Link from "next/link";
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#F5F5F0] overflow-x-hidden font-sans">
-      {/* Navbar Minimalista */}
-      <nav className="fixed top-0 left-0 right-0 h-20 bg-white/60 backdrop-blur-md border-b border-[#E5E7EB] z-50 px-8 flex items-center justify-between">
+      {/* Navbar — transparente sobre o hero escuro */}
+      <nav className="fixed top-0 left-0 right-0 h-20 bg-transparent z-50 px-8 flex items-center justify-between transition-all">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 bg-[#1F2937] rounded-xl flex items-center justify-center">
+          <div className="h-9 w-9 bg-[#84A59D]/20 border border-[#84A59D]/30 rounded-xl flex items-center justify-center">
             <Sparkles className="h-5 w-5 text-[#84A59D]" />
           </div>
-          <span className="text-xl font-display font-black tracking-tight text-[#1F2937]">TDAH CONSTANTE</span>
+          <span className="text-xl font-display font-black tracking-tight text-white">TDAH CONSTANTE</span>
         </div>
         <div className="flex items-center gap-8">
-           <Link href="/login" className="text-xs font-bold uppercase tracking-widest text-[#64748B] hover:text-[#1F2937] transition-colors">Entrar</Link>
+           <Link href="/login" className="text-xs font-bold uppercase tracking-widest text-white/50 hover:text-white transition-colors">Entrar</Link>
            <Link href="/register">
-              <button className="bg-[#1F2937] text-white px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-sm">Começar</button>
+              <button className="border border-[#84A59D]/40 bg-[#84A59D]/10 text-[#84A59D] px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-[#84A59D] hover:text-white transition-all">Começar</button>
            </Link>
         </div>
       </nav>
@@ -31,12 +31,12 @@ export default function LandingPage() {
       <HomeHero />
 
       {/* 2. O Problema (Contexto Relatável) */}
-      <section className="py-24 bg-white border-y border-[#E5E7EB]/50">
+      <section className="py-28 bg-[#F5F5F0]">
         <div className="container mx-auto px-6 text-center">
           <div className="max-w-3xl mx-auto">
             <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#84A59D] mb-6">O custo do silêncio</h3>
-            <p className="text-2xl md:text-3xl font-display font-medium text-[#1F2937] leading-relaxed mb-8">
-              "Eu sei o que preciso fazer, mas não consigo começar."
+            <p className="text-2xl md:text-4xl font-display font-medium text-[#1F2937] leading-relaxed mb-8">
+              &quot;Eu sei o que preciso fazer, mas não consigo começar.&quot;
             </p>
             <p className="text-lg text-[#64748B] font-medium leading-relaxed">
               O caos mental não é falta de vontade. É falta de um sistema que entenda que sua energia oscila, que o foco é caro e que a paralisia é real. Nós construímos o TDAH Constante para ser esse sistema.
