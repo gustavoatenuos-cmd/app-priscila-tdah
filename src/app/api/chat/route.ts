@@ -1,13 +1,10 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// ── Groq client (using OpenAI SDK compatibility) ──────────────────────────────
-const groq = new OpenAI({
-  apiKey: process.env.GROQ_API_KEY,
-  baseURL: "https://api.groq.com/openai/v1",
-});
+// Força a rota a ser dinâmica para evitar erro de build na Vercel
+export const dynamic = 'force-dynamic';
 
-// ── Knowledge base (Inline to avoid fs/path issues on Vercel) ──────────────────
+// ── Knowledge base (Inline) ──────────────────────────────────────────────────
 const KNOWLEDGE_BASE = `
 O TDAH Constante é um sistema de apoio para neurodivergentes focado em constância leve.
 PILARES:
@@ -46,6 +43,12 @@ LIMITES: Não faça diagnóstico. Não substitua médicos. Respostas curtas para
 
 export async function POST(req: Request) {
   try {
+    // Instancia o cliente apenas quando a função é chamada, para evitar erro de build
+    const groq = new OpenAI({
+      apiKey: process.env.GROQ_API_KEY || 'dummy_key', // Dummy key evita erro de inicialização se a env estiver vazia
+      baseURL: "https://api.groq.com/openai/v1",
+    });
+
     const body = await req.json();
     const { message, history = [], userName = null } = body;
 
@@ -53,9 +56,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Mensagem vazia.' }, { status: 400 });
     }
 
-    if (!process.env.GROQ_API_KEY) {
+    // Validação real da chave
+    if (!process.env.GROQ_API_KEY || process.env.GROQ_API_KEY === 'gsk_...') {
       return NextResponse.json({ 
-        response: `Olá${userName ? `, ${userName}` : ''}! Estou em modo de demonstração. Por favor, configure minha chave API no painel da Vercel para eu poder te ajudar melhor.` 
+        response: `Olá${userName ? `, ${userName}` : ''}! Estou em modo de demonstração. Configure a GROQ_API_KEY no painel da Vercel para eu poder te ajudar.` 
       });
     }
 
@@ -84,7 +88,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('[TC Assistant] Error:', error);
     return NextResponse.json({ 
-      response: "Tive um pequeno curto-circuito neural. Pode tentar de novo em um segundo?" 
+      response: "Tive um pequeno curto-circuito neural. Pode tentar de novo?" 
     });
   }
 }
