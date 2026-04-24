@@ -87,9 +87,10 @@ export default function BrainDumpPage() {
     <div className="px-8 py-10 md:px-14 lg:max-w-4xl mx-auto">
 
         <header className="mb-12 text-center">
-          <h1 className="text-3xl font-extrabold text-[#1F2937] uppercase tracking-tight">Descarrego Mental</h1>
+          <h1 className="text-3xl font-extrabold text-[#1F2937] uppercase tracking-tight">Esvaziar a Mente</h1>
           <p className="text-[#64748B] font-medium text-lg mt-2">Tire da cabeça, coloque no papel. Sem ordem, sem pressão.</p>
         </header>
+
 
         {/* Input Area */}
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#E5E7EB] mb-12">

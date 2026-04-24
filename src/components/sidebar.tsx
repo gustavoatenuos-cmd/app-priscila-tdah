@@ -36,7 +36,7 @@ export function Sidebar() {
     { href: "/dashboard/focus", icon: Target, label: "Foco" },
     { href: "/dashboard/analytics", icon: BarChart2, label: "Análises" },
     { href: "/dashboard/journal", icon: BookOpen, label: "Diário" },
-    { href: "/dashboard/brain-dump", icon: Brain, label: "Descarrego" },
+    { href: "/dashboard/brain-dump", icon: Brain, label: "Mente" },
     { href: "/dashboard/sos", icon: Zap, label: "SOS" },
     { href: "/dashboard/support", icon: HelpCircle, label: "IA Ajuda" },
     { href: "/pricing", icon: Crown, label: "Assine" },

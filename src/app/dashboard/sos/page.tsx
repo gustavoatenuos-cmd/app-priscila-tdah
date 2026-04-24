@@ -25,9 +25,13 @@ export default function SOSPage() {
         <Heart className="h-10 w-10 text-[#84A59D]" />
       </div>
       <h1 className="text-4xl font-black text-[#1F2937] mb-6">Está tudo bem travar.</h1>
-      <p className="text-[#64748B] text-xl font-medium mb-10 leading-relaxed">
+      <p className="text-[#64748B] text-xl font-medium mb-4 leading-relaxed">
         Seu cérebro só está precisando de um caminho mais simples agora. Vamos encontrar a primeira peça do quebra-cabeça juntos?
       </p>
+      <p className="text-[#9CA3AF] text-sm font-medium mb-10 leading-relaxed max-w-lg mx-auto">
+        O SOS é uma ferramenta de neuroplasticidade para vencer a paralisia. Escolha uma única tarefa que está te travando e nós vamos quebrá-la em passos tão pequenos que será impossível não começar.
+      </p>
+
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <button onClick={() => setStep(1)} className="bg-[#1F2937] text-white px-10 py-5 rounded-[24px] font-bold text-lg shadow-xl shadow-black/10 hover:bg-black transition-all">
           Sim, me ajude a começar

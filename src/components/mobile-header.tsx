@@ -1,7 +1,7 @@
 "use client";
 
 import { Menu, X, User, BarChart2, BookOpen, Crown, HelpCircle, LogOut } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -9,8 +9,24 @@ import { supabase } from "@/lib/supabase";
 
 export function MobileHeader() {
   const [isOpen, setIsOpen] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
   const pathname = usePathname();
   const router = useRouter();
+
+  useEffect(() => {
+    async function loadProfile() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        if (data) setProfile(data);
+      }
+    }
+    loadProfile();
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -68,8 +84,8 @@ export function MobileHeader() {
                     <User className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-[#1F2937]">Minha Conta</p>
-                    <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-wider">Perfil</p>
+                    <p className="text-sm font-bold text-[#1F2937]">{profile?.full_name || "Sua Conta"}</p>
+                    <p className="text-[10px] font-black text-[#84A59D] uppercase tracking-widest">Assistente Pessoal</p>
                   </div>
                 </div>
                 <button onClick={() => setIsOpen(false)} className="p-2 text-[#9CA3AF] hover:text-[#1F2937]">

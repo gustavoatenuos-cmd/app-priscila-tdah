@@ -7,6 +7,7 @@ import { Sidebar } from "@/components/sidebar";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { syncTaskToGoogleCalendar } from "@/lib/calendar";
+import { AssistantVoice } from "@/components/assistant-voice";
 
 import { 
   DndContext, 
@@ -201,10 +202,11 @@ export default function PlannerPage() {
                 <div className="h-16 w-16 bg-white rounded-2xl flex items-center justify-center mb-6 text-[#84A59D] shadow-sm border border-[#E5E7EB]">
                    <Inbox className="h-8 w-8" />
                 </div>
+                <AssistantVoice 
+                  message="Muitas vezes, a sobrecarga vem de tentar processar tudo ao mesmo tempo. Minha sugestão: tire tudo da sua cabeça agora. Não julgue, apenas escreva." 
+                  className="mb-10 w-full max-w-2xl"
+                />
                 <h2 className="text-3xl font-black text-[#1F2937] mb-3 uppercase tracking-tighter">Etapa 01: Esvazie a Mente</h2>
-                <p className="text-[#64748B] font-medium mb-10 max-w-xl text-sm leading-relaxed">
-                  Não tente organizar agora. Apenas jogue para fora tudo o que está ocupando espaço no seu cérebro.
-                </p>
 
                 <div className="w-full max-w-xl flex gap-3 mb-10">
                    <input 
@@ -238,8 +240,11 @@ export default function PlannerPage() {
             {plannerStage === 'prioritize' && (
               <motion.div key="prioritize" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col h-full">
                 <div className="text-center mb-10">
-                   <h2 className="text-2xl font-black text-[#1F2937] mb-2 uppercase tracking-tighter">Etapa 02: O Filtro Kanban 1-2-3</h2>
-                   <p className="text-[#64748B] font-medium text-xs">Arraste os cards para definir o nível de prioridade. TDAH precisa de limites claros.</p>
+                 <AssistantVoice 
+                    message="Excelente. Agora, vamos aplicar o filtro 1-2-3. Escolha no máximo 3 coisas essenciais para hoje. O resto, podemos delegar para mais tarde ou descartar." 
+                    className="mb-8 w-full max-w-2xl mx-auto"
+                 />
+                 <h2 className="text-2xl font-black text-[#1F2937] mb-2 uppercase tracking-tighter">Etapa 02: O Filtro Kanban 1-2-3</h2>
                 </div>
 
                 <DndContext 
@@ -300,7 +305,7 @@ export default function PlannerPage() {
                 </DndContext>
 
                 <div className="flex justify-between items-center mt-12 pt-8 border-t border-[#E5E7EB]">
-                   <button onClick={() => setPlannerStage('dump')} className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-[0.2em] hover:text-[#1F2937]">Voltar para Despejo</button>
+                   <button onClick={() => setPlannerStage('dump')} className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-[0.2em] hover:text-[#1F2937]">Voltar para Esvaziar</button>
                    <button onClick={() => setPlannerStage('confirm')} className="bg-[#1F2937] hover:bg-black text-white px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl flex items-center gap-3 transition-all group">
                      Finalizar Plano <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                    </button>

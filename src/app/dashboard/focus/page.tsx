@@ -10,6 +10,7 @@ import { Sidebar } from "@/components/sidebar";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useState, useEffect, useRef } from "react";
+import { AssistantVoice } from "@/components/assistant-voice";
 
 const MINDFULNESS_DURATION = 2 * 60; // 2 minutos
 const FOCUS_DURATION = 50 * 60; // 50 minutos
@@ -250,6 +251,10 @@ export default function FocusPage() {
                     <Sparkles className="h-3 w-3 text-[#84A59D]" />
                     <span className="text-[10px] font-black uppercase tracking-widest text-[#84A59D]">Ativação Cognitiva</span>
                   </div>
+                  <AssistantVoice 
+                    message="O foco não é sobre trabalhar mais, mas sobre trabalhar com menos interrupções. Vamos preparar seu cérebro para entrar na Zona de Fluxo?" 
+                    className="mb-8 w-full max-w-md"
+                  />
                   <h2 className="text-5xl font-black text-[#1F2937] leading-[1.1] mb-8">Pronta para construir seu <span className="text-[#84A59D]">Poder de Foco</span>?</h2>
                   
                   <div className="w-full max-w-md space-y-6">
@@ -313,10 +318,11 @@ export default function FocusPage() {
                       <Wind className="h-12 w-12 text-[#84A59D] animate-pulse" />
                       <div className="absolute inset-0 bg-[#84A59D]/20 blur-2xl rounded-full scale-150 animate-pulse" />
                    </div>
+                   <AssistantVoice 
+                      message="Esta fase é crucial. Ao anotar o que te preocupa, você diz ao seu cérebro que a informação está segura e que ele pode parar de 'gritar' por atenção." 
+                      className="mb-8 w-full"
+                   />
                    <h2 className="text-4xl font-black text-[#1F2937] mb-4">Fase 01: Silenciando o Ruído</h2>
-                   <p className="text-[#64748B] font-medium text-lg leading-relaxed">
-                      Sente-se, respire. Escreva abaixo tudo o que está "apitando" na sua mente agora para podermos focar no que importa em seguida.
-                   </p>
                 </div>
 
                 <div className="text-[64px] font-mono font-black text-[#1F2937] mb-12 tabular-nums">

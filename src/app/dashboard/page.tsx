@@ -9,6 +9,7 @@ import { Sidebar } from "@/components/sidebar";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import { AssistantVoice } from "@/components/assistant-voice";
 
 export default function NeumorphicDashboard() {
   const router = useRouter();
@@ -167,6 +168,15 @@ export default function NeumorphicDashboard() {
            </div>
          </header>
 
+         <AssistantVoice 
+            message={
+              profile?.mindset_profile === 'sobrecarga' 
+                ? "Percebi que você está se sentindo sobrecarregada hoje. Minha sugestão: foque apenas na primeira prioridade essencial e esqueça o resto por enquanto." 
+                : "Seu nível de energia está ótimo para tarefas que exigem criatividade agora. Que tal começar por aquele projeto que você estava adiando?"
+            }
+            className="mb-10"
+         />
+
          {/* CAMINHO DO DIA (ETAPAS VISUAIS) */}
          <div className="grid grid-cols-3 gap-2 md:gap-4 mb-8 md:mb-10">
             <StageCard step={1} label="Planejar" active={stats.totalTasks > 0} current={stats.totalTasks === 0} />
@@ -312,7 +322,7 @@ export default function NeumorphicDashboard() {
                         <div className="absolute w-5 h-5 rounded-full bg-[#64748B] -left-[42px] top-1 border-[4px] border-[#FFFFFF] shadow-sm ring-4 ring-[#64748B]/10 group-hover:scale-125 transition-transform"></div>
                         <div className="bg-[#F8FAFC] p-4 rounded-2xl border border-[#64748B]/10">
                            <span className="text-[10px] font-black text-[#64748B] font-mono uppercase tracking-widest block mb-1">Janela de Foco</span>
-                           <span className="text-[16px] font-bold text-[#1F2937]">Melhor momento para Deep Work</span>
+                           <span className="text-[16px] font-bold text-[#1F2937]">Melhor momento para Foco Profundo</span>
                            <p className="text-[11px] text-[#64748B] mt-1">Sua energia está {profile?.energy_level === 'alta' ? 'no pico' : 'estável'}. Aproveite.</p>
                         </div>
                      </div>
@@ -367,7 +377,7 @@ export default function NeumorphicDashboard() {
                {/* FOCUS SESSION PANEL */}
                <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="bg-[#FFFFFF] rounded-3xl p-6 md:p-8 shadow-[0_12px_40px_rgba(0,0,0,0.03)] border border-[#E5E7EB]/50 flex-1 flex flex-col justify-between">
                   <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-sm font-bold text-[#333333] tracking-widest uppercase">Deep Work</h2>
+                    <h2 className="text-sm font-bold text-[#333333] tracking-widest uppercase">Foco Profundo</h2>
                     <span className="text-[#9CA3AF] tracking-widest font-bold">•••</span>
                   </div>
 
