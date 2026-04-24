@@ -75,7 +75,7 @@ export default function Home() {
           >
             <div className="aspect-[4/5] bg-white rounded-[64px] shadow-[0_40px_100px_rgba(0,0,0,0.08)] border border-[#E5E7EB] relative overflow-hidden group">
                <img 
-                 src="/mockup_dashboard.png" 
+                 src="/mockup_dashboard_pt.png" 
                  alt="Dashboard TDAH Constante" 
                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                />
