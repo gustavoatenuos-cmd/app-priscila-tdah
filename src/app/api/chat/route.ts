@@ -16,58 +16,82 @@ PILARES:
 `;
 
 // ── System prompt builder ──────────────────────────────────────────────────────
-function buildSystemPrompt(userName: string | null): string {
-  const userContext = userName ? `Você está falando com ${userName}.` : "";
+function buildSystemPrompt(profile: any): string {
+  const { 
+    full_name, 
+    occupation, 
+    main_struggle, 
+    mindset_profile, 
+    life_friction, 
+    energy_level, 
+    peak_time, 
+    interaction_tone,
+    bio 
+  } = profile || {};
+
+  const nameContext = full_name ? `Você está falando com ${full_name}.` : "";
+  const diagnosticContext = `
+DADOS DO USUÁRIO PARA PERSONALIZAÇÃO:
+- Ocupação: ${occupation || 'Não informado'}
+- Principal Dificuldade: ${main_struggle || 'Não informado'}
+- Padrão Comportamental: ${mindset_profile || 'Não informado'}
+- Maior Fricção: ${life_friction || 'Não informado'}
+- Nível de Energia Geral: ${energy_level || 'Não informado'}
+- Pico de Performance: ${peak_time || 'Não informado'}
+- Tom de Suporte Preferido: ${interaction_tone || 'acolhedor'}
+- Bio/Como pensa: ${bio || 'Não informado'}
+  `.trim();
 
   return `
-Você é o TC Assistant, guia de neuroplasticidade do app TDAH Constante.
-${userContext}
+Você é o TC Assistant, guia de neuroplasticidade e companheiro cognitivo do app TDAH Constante.
+${nameContext}
 
-OBJETIVO: Ajudar o usuário a sair da paralisia com leveza e clareza.
+${diagnosticContext}
+
+OBJETIVO: Ajudar o usuário a sair da paralisia com leveza e clareza, adaptando as estratégias à realidade dele (cargo, desafios e nível de energia).
+
 PRINCÍPIOS: Constância > Perfeição | Microação > Plano Ideal | Regulação antes de Produtividade.
 
 ESTILO:
 - Português do Brasil.
-- Tom acolhedor e objetivo. Frases curtas.
-- Uma orientação por vez. Máximo 3-4 frases.
-- Máximo UMA pergunta por resposta.
+- Tom: ${interaction_tone === 'direto' ? 'direto, pragmático e objetivo' : 'acolhedor, empático e humano'}.
+- Frases curtas para evitar fadiga cognitiva.
+- Uma orientação por vez. 
 
-ESTRATÉGIAS: Respiração 4-2-6, Regra dos 3 itens, Micro-passo, Timer de 10min, Escrever no papel, Pausa sensorial.
+ESTRATÉGIAS: Respiração 4-2-6, Regra dos 3 itens, Micro-passo, Timer de 10-15min, Escrever no papel, Pausa sensorial.
 
 CONHECIMENTO:
 ${KNOWLEDGE_BASE}
 
-LIMITES: Não faça diagnóstico. Não substitua médicos. Respostas curtas para evitar fadiga cognitiva.
+LIMITES: Não faça diagnóstico médico. Não substitua tratamento profissional.
   `.trim();
 }
 
 export async function POST(req: Request) {
   try {
-    // Instancia o cliente apenas quando a função é chamada, para evitar erro de build
-    const groq = new OpenAI({
-      apiKey: process.env.GROQ_API_KEY || 'dummy_key', // Dummy key evita erro de inicialização se a env estiver vazia
-      baseURL: "https://api.groq.com/openai/v1",
-    });
-
     const body = await req.json();
-    const { message, history = [], userName = null } = body;
+    const { message, history = [], profile = null } = body;
 
     if (!message?.trim()) {
       return NextResponse.json({ error: 'Mensagem vazia.' }, { status: 400 });
     }
 
-    // Validação real da chave
-    if (!process.env.GROQ_API_KEY || process.env.GROQ_API_KEY === 'gsk_...') {
+    if (!process.env.GROQ_API_KEY) {
       return NextResponse.json({ 
-        response: `Olá${userName ? `, ${userName}` : ''}! Estou em modo de demonstração. Configure a GROQ_API_KEY no painel da Vercel para eu poder te ajudar.` 
+        response: "Estou em modo de demonstração. Configure a GROQ_API_KEY para ativar meu motor cerebral." 
       });
     }
 
-    const systemPrompt = buildSystemPrompt(userName);
+    const groq = new OpenAI({
+      apiKey: process.env.GROQ_API_KEY,
+      baseURL: "https://api.groq.com/openai/v1",
+    });
+
+    const systemPrompt = buildSystemPrompt(profile);
 
     const messages: any[] = [
       { role: 'system', content: systemPrompt },
-      ...history.slice(-6).map((m: any) => ({
+      ...history.slice(-10).map((m: any) => ({
         role: m.role,
         content: m.content,
       })),
@@ -77,8 +101,8 @@ export async function POST(req: Request) {
     const completion = await groq.chat.completions.create({
       model: 'llama-3.1-8b-instant',
       messages,
-      max_tokens: 400,
-      temperature: 0.6,
+      max_tokens: 600,
+      temperature: 0.7,
     });
 
     const response = completion.choices[0]?.message?.content ?? 'Não consegui processar sua mensagem agora.';
@@ -88,7 +112,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('[TC Assistant] Error:', error);
     return NextResponse.json({ 
-      response: "Tive um pequeno curto-circuito neural. Pode tentar de novo?" 
+      response: "Tive um pequeno curto-circuito neural. Tente novamente em instantes." 
     });
   }
 }

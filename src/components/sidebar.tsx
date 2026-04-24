@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, CheckSquare, Target, BarChart2, BookOpen, Brain, Crown, Zap, LogOut, HelpCircle } from "lucide-react";
+import { Home, CheckSquare, Target, BarChart2, BookOpen, Brain, Crown, Zap, LogOut, HelpCircle, Fingerprint } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -39,6 +39,7 @@ export function Sidebar() {
     { href: "/dashboard/brain-dump", icon: Brain, label: "Mente" },
     { href: "/dashboard/sos", icon: Zap, label: "SOS" },
     { href: "/dashboard/support", icon: HelpCircle, label: "IA Ajuda" },
+    { href: "/dashboard/profile", icon: Fingerprint, label: "Perfil" },
     { href: "/pricing", icon: Crown, label: "Assine" },
   ];
 

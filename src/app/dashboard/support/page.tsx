@@ -32,7 +32,7 @@ function renderMarkdown(text: string) {
 }
 
 export default function SupportPage() {
-  const [userName, setUserName] = useState<string | null>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [messages, setMessages] = useState<Message[]>([
     { role: 'assistant', content: "Olá! Sou seu guia de neuroplasticidade. Como posso te ajudar a sair da paralisia hoje?" }
   ]);
@@ -42,23 +42,23 @@ export default function SupportPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    async function getUser() {
+    async function getUserProfile() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data: profile } = await supabase
+        const { data } = await supabase
           .from('profiles')
-          .select('full_name')
+          .select('*')
           .eq('id', user.id)
           .single();
         
-        if (profile?.full_name) {
-          const first = profile.full_name.split(' ')[0];
-          setUserName(first);
-          setMessages([{ role: 'assistant', content: `Olá, ${first}! Sou seu guia de neuroplasticidade. Como posso te ajudar com o foco hoje?` }]);
+        if (data) {
+          setProfile(data);
+          const firstName = data.full_name?.split(' ')[0] || "viajante";
+          setMessages([{ role: 'assistant', content: `Olá, ${firstName}! Sou seu guia de neuroplasticidade. Como posso te ajudar com o foco hoje?` }]);
         }
       }
     }
-    getUser();
+    getUserProfile();
   }, []);
 
   useEffect(() => {
@@ -81,7 +81,7 @@ export default function SupportPage() {
         body: JSON.stringify({ 
           message: userMessage, 
           history: messages,
-          userName: userName // Pass the name to the API
+          profile: profile // Pass the full profile for deep context
         }),
         headers: { 'Content-Type': 'application/json' }
       });

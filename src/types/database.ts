@@ -11,6 +11,28 @@ export type DatabaseUser = {
   preferences: UserPreferences;
 };
 
+// ── Profile / Diagnostic Data ────────────────────────────────────────────────
+export type UserProfile = {
+  id: string; // matches auth.uid
+  full_name?: string;
+  avatar_url?: string;
+  
+  // Diagnostic Fields
+  main_struggle?: 'inercia' | 'memoria' | 'foco';
+  mindset_profile?: 'paralisia' | 'criativa' | 'hiperfoco';
+  life_friction?: 'trabalho' | 'casa' | 'saude' | 'financas' | 'social' | 'projetos';
+  energy_level?: 'baixa' | 'alta';
+  peak_time?: 'manha' | 'noite';
+  interaction_tone?: 'acolhedor' | 'direto';
+  
+  // Personal Info for AI context
+  occupation?: string;
+  age?: number;
+  bio?: string; // "How I work/think"
+  
+  updated_at?: Date;
+};
+
 export type Habit = {
   id: string;
   user_id: string;
@@ -25,6 +47,7 @@ export type TaskOrEvent = {
   title: string;
   date: Date; // Timestamp
   status: 'pendente' | 'em_andamento' | 'concluido';
+  priority_level?: 'essencial' | 'importante' | 'opcional';
 };
 
 export type WheelOfLifeScore = {
