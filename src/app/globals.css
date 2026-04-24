@@ -49,6 +49,8 @@
   --color-muted-2: var(--muted-2);
   --color-muted-2-foreground: var(--muted-2-foreground);
   --color-transparent: transparent;
+  --color-sparkles-color: var(--sparkles-color);
+  --color-gradient-color: var(--gradient-color);
   --radius-xs: calc(var(--radius) - 4px);
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
@@ -122,6 +124,8 @@
   --gradient-1: hsl(227 81% 67%);
   --gradient-2: hsl(125 51% 53%);
   --gradient-3: hsl(318 58% 66%);
+  --gradient-color: #8350e8;
+  --sparkles-color: #8350e8;
   --font-sans: "Inter", sans-serif;
   --font-serif: "Roboto Serif", serif;
   --font-mono: "Roboto Mono", monospace;
@@ -166,7 +170,10 @@
   --gradient-1: hsl(240 77% 25%);
   --gradient-2: hsl(125 51% 53%);
   --gradient-3: hsl(318 58% 66%);
+  --gradient-color: #8350e8;
+  --sparkles-color: #ffffff;
 }
+
 
 @keyframes accordion-down {
   from { height: 0; }
