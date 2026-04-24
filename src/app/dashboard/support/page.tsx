@@ -39,33 +39,25 @@ export default function SupportPage() {
     setLoading(true);
 
     try {
-      // Fetch the knowledge base
-      const docsRes = await fetch('/llms.txt');
-      const docsText = await docsRes.text();
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        body: JSON.stringify({ 
+          message: userMessage,
+          history: messages 
+        }),
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-      // Simple keyword-based logic (Simulating the agent from the template)
-      // In a real scenario, this would call an LLM API with the context
-      setTimeout(() => {
-        let response = "Desculpe, ainda estou aprendendo sobre esse ponto específico. Deseja que eu encaminhe sua dúvida para nossa equipe via e-mail?";
-        
-        const lowerMsg = userMessage.toLowerCase();
-        
-        if (lowerMsg.includes("1-2-3") || lowerMsg.includes("planejamento")) {
-          response = "A metodologia 1-2-3 consiste em escolher 1 tarefa Essencial, 2 Importantes e 3 Opcionais. Isso ajuda a reduzir a paralisia por análise e garante que você foque no que realmente importa.";
-        } else if (lowerMsg.includes("pontos") || lowerMsg.includes("nível") || lowerMsg.includes("score")) {
-          response = "Você ganha Pontos de Clareza ao planejar seu dia (+50 pts) e Power Score ao completar sessões de foco. A cada 500 pontos, você sobe de nível!";
-        } else if (lowerMsg.includes("foco") || lowerMsg.includes("timer")) {
-          response = "Nossa Zona de Fluxo inclui um Mindfulness de 2 minutos para silenciar o ruído mental e um 'Thought Sandbox' para você anotar distrações sem perder o foco.";
-        } else if (lowerMsg.includes("plano b") || lowerMsg.includes("sos")) {
-          response = "O Plano B é para dias difíceis. Ele reduz suas metas ao mínimo absoluto para evitar a culpa. Você pode ativá-lo no Dashboard.";
-        }
+      const data = await res.json();
 
-        setMessages(prev => [...prev, { role: 'assistant', content: response }]);
-        setLoading(false);
-      }, 1000);
-
+      if (data.response) {
+        setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
+      } else {
+        throw new Error();
+      }
     } catch (err) {
       toast.error("Erro ao processar resposta.");
+    } finally {
       setLoading(false);
     }
   };
