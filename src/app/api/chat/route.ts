@@ -3,12 +3,13 @@ import fs from 'fs';
 import path from 'path';
 import OpenAI from 'openai';
 
-// ── OpenAI client ──────────────────────────────────────────────────────────────
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+// ── Groq client (using OpenAI SDK compatibility) ──────────────────────────────
+const groq = new OpenAI({
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: "https://api.groq.com/openai/v1",
 });
 
-// ── Knowledge base loader (cached at module level) ─────────────────────────────
+// ── Knowledge base loader ──────────────────────────────────────────────────────
 let knowledgeBaseCache: string | null = null;
 
 function getKnowledgeBase(): string {
@@ -22,59 +23,79 @@ function getKnowledgeBase(): string {
   }
 }
 
-// ── System prompt ──────────────────────────────────────────────────────────────
-function buildSystemPrompt(knowledgeBase: string): string {
+// ── System prompt builder ──────────────────────────────────────────────────────
+function buildSystemPrompt(knowledgeBase: string, userName: string | null): string {
+  const userContext = userName ? `Você está falando com ${userName}. Use o nome dele(a) ocasionalmente para ser mais pessoal.` : "";
+
   return `
-Você é o TC Assistant — o guia pessoal de neuroplasticidade do app TDAH Constante.
+Você é o TC Assistant, um assistente baseado nos materiais de neuroplasticidade, constância leve, foco e rotina para pessoas com TDAH.
+${userContext}
 
-PERSONALIDADE:
-- Tom: acolhedor, direto e prático. Nunca condescendente.
-- Fala como um amigo especialista, não como um chatbot corporativo.
-- Valide primeiro, sugira depois. Se o usuário estiver frustrado, reconheça antes de dar dicas.
-- Use frases curtas. Evite parágrafos longos (sobrecarga cognitiva).
-- Nunca invente funcionalidades que não existem no app.
+Sua função é ajudar o usuário a sair da paralisia e voltar para o próximo passo possível com leveza, sem culpa e com clareza.
 
-BASE DE CONHECIMENTO DO APP:
+PRINCÍPIOS CENTRAIS:
+- Constância > Perfeição
+- Microação > Plano Ideal
+- Visibilidade > Depender da Memória
+- Regulação antes de Produtividade
+- Adaptação > Abandono
+- Foco no próximo passo, não na vida inteira
+
+ESTILO DE RESPOSTA:
+- Responda SEMPRE em português do Brasil.
+- Tom acolhedor, humano e objetivo.
+- Frases curtas.
+- Uma orientação por vez.
+- Sempre que possível, transforme a resposta em ação prática.
+- Faça no máximo UMA pergunta por resposta.
+
+FLUXO DE RESPOSTA:
+1. RECONHEÇA a dificuldade sem dramatizar.
+2. IDENTIFIQUE a trava principal (Foco, Sobrecarga, Culpa, Emoção, Energia, Organização ou Decisão).
+3. ESCOLHA uma estratégia simples:
+   - Respiração 4-2-6
+   - Regra dos 3 itens
+   - Micro-passo
+   - Timer de 10 ou 15 minutos
+   - Tirar estímulos visuais
+   - Escrever no papel
+   - Pausa sensorial
+   - Ancoragem visual
+   - Recompensa consciente
+4. CONVIDE o usuário para um próximo passo imediato.
+
+BASE DE CONHECIMENTO ESPECÍFICA (llms.txt):
 ${knowledgeBase}
 
-PILARES DO APP:
-1. Esvaziar a Mente (brain dump guiado)
-2. Foco Profundo — timer com Thought Sandbox para estacionar distrações
-3. Método 1-2-3 — 1 Essencial, 2 Importantes, 3 Opcionais
-4. SOS — micro-ação anti-paralisia
-5. Power Score — sistema de pontos e gamificação
-
-DIRETRIZES:
-- Se não souber algo, admita e ofereça enviar para o suporte humano.
-- Use **negrito** para termos-chave do app.
-- Máximo 3-4 frases por resposta. Se precisar de mais, use lista.
-- Sempre termine com uma pergunta curta ou ação concreta.
-- Responda SEMPRE em português do Brasil.
+LIMITES E ÉTICA:
+- Não faça diagnóstico.
+- Não substitua tratamento médico ou psicológico.
+- Se houver sinais de risco, sofrimento intenso ou crise, oriente busca de ajuda profissional.
+- Não prometa cura.
+- Respostas curtas para evitar fadiga cognitiva.
   `.trim();
 }
 
-// ── Route handler ──────────────────────────────────────────────────────────────
 export async function POST(req: Request) {
   try {
-    const { message, history = [] } = await req.json();
+    const { message, history = [], userName = null } = await req.json();
 
     if (!message?.trim()) {
       return NextResponse.json({ error: 'Mensagem vazia.' }, { status: 400 });
     }
 
-    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'sk-...') {
-      // Fallback inteligente enquanto a chave não está configurada
-      return NextResponse.json({
-        response: fallbackResponse(message),
+    // Force key check - if missing, use the fallbackResponse
+    if (!process.env.GROQ_API_KEY || process.env.GROQ_API_KEY === 'sk-...') {
+      return NextResponse.json({ 
+        response: fallbackResponse(message, userName) 
       });
     }
 
     const knowledgeBase = getKnowledgeBase();
-    const systemPrompt = buildSystemPrompt(knowledgeBase);
+    const systemPrompt = buildSystemPrompt(knowledgeBase, userName);
 
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
       { role: 'system', content: systemPrompt },
-      // Include conversation history (max 10 turns to control token cost)
       ...history.slice(-10).map((m: { role: string; content: string }) => ({
         role: m.role as 'user' | 'assistant',
         content: m.content,
@@ -82,11 +103,11 @@ export async function POST(req: Request) {
       { role: 'user', content: message },
     ];
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+    const completion = await groq.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
       messages,
-      max_tokens: 300,
-      temperature: 0.7,
+      max_tokens: 500,
+      temperature: 0.6,
     });
 
     const response = completion.choices[0]?.message?.content ?? 'Não consegui processar sua mensagem.';
@@ -94,36 +115,28 @@ export async function POST(req: Request) {
     return NextResponse.json({ response });
 
   } catch (error) {
-    console.error('[TC Assistant] Chat error:', error);
-    return NextResponse.json(
-      { error: 'Erro ao processar mensagem. Tente novamente.' },
-      { status: 500 }
-    );
+    console.error('[TC Assistant] Groq Chat error:', error);
+    // Even if it fails, try the fallback to not break user experience
+    return NextResponse.json({ 
+      response: fallbackResponse(message, userName) 
+    });
   }
 }
 
-// ── Smart fallback (used when OPENAI_API_KEY is not configured yet) ────────────
-function fallbackResponse(message: string): string {
+function fallbackResponse(message: string, userName: string | null): string {
+  const name = userName ? `, ${userName}` : "";
   const msg = message.toLowerCase();
 
-  if (/oi|ol[aá]|bom dia|boa tarde|boa noite|ajuda/.test(msg)) {
-    return "Olá! Estou aqui para calibrar seu foco. Como posso te ajudar com o **Método 1-2-3** ou com sua **Zona de Fluxo** hoje?";
+  if (msg.includes("nome")) {
+    return userName ? `Sim, eu sei seu nome! Você se chama **${userName}**. Como posso te ajudar hoje?` : "Ainda não tive o prazer de saber seu nome. Como você se chama?";
   }
-  if (/1.?2.?3|prioridade|organizar|planejar/.test(msg)) {
-    return "O **Método 1-2-3** é seu filtro de segurança. Escolha **1 Essencial**, **2 Importantes** e **3 Opcionais**. Isso evita sobrecarga e garante que você complete o que realmente importa. Quer definir sua prioridade agora?";
+  
+  if (/oi|ol[aá]|bom dia|boa tarde|boa noite|ajuda/.test(msg)) {
+    return `Olá${name}! Estou aqui para calibrar seu foco. Como posso te ajudar com o **Método 1-2-3** ou com sua **Zona de Fluxo** hoje?`;
   }
   if (/sos|trav|paralisi|n[aã]o consigo|difícil|cansad/.test(msg)) {
-    return "Entendo. Dias assim acontecem. Ative o **SOS**: escolha uma micro-ação tão pequena que seja impossível não fazer. O objetivo é só começar. O que seria o menor passo possível agora?";
-  }
-  if (/foco|concentra|zona de fluxo|timer/.test(msg)) {
-    return "Na **Zona de Fluxo**, comece com 2 min de respiração para baixar a frequência mental. Se surgir uma distração, jogue no **Thought Sandbox** e continue. Quantos minutos você consegue reservar agora?";
-  }
-  if (/pontos|n[ií]vel|progresso|gamifica/.test(msg)) {
-    return "Cada ação gera **Power Score**! Planejar o dia = +50 pontos. Completar um foco = pontos de constância. Você sobe de nível conforme mantém a sequência. Quer saber como está seu progresso hoje?";
-  }
-  if (/esvaziar|dump|pensamento|mente cheia|ansiedad/.test(msg)) {
-    return "Use o **Esvaziar a Mente** para tirar tudo da cabeça sem julgamento. Escreva tudo, depois o app te ajuda a filtrar o que realmente importa. Quer abrir isso agora?";
+    return `Entendo${name}. Dias assim acontecem. Ative o **SOS**: escolha uma micro-ação tão pequena que seja impossível não fazer. O que seria o menor passo possível agora?`;
   }
 
-  return "Essa é uma boa pergunta. Com base no **TDAH Constante**, o melhor caminho é uma micro-ação de cada vez. Quer que eu explique como o **Método 1-2-3** ou o **SOS** podem ajudar nisso?";
+  return `Essa é uma boa pergunta${name}. Com base no **TDAH Constante**, o melhor caminho é uma micro-ação de cada vez. Quer que eu explique como o **Método 1-2-3** ou o **SOS** podem ajudar nisso?`;
 }

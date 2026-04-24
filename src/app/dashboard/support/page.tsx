@@ -9,6 +9,7 @@ import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { AnimatedBrain } from "@/components/animated-brain";
+import { supabase } from "@/lib/supabase";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -31,13 +32,34 @@ function renderMarkdown(text: string) {
 }
 
 export default function SupportPage() {
+  const [userName, setUserName] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: "Olá! Sou seu guia de neuroplasticidade. Como posso te ajudar com a metodologia ou com o app hoje?" }
+    { role: 'assistant', content: "Olá! Sou seu guia de neuroplasticidade. Como posso te ajudar a sair da paralisia hoje?" }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [escalating, setEscalating] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    async function getUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile?.full_name) {
+          const first = profile.full_name.split(' ')[0];
+          setUserName(first);
+          setMessages([{ role: 'assistant', content: `Olá, ${first}! Sou seu guia de neuroplasticidade. Como posso te ajudar com o foco hoje?` }]);
+        }
+      }
+    }
+    getUser();
+  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -56,7 +78,11 @@ export default function SupportPage() {
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
-        body: JSON.stringify({ message: userMessage, history: messages }),
+        body: JSON.stringify({ 
+          message: userMessage, 
+          history: messages,
+          userName: userName // Pass the name to the API
+        }),
         headers: { 'Content-Type': 'application/json' }
       });
 
