@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Sparkles, Brain } from "lucide-react";
+import { AnimatedBrain } from "@/components/animated-brain";
 
 interface AssistantVoiceProps {
   message: string;
@@ -15,8 +15,8 @@ export function AssistantVoice({ message, className = "" }: AssistantVoiceProps)
       animate={{ opacity: 1, y: 0 }}
       className={`flex items-start gap-4 bg-white/40 backdrop-blur-md p-6 rounded-[32px] border border-[#84A59D]/20 shadow-sm ${className}`}
     >
-      <div className="h-10 w-10 bg-[#1F2937] rounded-2xl flex items-center justify-center text-[#84A59D] shrink-0 shadow-lg">
-        <Sparkles className="h-5 w-5" />
+      <div className="h-12 w-12 bg-[#1F2937] rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-black/10">
+        <AnimatedBrain size={30} state="idle" />
       </div>
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-1">
