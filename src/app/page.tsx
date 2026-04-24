@@ -73,23 +73,13 @@ export default function Home() {
             transition={{ duration: 1.2, delay: 0.2 }}
             className="relative"
           >
-            <div className="aspect-[4/5] bg-white rounded-[64px] shadow-[0_40px_100px_rgba(0,0,0,0.08)] border border-[#E5E7EB] p-10 relative overflow-hidden group">
-               <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
-                 <Brain className="h-64 w-64" />
-               </div>
-               
-               {/* UI Elements simulation */}
-               <div className="space-y-8 relative z-10">
-                  <div className="h-12 w-48 bg-[#F8F9FA] rounded-2xl animate-pulse" />
-                  <div className="h-40 w-full bg-[#1F2937]/5 rounded-[40px] p-8">
-                     <div className="h-4 w-32 bg-[#1F2937]/20 rounded-full mb-4" />
-                     <div className="h-8 w-64 bg-[#1F2937]/10 rounded-full" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="h-32 bg-[#84A59D]/10 rounded-[32px]" />
-                    <div className="h-32 bg-[#F8F9FA] rounded-[32px] border border-dashed border-[#E5E7EB]" />
-                  </div>
-               </div>
+            <div className="aspect-[4/5] bg-white rounded-[64px] shadow-[0_40px_100px_rgba(0,0,0,0.08)] border border-[#E5E7EB] relative overflow-hidden group">
+               <img 
+                 src="/mockup_dashboard.png" 
+                 alt="Dashboard TDAH Constante" 
+                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+               />
+               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
 
             {/* Floating Badges */}
