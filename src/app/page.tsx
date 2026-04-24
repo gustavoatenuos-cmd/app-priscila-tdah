@@ -75,8 +75,8 @@ export default function Home() {
           >
             <div className="aspect-[4/5] bg-white rounded-[64px] shadow-[0_40px_100px_rgba(0,0,0,0.08)] border border-[#E5E7EB] relative overflow-hidden group">
                <img 
-                 src="/mockup_dashboard_pt.png" 
-                 alt="Dashboard TDAH Constante" 
+                 src="/mockup_ecosystem.png" 
+                 alt="Ecossistema TDAH Constante" 
                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                />
                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
