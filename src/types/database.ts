@@ -98,3 +98,20 @@ export type FinancialMetrics = {
   fixed_costs: number;
   net_profit: number; // revenue - ad_spend - fixed_costs
 };
+
+// ── Chat & AI History ────────────────────────────────────────────────────────
+export type ChatSession = {
+  id: string;
+  user_id: string;
+  title: string;
+  created_at: Date;
+  expires_at: Date;
+};
+
+export type ChatMessage = {
+  id: string;
+  session_id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  created_at: Date;
+};

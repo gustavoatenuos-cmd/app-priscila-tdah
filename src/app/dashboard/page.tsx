@@ -1,488 +1,597 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { CircleCheck, Clock, Brain, Zap, ArrowRight, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { BookOpen, Check, Snowflake, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Sidebar } from "@/components/sidebar";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import { AssistantVoice } from "@/components/assistant-voice";
+import { fraseDodia } from "@/lib/frases-data";
+import { PRESENCA_365 } from "@/lib/presenca-data";
 
-export default function NeumorphicDashboard() {
+export default function MeuDia() {
   const router = useRouter();
-  const [currentDate, setCurrentDate] = useState("");
-  const [planoB, setPlanoB] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
-  const [tasks, setTasks] = useState<any[]>([]);
-  const [stats, setStats] = useState({
-    completedTasks: 0,
-    totalTasks: 0,
-    focusMinutes: 0,
-    progress: 0
+  const [currentDate, setCurrentDate] = useState("");
+  const [frase, setFrase] = useState("");
+
+  // Presença 365
+  const [diaAtual, setDiaAtual] = useState(1);
+  const [presencaHoje, setPresencaHoje] = useState(false);
+
+  // Tarefas do dia (3 máximo)
+  const [tarefas, setTarefas] = useState<{
+    essencial: { id?: string; titulo: string; feito: boolean };
+    leve: { id?: string; titulo: string; feito: boolean };
+    opcional: { id?: string; titulo: string; feito: boolean };
+  }>({
+    essencial: { titulo: "", feito: false },
+    leve: { titulo: "", feito: false },
+    opcional: { titulo: "", feito: false },
   });
 
+  // Constância semanal
+  const [diasSemana, setDiasSemana] = useState<boolean[]>([false, false, false, false, false, false, false]);
+  const [diasPresente, setDiasPresente] = useState(0);
+
+  // Travei modal
+  const [traveiAberto, setTraveiAberto] = useState(false);
+  const [traveiStep, setTraveiStep] = useState<"opcoes" | "timer" | "respirar" | "minima" | "feito">("opcoes");
+  const [traveiTimer, setTraveiTimer] = useState(60);
+  const [traveiAcao, setTraveiAcao] = useState("");
+
   useEffect(() => {
-    setCurrentDate(format(new Date(), "EEEE, MMM dd, yyyy | hh:mm a", { locale: ptBR }));
-    
+    setMounted(true);
+    setCurrentDate(format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR }));
+    setFrase(fraseDodia());
+
     async function loadData() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push("/login");
-        return;
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) { router.push("/login"); return; }
+
+        // Profile
+        const { data: profileData } = await supabase
+          .from("profiles").select("*").eq("id", user.id).single();
+        setProfile(profileData || { full_name: "Você" });
+
+        // Calcular dia atual do 365
+        const { data: presencas } = await supabase
+          .from("presenca_diaria")
+          .select("dia_numero")
+          .eq("user_id", user.id)
+          .eq("completado", true)
+          .order("dia_numero", { ascending: false })
+          .limit(1);
+
+        const ultimoDia = presencas?.[0]?.dia_numero || 0;
+        const proximoDia = Math.min(ultimoDia + 1, 365);
+        setDiaAtual(proximoDia);
+
+        // Verificar se já marcou presença hoje
+        const { data: presencaHojeData } = await supabase
+          .from("presenca_diaria")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("dia_numero", proximoDia)
+          .eq("completado", true)
+          .maybeSingle();
+        setPresencaHoje(!!presencaHojeData);
+
+        // Carregar tarefas de hoje
+        const today = new Date().toISOString().split("T")[0];
+        const { data: tarefasData } = await supabase
+          .from("tasks")
+          .select("*")
+          .eq("user_id", user.id)
+          .gte("created_at", today + "T00:00:00")
+          .lte("created_at", today + "T23:59:59")
+          .order("created_at", { ascending: true });
+
+        if (tarefasData && tarefasData.length > 0) {
+          const e = tarefasData.find((t: any) => t.priority_level === "essencial");
+          const l = tarefasData.find((t: any) => t.priority_level === "importante");
+          const o = tarefasData.find((t: any) => t.priority_level === "opcional");
+          setTarefas({
+            essencial: e ? { id: e.id, titulo: e.title, feito: e.completed } : { titulo: "", feito: false },
+            leve: l ? { id: l.id, titulo: l.title, feito: l.completed } : { titulo: "", feito: false },
+            opcional: o ? { id: o.id, titulo: o.title, feito: o.completed } : { titulo: "", feito: false },
+          });
+        }
+
+        // Constância da semana
+        const now = new Date();
+        const dayOfWeek = now.getDay(); // 0=dom
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - dayOfWeek);
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        const { data: constanciaData } = await supabase
+          .from("constancia")
+          .select("data")
+          .eq("user_id", user.id)
+          .gte("data", startOfWeek.toISOString().split("T")[0])
+          .lte("data", now.toISOString().split("T")[0]);
+
+        const diasSet = new Set(constanciaData?.map((c: any) => c.data) || []);
+        const semana: boolean[] = [];
+        for (let i = 0; i <= 6; i++) {
+          const d = new Date(startOfWeek);
+          d.setDate(startOfWeek.getDate() + i);
+          const dStr = d.toISOString().split("T")[0];
+          semana.push(diasSet.has(dStr));
+        }
+        setDiasSemana(semana);
+        setDiasPresente(semana.filter(Boolean).length);
+
+        // Registrar que apareceu hoje
+        await supabase.from("constancia").upsert(
+          { user_id: user.id, data: today, apareceu: true },
+          { onConflict: "user_id,data" }
+        );
+      } catch (err) {
+        console.error("Erro ao carregar dados:", err);
+      } finally {
+        setLoading(false);
       }
-
-      const today = new Date().toISOString().split('T')[0];
-
-      // Load Profile
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-      
-      setProfile(profileData);
-
-      // Check if onboarding is complete
-      if (!profileData || !profileData.energy_level) {
-        router.push("/onboarding");
-        return;
-      }
-
-      // Load All Today's Tasks for stats
-      const { data: allTasks } = await supabase
-        .from('tasks')
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('created_at', today);
-      
-      const completedCount = allTasks?.filter(t => t.completed).length || 0;
-      const totalCount = allTasks?.length || 0;
-      const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-
-      // Load Today's Focus Sessions
-      const { data: focusData } = await supabase
-        .from('focus_sessions')
-        .select('duration_minutes')
-        .eq('user_id', user.id)
-        .gte('created_at', today);
-      
-      const totalMinutes = focusData?.reduce((acc, curr) => acc + (curr.duration_minutes || 0), 0) || 0;
-
-      setStats({
-        completedTasks: completedCount,
-        totalTasks: totalCount,
-        focusMinutes: totalMinutes,
-        progress: progressPercent
-      });
-
-      // Load Latest 3 Tasks for the list
-      setTasks(allTasks?.slice(0, 3) || []);
-      setLoading(false);
     }
     loadData();
   }, [router]);
 
+  // Timer do Travei
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (traveiStep === "timer" && traveiTimer > 0) {
+      timer = setInterval(() => {
+        setTraveiTimer((prev) => {
+          if (prev <= 1) { setTraveiStep("feito"); return 0; }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [traveiStep, traveiTimer]);
+
   const getGreeting = () => {
     const hour = new Date().getHours();
-    const name = profile?.full_name?.split(' ')[0] || "Bem-vindo(a)";
-    let salute = "Bom dia";
-    if (hour >= 12 && hour < 18) salute = "Boa tarde";
-    if (hour >= 18 || hour < 5) salute = "Boa noite";
-    return `${salute}, ${name} 🌿`;
+    const name = profile?.full_name?.split(" ")[0] || "Você";
+    if (hour < 12) return `Bom dia, ${name} 🌿`;
+    if (hour < 18) return `Boa tarde, ${name} 🌿`;
+    return `Boa noite, ${name} 🌿`;
   };
 
-  const getDecisionText = () => {
-    if (planoB) return "Sua energia está reduzida, então não force. Um micro-passo agora é melhor do que a paralisia total.";
-    
-    const hour = new Date().getHours();
-    const isMorning = hour < 12;
-    const isAfternoon = hour >= 12 && hour < 18;
+  const saveTarefa = async (tipo: "essencial" | "leve" | "opcional", titulo: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || !titulo.trim()) return;
 
-    if (profile?.mindset_profile === 'sobrecarga') {
-      return "Tudo bem se sentir assim. Vamos focar em UM micro-passo agora. Sua mente precisa de simplicidade.";
-    }
+    const prioridade = tipo === "essencial" ? "essencial" : tipo === "leve" ? "importante" : "opcional";
+    const tarefa = tarefas[tipo];
 
-    if (profile?.mindset_profile === 'criativa') {
-      return "Sua mente está cheia de conexões. Que tal descarregar o que está flutuando e escolher uma única âncora?";
+    if (tarefa.id) {
+      await supabase.from("tasks").update({ title: titulo.trim() }).eq("id", tarefa.id);
+      setTarefas((prev) => ({ ...prev, [tipo]: { ...prev[tipo], titulo: titulo.trim() } }));
+    } else {
+      const { data } = await supabase.from("tasks")
+        .insert({ user_id: user.id, title: titulo.trim(), priority_level: prioridade })
+        .select("id")
+        .single();
+      if (data) setTarefas((prev) => ({ ...prev, [tipo]: { id: data.id, titulo: titulo.trim(), feito: false } }));
     }
-
-    if (profile?.mindset_profile === 'hiperfoco') {
-       return "Você está em estado de fluxo. Canalize essa energia para o que realmente importa antes da bateria baixar.";
-    }
-
-    if (profile?.energy_level === 'baixa') {
-      return "Sugerimos focar apenas na tarefa essencial agora. Respeite o seu limite biológico.";
-    }
-    
-    if (isMorning) return "Você está em uma excelente janela de energia matinal. Ótimo momento para resolver pendências cognitivas.";
-    if (isAfternoon) return "A tarde pede ritmo constante. Avance na sua prioridade e mantenha o foco no essencial.";
-    return "O dia está terminando. Que tal um último esforço focado ou apenas organizar o descarrego para amanhã?";
   };
+
+  const marcarFeito = async (tipo: "essencial" | "leve" | "opcional") => {
+    const tarefa = tarefas[tipo];
+    if (!tarefa.id) return;
+    const novoStatus = !tarefa.feito;
+    await supabase.from("tasks").update({ completed: novoStatus }).eq("id", tarefa.id);
+    setTarefas((prev) => ({ ...prev, [tipo]: { ...prev[tipo], feito: novoStatus } }));
+  };
+
+  const abrirTravei = () => {
+    setTraveiAberto(true);
+    setTraveiStep("opcoes");
+    setTraveiTimer(60);
+    setTraveiAcao("");
+  };
+
+  const handleTraveiFeito = async () => {
+    if (traveiStep === "minima" && traveiAcao.trim()) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const newTitle = `Micro-ação: ${traveiAcao.trim()}`;
+          const { data } = await supabase.from("tasks").insert({
+            user_id: user.id,
+            title: newTitle,
+            priority_level: "opcional",
+            completed: true
+          }).select("id").single();
+
+          if (data) {
+            setTarefas(prev => ({
+              ...prev,
+              opcional: { id: data.id, titulo: newTitle, feito: true }
+            }));
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    setTraveiStep("feito");
+    setFrase("Um passo minúsculo ainda é um passo para frente. Orgulho de você! 🌿");
+  };
+
+  const limparTarefas = async () => {
+    if (!confirm("Isso vai apagar suas tarefas de hoje para você poder recomeçar sem peso. Tem certeza?")) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const today = new Date().toISOString().split("T")[0];
+      await supabase.from("tasks")
+        .delete()
+        .eq("user_id", user.id)
+        .gte("created_at", today + "T00:00:00")
+        .lte("created_at", today + "T23:59:59");
+
+      setTarefas({
+        essencial: { titulo: "", feito: false },
+        leve: { titulo: "", feito: false },
+        opcional: { titulo: "", feito: false },
+      });
+
+      setFrase("Você não falhou, você pausou. É seguro recomeçar. 🌿");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const diaData = PRESENCA_365.find((d) => d.dia === diaAtual);
 
   if (loading) return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#F5F5F0] text-[#1F2937]">
-      <motion.div 
-        animate={{ 
-          scale: [1, 1.1, 1],
-          rotate: [0, 5, -5, 0]
-        }}
-        transition={{ duration: 2, repeat: Infinity }}
-        className="mb-8"
-      >
-        <Brain className="h-16 w-16 text-[#84A59D]" />
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#F5F5F0]">
+      <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
+        <div className="h-12 w-12 rounded-full bg-[#84A59D]/20 flex items-center justify-center">
+          <div className="h-6 w-6 rounded-full bg-[#84A59D]/40" />
+        </div>
       </motion.div>
-      <h2 className="text-xl font-black uppercase tracking-[0.2em] animate-pulse text-center px-4">Calibrando seu Ecossistema Cognitivo...</h2>
-      <p className="text-[#64748B] font-medium mt-2">Personalizando sua interface de foco.</p>
     </div>
   );
 
+  if (!mounted) return <div className="min-h-screen bg-[#F5F5F0]" />;
+
   return (
-    <div className="px-6 py-8 md:px-14 lg:max-w-7xl mx-auto">
+    <>
+      <div className="px-6 py-8 md:px-12 lg:max-w-2xl mx-auto space-y-8 pb-32">
 
-         
-         <header className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-           <div>
-             <h1 className="text-3xl font-extrabold tracking-tight text-[#1F2937] uppercase">{getGreeting()}</h1>
-             <p className="text-[#64748B] font-medium text-sm mt-1">Sua mente está {profile?.mindset_profile === 'hiperfoco' ? 'em foco' : profile?.energy_level === 'alta' ? 'vibrante' : 'calma'}. {currentDate}</p>
-           </div>
-           
-           <div className="flex flex-col items-end gap-3 w-full md:w-auto">
-              {/* LEVEL BAR (ADHD REWARD) */}
-              <div className="w-full md:w-64 bg-white p-4 rounded-[28px] border border-[#E5E7EB] shadow-sm">
-                 <div className="flex justify-between items-center mb-2">
-                    <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Nível {profile?.current_level || 1}</span>
-                    <span className="text-[10px] font-black text-[#1F2937] uppercase tracking-widest">{profile?.total_points || 0} PTS</span>
-                 </div>
-                 <div className="w-full h-2 bg-[#F1F5F9] rounded-full overflow-hidden">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: `${((profile?.total_points || 0) % 500) / 500 * 100}%` }}
-                      className="h-full bg-gradient-to-r from-[#84A59D] to-[#1F2937]"
-                    />
-                 </div>
+        {/* ── SAUDAÇÃO ── */}
+        <header>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#1F2937]">{getGreeting()}</h1>
+          <p className="text-sm text-[#9CA3AF] mt-1 capitalize">{currentDate}</p>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-sm text-[#84A59D] mt-3 italic font-medium"
+          >
+            "{frase}"
+          </motion.p>
+        </header>
+
+        {/* ── 365 DIAS DE PRESENÇA ── */}
+        <Link href="/dashboard/presenca-365">
+          <motion.section
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            className="bg-white rounded-3xl p-6 border border-[#E5E7EB] shadow-sm cursor-pointer group"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 bg-[#84A59D]/10 rounded-2xl flex items-center justify-center">
+                  <BookOpen className="h-6 w-6 text-[#84A59D]" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">
+                    Dia {diaAtual} de 365
+                  </p>
+                  <p className="text-sm font-semibold text-[#1F2937] mt-0.5">
+                    {presencaHoje ? "✅ Presente hoje!" : "Sua presença de hoje te espera"}
+                  </p>
+                </div>
               </div>
-           </div>
-         </header>
-
-         <AssistantVoice 
-            message={
-              profile?.mindset_profile === 'sobrecarga' 
-                ? "Percebi que você está se sentindo sobrecarregada hoje. Minha sugestão: foque apenas na primeira prioridade essencial e esqueça o resto por enquanto." 
-                : "Seu nível de energia está ótimo para tarefas que exigem criatividade agora. Que tal começar por aquele projeto que você estava adiando?"
-            }
-            className="mb-10"
-         />
-
-         {/* CAMINHO DO DIA (ETAPAS VISUAIS) */}
-         <div className="grid grid-cols-3 gap-2 md:gap-4 mb-8 md:mb-10">
-            <StageCard step={1} label="Planejar" active={stats.totalTasks > 0} current={stats.totalTasks === 0} />
-            <StageCard step={2} label="Executar" active={stats.completedTasks > 0} current={stats.totalTasks > 0 && stats.completedTasks < stats.totalTasks} />
-            <StageCard step={3} label="Celebrar" active={stats.progress === 100} current={stats.progress === 100} />
-         </div>
-
-
-         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
-            {/* LEFT BIG COLUMN */}
-            <div className="lg:col-span-8 flex flex-col gap-8">
-               
-                {/* SEU MELHOR PRÓXIMO PASSO (DYNAMIC) */}
-                <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-[#FFFFFF] rounded-[32px] md:rounded-[40px] p-6 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-[#84A59D]/20 border-l-[12px] md:border-l-[16px] border-l-[#84A59D] relative overflow-hidden group">
-                   <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                      <Brain className="h-24 w-24 md:h-32 md:w-32" />
-                   </div>
-                   
-                   <div className="flex items-center gap-3 mb-6">
-                      <div className="h-6 w-10 md:h-8 md:w-14 rounded-xl bg-[#84A59D]/10 flex items-center justify-center text-[#84A59D]">
-                         <Zap className="h-3 w-3 md:h-4 md:w-4" />
-                      </div>
-                      <span className="text-[10px] md:text-[11px] font-black text-[#84A59D] uppercase tracking-widest">Decisão Inteligente</span>
-                   </div>
- 
-                   <h2 className="text-2xl md:text-3xl font-black text-[#1F2937] mb-3 leading-tight">
-                     {profile?.mindset_profile === 'sobrecarga' ? 'Apenas respire e faça isto:' : 
-                      'Seu melhor próximo passo'}
-                   </h2>
-
-
-                   <div className="flex flex-col sm:flex-row items-center gap-3 mt-8 mb-6 max-w-2xl">
-                      <div className="flex items-center gap-3 bg-[#F9FAFB] p-5 rounded-2xl border border-[#E5E7EB] flex-1 w-full">
-                         <div className="h-6 w-6 rounded-full border-2 border-[#84A59D] flex-shrink-0" />
-                         <input 
-                            type="text"
-                            placeholder="Defina sua prioridade essencial..."
-                            className="bg-transparent border-none focus:outline-none font-bold text-[#333333] text-lg w-full"
-                            defaultValue={tasks.find(t => t.priority_level === 'essencial')?.title || ""}
-                            onKeyDown={async (e) => {
-                               if (e.key === 'Enter') {
-                                  const title = (e.target as HTMLInputElement).value;
-                                  const { data: { user } } = await supabase.auth.getUser();
-                                  if (user) {
-                                     await supabase.from('tasks').insert({ user_id: user.id, title, priority_level: 'essencial' });
-                                     window.location.reload();
-                                  }
-                               }
-                            }}
-                         />
-                      </div>
-                      <Link href="/dashboard/sos" className="bg-red-50 hover:bg-red-100 text-red-500 px-6 py-5 rounded-2xl font-bold text-sm uppercase tracking-widest transition-all border border-red-100 flex items-center gap-2 shrink-0">
-                         <Zap className="h-4 w-4" /> Travei
-                      </Link>
-                   </div>
-
-                   <p className="text-[#64748B] font-medium text-lg max-w-xl leading-relaxed">
-                     {getDecisionText()}
-                   </p>
-
-                   <div className="mt-10 flex gap-4">
-                      <Link href="/dashboard/focus" className="bg-[#333333] hover:bg-black text-white px-8 py-5 rounded-[20px] font-bold text-sm uppercase tracking-widest transition-all shadow-xl shadow-black/10 flex items-center gap-3">
-                        {profile?.mindset_profile === 'sobrecarga' ? 'Fazer só isto' : 'Aceitar Sugestão'} <ArrowRight className="h-4 w-4" />
-                      </Link>
-                     {profile?.mindset_profile === 'sobrecarga' && (
-                        <button onClick={() => setPlanoB(true)} className="px-8 py-5 rounded-[20px] font-bold text-sm uppercase tracking-widest text-[#64748B] hover:text-[#333333] transition-all">
-                           Ativar Plano B
-                        </button>
-                     )}
-                   </div>
-                </motion.div>
-
-               {/* MONITOR DE DESEMPENHO MINI */}
-               <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-[#FFFFFF] rounded-[40px] p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-[#E5E7EB]/50 flex flex-col md:flex-row items-center gap-10">
-                  {/* Circular Progress SVG */}
-                  <div className="relative w-36 h-36 flex items-center justify-center shrink-0">
-                     <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                       <circle cx="50" cy="50" r="42" stroke="#F1F5F9" strokeWidth="10" fill="none" />
-                       <circle 
-                         cx="50" cy="50" r="42" 
-                         stroke="#64748B" 
-                         strokeWidth="10" 
-                         fill="none" 
-                         strokeDasharray="264" 
-                         strokeDashoffset={264 - (264 * stats.progress) / 100} 
-                         strokeLinecap="round" 
-                         className="transition-all duration-1000 ease-out"
-                       />
-                     </svg>
-                     <div className="absolute flex flex-col items-center">
-                       <span className="text-3xl font-black text-[#333333] font-mono tracking-tighter">{stats.progress}%</span>
-                       <span className="text-[9px] uppercase font-black text-[#64748B] tracking-widest mt-1">Feito</span>
-                     </div>
-                  </div>
- 
-                  <div className="grid grid-cols-2 gap-8 w-full">
-                     <div>
-                       <h3 className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1">Tarefas</h3>
-                       <span className="text-2xl font-black text-[#333333] font-mono tracking-tighter">{stats.completedTasks}/{stats.totalTasks}</span>
-                     </div>
-                     <div>
-                       <h3 className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1">Foco Real</h3>
-                       <span className="text-2xl font-black text-[#333333] font-mono tracking-tighter">{stats.focusMinutes}m</span>
-                     </div>
-                      <div className="col-span-2 pt-4 border-t border-dashed border-[#F1F5F9]">
-                         <p className="text-[11px] text-[#64748B] font-medium italic">
-                           {stats.progress === 100 ? "&quot;Você completou tudo o que se propôs! Orgulhe-se.&quot;" : 
-                            stats.progress > 50 ? "&quot;Você está com ótimo ritmo hoje. Mantenha a constância.&quot;" :
-                            "&quot;Cada micro-passo conta. O importante é não parar.&quot;"}
-                         </p>
-                      </div>
-                  </div>
-               </motion.div>
-
-               {/* UPCOMING SCHEDULE PANEL */}
-               <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="bg-[#FFFFFF] rounded-[40px] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-[#E5E7EB]/50 flex-1">
-                  <div className="flex justify-between items-center mb-10">
-                    <h2 className="text-sm font-bold text-[#333333] tracking-widest uppercase">Agenda & Fluxo</h2>
-                    <span className="bg-[#84A59D]/10 text-[#84A59D] text-[10px] font-black px-3 py-1 rounded-lg uppercase tracking-widest">Sincronizado</span>
-                  </div>
-                  
-                  <div className="relative pl-8 border-l-2 border-[#F1F5F9] space-y-12 ml-4">
-                     {tasks.length > 0 ? (
-                        tasks.slice(0, 2).map((task, idx) => (
-                           <div key={task.id} className="relative group">
-                              <div className="absolute w-5 h-5 rounded-full bg-[#84A59D] -left-[42px] top-1 border-[4px] border-[#FFFFFF] shadow-sm group-hover:scale-125 transition-transform"></div>
-                              <div className="flex flex-col gap-1">
-                                 <span className="text-[10px] font-black text-[#9CA3AF] font-mono uppercase tracking-widest leading-none">Fluxo Atual</span>
-                                 <span className={`text-[16px] font-bold ${task.completed ? 'text-[#9CA3AF] line-through' : 'text-[#333333]'}`}>{task.title}</span>
-                              </div>
-                           </div>
-                        ))
-                     ) : (
-                        <div className="relative group">
-                           <div className="absolute w-5 h-5 rounded-full bg-[#E5E7EB] -left-[42px] top-1 border-[4px] border-[#FFFFFF] shadow-sm"></div>
-                           <p className="text-[14px] text-[#9CA3AF] italic">Nenhuma atividade planejada.</p>
-                        </div>
-                     )}
-
-                     {/* SUGGESTED WINDOW */}
-                     <div className="relative group">
-                        <div className="absolute w-5 h-5 rounded-full bg-[#64748B] -left-[42px] top-1 border-[4px] border-[#FFFFFF] shadow-sm ring-4 ring-[#64748B]/10 group-hover:scale-125 transition-transform"></div>
-                        <div className="bg-[#F8FAFC] p-4 rounded-2xl border border-[#64748B]/10">
-                           <span className="text-[10px] font-black text-[#64748B] font-mono uppercase tracking-widest block mb-1">Janela de Foco</span>
-                           <span className="text-[16px] font-bold text-[#1F2937]">Melhor momento para Foco Profundo</span>
-                           <p className="text-[11px] text-[#64748B] mt-1">Sua energia está {profile?.energy_level === 'alta' ? 'no pico' : 'estável'}. Aproveite.</p>
-                        </div>
-                     </div>
-                  </div>
-               </motion.div>
+              <ChevronRight className="h-5 w-5 text-[#9CA3AF] group-hover:text-[#1F2937] transition-colors" />
             </div>
+          </motion.section>
+        </Link>
 
-            {/* RIGHT SMALL COLUMN */}
-            <div className="lg:col-span-4 flex flex-col gap-8">
-               
-               {/* 3 PRIORIDADES PANEL */}
-               <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="bg-[#FFFFFF] rounded-[40px] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-[#E5E7EB]/50">
-                  <div className="flex justify-between items-center mb-10">
-                    <div>
-                      <h2 className="text-xl font-black text-[#1F2937] tracking-tight">O Foco de Hoje</h2>
-                      <p className="text-xs text-[#9CA3AF] font-bold uppercase mt-1">Três é o número mágico</p>
-                    </div>
-                    
-                    <button 
-                      onClick={() => setPlanoB(!planoB)}
-                      className={`px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${
-                        planoB ? 'bg-orange-100 text-orange-500 border-orange-200' : 'bg-[#F1F5F9] text-[#9CA3AF] border-transparent'
+        {/* ── 3 TAREFAS DO DIA ── */}
+        <section className="bg-white rounded-3xl p-6 border border-[#E5E7EB] shadow-sm space-y-5">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">Minhas 3 tarefas de hoje</h2>
+            <button
+              onClick={limparTarefas}
+              className="text-[10px] font-bold text-[#84A59D] hover:text-[#1F2937] transition-colors uppercase tracking-wider bg-[#84A59D]/10 px-2 py-1 rounded-md"
+            >
+              Recomeçar
+            </button>
+          </div>
+
+          {(["essencial", "leve", "opcional"] as const).map((tipo) => {
+            const labels = { essencial: "Essencial", leve: "Leve", opcional: "Opcional" };
+            const colors = {
+              essencial: "bg-[#1F2937]",
+              leve: "bg-[#84A59D]",
+              opcional: "bg-[#D1D5DB]",
+            };
+            const tarefa = tarefas[tipo];
+
+            return (
+              <div key={tipo} className="flex items-center gap-3">
+                {/* Bolinha de status */}
+                <button
+                  onClick={() => tarefa.id && marcarFeito(tipo)}
+                  disabled={!tarefa.id}
+                  className={`h-6 w-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${tarefa.feito
+                      ? `${colors[tipo]} border-transparent`
+                      : "border-[#D1D5DB] hover:border-[#84A59D]"
+                    } ${!tarefa.id ? "opacity-30" : "cursor-pointer"}`}
+                >
+                  {tarefa.feito && <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />}
+                </button>
+
+                {/* Input */}
+                <div className="flex-1 min-w-0">
+                  <label className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-wider block mb-0.5">
+                    {labels[tipo]}
+                  </label>
+                  <input
+                    type="text"
+                    value={tarefa.titulo}
+                    placeholder={`Tarefa ${labels[tipo].toLowerCase()}...`}
+                    onChange={(e) =>
+                      setTarefas((prev) => ({
+                        ...prev,
+                        [tipo]: { ...prev[tipo], titulo: e.target.value },
+                      }))
+                    }
+                    onBlur={(e) => saveTarefa(tipo, e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") saveTarefa(tipo, (e.target as HTMLInputElement).value);
+                    }}
+                    className={`w-full bg-transparent text-sm font-medium text-[#1F2937] focus:outline-none placeholder:text-[#D1D5DB] ${tarefa.feito ? "line-through text-[#9CA3AF]" : ""
                       }`}
-                    >
-                      Mudar para Plano B
-                    </button>
-                  </div>
-                  
-                  <div className="space-y-6">
-                     {tasks.length > 0 ? (
-                       tasks.map((task, idx) => (
-                         <PrioridadeItem 
-                            key={task.id} 
-                            index={idx + 1} 
-                            label={task.priority_level} 
-                            title={planoB ? `Modo Leve: ${task.title}` : task.title} 
-                            completed={task.completed} 
-                          />
-                       ))
-                     ) : (
-                       <p className="text-xs text-[#9CA3AF]">Nenhuma tarefa definida para hoje.</p>
-                     )}
-                  </div>
+                  />
+                </div>
+              </div>
+            );
+          })}
 
-                  <div className="mt-10 pt-8 border-t border-[#F1F5F9] text-center">
-                    <p className="text-[#64748B] text-sm font-medium italic">
-                       {planoB ? "✨ Hoje o mínimo é o seu 100%. Sem culpa." : "✨ Focar em 3 coisas te dá liberdade, não limite."}
+          <p className="text-xs text-[#84A59D] italic text-center pt-2">
+            Fiz ✓ mesmo que mínimo — isso conta.
+          </p>
+        </section>
+
+        {/* ── CONSTÂNCIA DA SEMANA ── */}
+        <section className="bg-white rounded-3xl p-6 border border-[#E5E7EB] shadow-sm">
+          <h2 className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider mb-4">Esta semana</h2>
+          <div className="flex items-center justify-center gap-3 mb-3">
+            {["D", "S", "T", "Q", "Q", "S", "S"].map((dia, i) => (
+              <div key={i} className="flex flex-col items-center gap-1.5">
+                <span className="text-[10px] font-bold text-[#9CA3AF]">{dia}</span>
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: i * 0.05 }}
+                  className={`h-8 w-8 rounded-full flex items-center justify-center transition-all ${diasSemana[i]
+                      ? "bg-[#84A59D] shadow-sm"
+                      : i <= new Date().getDay()
+                        ? "bg-[#F1F5F9]"
+                        : "bg-[#F9FAFB] border border-dashed border-[#E5E7EB]"
+                    }`}
+                >
+                  {diasSemana[i] && <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />}
+                </motion.div>
+              </div>
+            ))}
+          </div>
+          <p className="text-sm text-[#64748B] text-center font-medium">
+            Você apareceu <span className="font-bold text-[#1F2937]">{diasPresente}</span> {diasPresente === 1 ? "dia" : "dias"} esta semana 🌿
+          </p>
+          <p className="text-xs text-[#9CA3AF] text-center mt-1 italic">
+            Sem pressa. Sem perfeição. Só presença.
+          </p>
+        </section>
+      </div>
+
+      {/* ── BOTÃO TRAVEI (FLUTUANTE) ── */}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={abrirTravei}
+        className="fixed bottom-24 md:bottom-8 right-6 md:right-8 bg-[#1F2937] text-white px-6 py-4 rounded-2xl shadow-lg shadow-black/10 flex items-center gap-3 z-40 group"
+      >
+        <Snowflake className="h-5 w-5 group-hover:rotate-45 transition-transform" />
+        <span className="font-bold text-sm">Travei</span>
+      </motion.button>
+
+      {/* ── MODAL TRAVEI ── */}
+      <AnimatePresence>
+        {traveiAberto && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/30 backdrop-blur-sm p-4"
+            onClick={() => setTraveiAberto(false)}
+          >
+            <motion.div
+              initial={{ y: 100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 100, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl"
+            >
+              {/* OPÇÕES */}
+              {traveiStep === "opcoes" && (
+                <div className="space-y-6">
+                  <div className="text-center">
+                    <div className="h-14 w-14 bg-[#F1F5F9] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <Snowflake className="h-7 w-7 text-[#64748B]" />
+                    </div>
+                    <h2 className="text-lg font-bold text-[#1F2937]">
+                      Você não está travada.
+                    </h2>
+                    <p className="text-sm text-[#64748B] mt-1">
+                      Seu cérebro está sobrecarregado. Escolha uma saída:
                     </p>
                   </div>
-               </motion.div>
 
-               {/* FOCUS SESSION PANEL */}
-               <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="bg-[#FFFFFF] rounded-3xl p-6 md:p-8 shadow-[0_12px_40px_rgba(0,0,0,0.03)] border border-[#E5E7EB]/50 flex-1 flex flex-col justify-between">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-sm font-bold text-[#333333] tracking-widest uppercase">Foco Profundo</h2>
-                    <span className="text-[#9CA3AF] tracking-widest font-bold">•••</span>
-                  </div>
-
-                  <div className="flex flex-col items-center">
-                    <button className="w-full bg-[#64748B] hover:bg-[#475569] text-white font-bold text-xs tracking-widest uppercase py-4 rounded-xl transition-all shadow-md shadow-[#64748B]/20">
-                      Iniciar / Parar
+                  <div className="space-y-3">
+                    <button
+                      onClick={() => { setTraveiTimer(60); setTraveiStep("timer"); }}
+                      className="w-full bg-[#F8F9FA] hover:bg-[#F1F5F9] p-5 rounded-2xl text-left transition-all group"
+                    >
+                      <p className="font-bold text-[#1F2937] flex items-center gap-2">
+                        ⏱️ Começar com 1 minuto
+                      </p>
+                      <p className="text-xs text-[#9CA3AF] mt-1">
+                        Só 60 segundos. Depois você decide.
+                      </p>
                     </button>
-                    
-                    <div className="mt-6 text-center">
-                      <span className="text-3xl font-black text-[#333333] font-mono">00:45:00</span>
-                      <span className="text-sm font-bold text-[#9CA3AF] font-mono ml-2">/ 01:00:00</span>
-                    </div>
-                  </div>
 
-                  <div className="flex justify-between items-center mt-6 pt-6 border-t border-[#E5E7EB]/50">
-                     <span className="text-[11px] font-bold text-[#64748B] uppercase tracking-widest">Foco Isolado</span>
-                     <div className="h-6 w-10 bg-[#64748B] rounded-full p-1 flex justify-end items-center cursor-pointer">
-                        <div className="h-4 w-4 bg-white rounded-full"></div>
-                     </div>
-                  </div>
-               </motion.div>
+                    <button
+                      onClick={() => setTraveiStep("respirar")}
+                      className="w-full bg-[#F8F9FA] hover:bg-[#F1F5F9] p-5 rounded-2xl text-left transition-all"
+                    >
+                      <p className="font-bold text-[#1F2937] flex items-center gap-2">
+                        🌬️ Levantar e respirar
+                      </p>
+                      <p className="text-xs text-[#9CA3AF] mt-1">
+                        Saia da cadeira. 3 respirações. Volte.
+                      </p>
+                    </button>
 
-               {/* WELLNESS CHECK PANEL */}
-               <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4 }} className="bg-[#FFFFFF] rounded-[40px] p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-[#E5E7EB]/50">
-                  <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-sm font-bold text-[#333333] tracking-widest uppercase">Energia & Bem-estar</h2>
-                    <Sparkles className="h-5 w-5 text-[#84A59D]" />
+                    <button
+                      onClick={() => setTraveiStep("minima")}
+                      className="w-full bg-[#F8F9FA] hover:bg-[#F1F5F9] p-5 rounded-2xl text-left transition-all"
+                    >
+                      <p className="font-bold text-[#1F2937] flex items-center gap-2">
+                        ✅ Versão mínima
+                      </p>
+                      <p className="text-xs text-[#9CA3AF] mt-1">
+                        Qual a menor parte da tarefa que você pode fazer agora?
+                      </p>
+                    </button>
                   </div>
+                </div>
+              )}
 
-                  <div className="space-y-6">
-                     <WellnessBar 
-                        label="Hidratação" 
-                        value={profile?.energy_level === 'alta' ? "85%" : "60%"} 
-                        desc={profile?.energy_level === 'alta' ? "Excelente! Hidratação em dia." : "Lembre-se de beber água para manter o foco."} 
-                     />
-                     <WellnessBar 
-                        label="Descanso" 
-                        value={profile?.energy_level === 'alta' ? "90%" : "50%"} 
-                        desc={profile?.energy_level === 'alta' ? "Seu sono foi restaurador." : "Sentindo cansaço? Uma pausa curta pode ajudar."} 
-                     />
-                     <WellnessBar 
-                        label="Humor" 
-                        value={profile?.mindset_profile === 'sobrecarga' ? "30%" : "75%"} 
-                        desc={profile?.mindset_profile === 'sobrecarga' ? "Detectamos sinais de estresse." : "Você parece em equilíbrio hoje."} 
-                     />
+              {/* TIMER 1 MIN */}
+              {traveiStep === "timer" && (
+                <div className="text-center space-y-6">
+                  <p className="text-sm text-[#9CA3AF] font-medium">Só 1 minuto. Você consegue.</p>
+                  <div className="text-7xl font-bold text-[#1F2937] font-mono tabular-nums">
+                    0:{traveiTimer.toString().padStart(2, "0")}
                   </div>
-               </motion.div>
+                  <div className="h-2 bg-[#F1F5F9] rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-[#84A59D] rounded-full"
+                      initial={{ width: "100%" }}
+                      animate={{ width: `${(traveiTimer / 60) * 100}%` }}
+                      transition={{ duration: 0.5 }}
+                    />
+                  </div>
+                  <button
+                    onClick={handleTraveiFeito}
+                    className="text-sm font-medium text-[#84A59D] underline"
+                  >
+                    Consegui antes do tempo!
+                  </button>
+                </div>
+              )}
 
-            </div>
-         </div>
-    </div>
+              {/* RESPIRAR */}
+              {traveiStep === "respirar" && (
+                <div className="text-center space-y-8 py-4">
+                  <p className="text-sm text-[#9CA3AF]">Siga o ritmo do círculo</p>
+                  <motion.div
+                    animate={{ scale: [1, 1.6, 1] }}
+                    transition={{ duration: 6, repeat: 2, ease: "easeInOut" }}
+                    onAnimationComplete={handleTraveiFeito}
+                    className="w-28 h-28 rounded-full bg-[#84A59D]/15 border-2 border-[#84A59D]/30 mx-auto"
+                  />
+                  <p className="text-sm text-[#64748B] italic animate-pulse">
+                    Inspire... segure... expire...
+                  </p>
+                  <button
+                    onClick={handleTraveiFeito}
+                    className="text-xs text-[#9CA3AF] underline"
+                  >
+                    Pular
+                  </button>
+                </div>
+              )}
+
+              {/* VERSÃO MÍNIMA */}
+              {traveiStep === "minima" && (
+                <div className="space-y-5">
+                  <div className="text-center">
+                    <h3 className="font-bold text-[#1F2937]">Qual a menor versão dessa tarefa?</h3>
+                    <p className="text-xs text-[#9CA3AF] mt-1">
+                      Ex: "abrir o documento", "ler 1 parágrafo", "pegar o material"
+                    </p>
+                  </div>
+                  <input
+                    type="text"
+                    value={traveiAcao}
+                    onChange={(e) => setTraveiAcao(e.target.value)}
+                    placeholder="Minha micro-ação é..."
+                    className="w-full bg-[#F8F9FA] border border-[#E5E7EB] p-4 rounded-2xl text-sm font-medium text-[#1F2937] focus:outline-none focus:border-[#84A59D]"
+                    autoFocus
+                  />
+                  <button
+                    onClick={handleTraveiFeito}
+                    disabled={!traveiAcao.trim()}
+                    className="w-full bg-[#1F2937] text-white py-4 rounded-2xl font-bold text-sm disabled:opacity-40 transition-all"
+                  >
+                    Fiz ✓
+                  </button>
+                </div>
+              )}
+
+              {/* FEITO */}
+              {traveiStep === "feito" && (
+                <div className="text-center space-y-5 py-4">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", damping: 10, stiffness: 200 }}
+                    className="h-16 w-16 bg-[#84A59D]/10 rounded-full flex items-center justify-center mx-auto"
+                  >
+                    <Check className="h-8 w-8 text-[#84A59D]" />
+                  </motion.div>
+                  <h3 className="text-lg font-bold text-[#1F2937]">Isso conta. 🌿</h3>
+                  <p className="text-sm text-[#64748B]">
+                    Você saiu da paralisia. Isso é coragem.
+                  </p>
+                  <button
+                    onClick={() => setTraveiAberto(false)}
+                    className="w-full bg-[#F8F9FA] text-[#1F2937] py-4 rounded-2xl font-bold text-sm hover:bg-[#F1F5F9] transition-all"
+                  >
+                    Voltar ao meu dia
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
-
-function WellnessBar({ label, value, desc }: { label: string, value: string, desc: string }) {
-  return (
-    <div>
-      <div className="flex justify-between items-end mb-2">
-        <span className="text-sm font-bold text-[#333333]">{label}</span>
-        <span className="text-xs font-black text-[#84A59D]">{value}</span>
-      </div>
-      <div className="w-full h-3 bg-[#F1F5F9] rounded-full overflow-hidden mb-2">
-         <div className="h-full bg-[#84A59D] transition-all duration-1000" style={{ width: value }}></div>
-      </div>
-      <p className="text-[10px] font-medium text-[#9CA3AF]">{desc}</p>
-    </div>
-  );
-}
-
-function PrioridadeItem({ index, label, title, completed }: { index: number, label: string, title: string, completed: boolean }) {
-  return (
-    <div className={`flex items-center gap-3 md:gap-5 p-4 md:p-5 rounded-[20px] md:rounded-[24px] transition-all border ${completed ? 'bg-[#F9FAFB] border-transparent opacity-60' : 'bg-white border-[#E5E7EB]/30 shadow-sm'}`}>
-       <div className={`h-8 w-8 md:h-10 md:w-10 rounded-full flex items-center justify-center text-xs md:text-sm font-black border-2 shrink-0 ${completed ? 'bg-[#84A59D] border-[#84A59D] text-white' : 'border-[#E5E7EB] text-[#9CA3AF]'}`}>
-          {completed ? <CircleCheck className="h-4 w-4 md:h-5 md:w-5" /> : index}
-       </div>
-       <div className="flex-1">
-         <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-[#9CA3AF] block mb-0.5 md:mb-1">{label}</span>
-         <span className={`text-sm md:text-[16px] font-bold ${completed ? 'text-[#9CA3AF] line-through' : 'text-[#333333]'}`}>
-           {title}
-         </span>
-       </div>
-    </div>
-  );
-}
-
-
-function StageCard({ step, label, active, current }: { step: number, label: string, active: boolean, current: boolean }) {
-  return (
-    <div className={`p-2 md:p-4 rounded-[16px] md:rounded-[24px] border-2 transition-all flex flex-col md:flex-row items-center gap-2 md:gap-3 ${
-      current ? 'bg-white border-[#1F2937] shadow-lg' : 
-      active ? 'bg-[#84A59D]/10 border-transparent' : 
-      'bg-white/40 border-transparent opacity-40'
-    }`}>
-       <div className={`h-5 w-5 md:h-6 md:w-6 rounded-lg flex items-center justify-center text-[8px] md:text-[10px] font-black ${
-         active || current ? 'bg-[#1F2937] text-white' : 'bg-[#E5E7EB] text-[#9CA3AF]'
-       }`}>
-         {step}
-       </div>
-       <span className={`text-[8px] md:text-[11px] font-black uppercase tracking-widest ${
-         active || current ? 'text-[#1F2937]' : 'text-[#9CA3AF]'
-       }`}>
-
-         {label}
-       </span>
-    </div>
-  );
-}
-

@@ -4,14 +4,12 @@ import { HomeHero } from "@/components/home-hero";
 import { HomeFeatures } from "@/components/home-features";
 import { HomeSosPreview } from "@/components/home-sos-preview";
 import PricingSection from "@/components/ui/pricing-section-4";
-import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Heart } from "lucide-react";
 import Link from "next/link";
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#F5F5F0] overflow-x-hidden font-sans">
-      {/* Navbar — transparente sobre o hero escuro */}
       <nav className="fixed top-0 left-0 right-0 h-20 bg-transparent z-50 px-8 flex items-center justify-between transition-all">
         <div className="flex items-center gap-3">
           <div className="h-9 w-9 bg-[#84A59D]/20 border border-[#84A59D]/30 rounded-xl flex items-center justify-center">
@@ -20,17 +18,15 @@ export default function LandingPage() {
           <span className="text-xl font-display font-black tracking-tight text-white">TDAH CONSTANTE</span>
         </div>
         <div className="flex items-center gap-8">
-           <Link href="/login" className="text-xs font-bold uppercase tracking-widest text-white/50 hover:text-white transition-colors">Entrar</Link>
-           <Link href="/register">
-              <button className="border border-[#84A59D]/40 bg-[#84A59D]/10 text-[#84A59D] px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-[#84A59D] hover:text-white transition-all">Começar</button>
-           </Link>
+          <Link href="/login" className="text-xs font-bold uppercase tracking-widest text-white/50 hover:text-white transition-colors">Entrar</Link>
+          <Link href="/register">
+            <button className="border border-[#84A59D]/40 bg-[#84A59D]/10 text-[#84A59D] px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-[#84A59D] hover:text-white transition-all">Começar</button>
+          </Link>
         </div>
       </nav>
 
-      {/* 1. Hero: O Acolhimento Prático */}
       <HomeHero />
 
-      {/* 2. O Problema (Contexto Relatável) */}
       <section className="py-28 bg-[#F5F5F0]">
         <div className="container mx-auto px-6 text-center">
           <div className="max-w-3xl mx-auto">
@@ -39,51 +35,42 @@ export default function LandingPage() {
               &quot;Eu sei o que preciso fazer, mas não consigo começar.&quot;
             </p>
             <p className="text-lg text-[#64748B] font-medium leading-relaxed">
-              O caos mental não é falta de vontade. É falta de um sistema que entenda que sua energia oscila, que o foco é caro e que a paralisia é real. Nós construímos o TDAH Constante para ser esse sistema.
+              O caos mental não é falta de vontade. É a sua mente funcionando do jeito dela — em ondas de energia, com travas reais e dias que não cabem em uma lista. O TDAH Constante foi feito para acompanhar essas ondas, não para te cobrar perfeição.
             </p>
           </div>
         </div>
       </section>
 
-      {/* 3. Recursos: A Metodologia */}
       <HomeFeatures />
-
-      {/* 4. SOS: O Destrave em Crise */}
       <HomeSosPreview />
 
-      {/* 5. Preços (Simplificados) */}
       <div className="bg-white">
         <PricingSection />
       </div>
 
-      {/* 6. CTA Final: Empoderamento sem Pressão */}
       <section className="py-32 bg-[#F5F5F0]">
-         <div className="container mx-auto px-6 text-center">
-            <div className="max-w-4xl mx-auto p-12 md:p-24 rounded-[4rem] bg-white shadow-2xl shadow-[#1F2937]/5 border border-[#E5E7EB]/50 relative overflow-hidden">
-               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-[#84A59D]" />
-               
-               <Heart className="h-12 w-12 text-[#84A59D] mx-auto mb-8" />
-               <h2 className="text-4xl md:text-6xl font-display font-black tracking-tight text-[#1F2937] mb-8 leading-tight">
-                  Organize o agora sem se cobrar perfeição.
-               </h2>
-               <p className="text-xl text-[#64748B] font-medium mb-12 max-w-xl mx-auto leading-relaxed italic">
-                 "A constância não é sobre nunca parar, mas sobre ter as ferramentas certas para recomeçar sempre que precisar."
-               </p>
-               
-               <Link href="/register">
-                 <button className="bg-[#1F2937] text-white px-12 py-6 rounded-[2.5rem] font-black text-xl shadow-2xl flex items-center gap-4 mx-auto hover:bg-black transition-all">
-                   CRIAR MINHA CONTA <ArrowRight className="h-6 w-6" />
-                 </button>
-               </Link>
-               
-               <p className="mt-8 text-xs font-bold text-[#9CA3AF] uppercase tracking-widest">
-                 Comece seu teste gratuito de 7 dias hoje.
-               </p>
-            </div>
-         </div>
+        <div className="container mx-auto px-6 text-center">
+          <div className="max-w-4xl mx-auto p-12 md:p-24 rounded-[4rem] bg-white shadow-2xl shadow-[#1F2937]/5 border border-[#E5E7EB]/50 relative overflow-hidden">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-[#84A59D]" />
+            <Heart className="h-12 w-12 text-[#84A59D] mx-auto mb-8" />
+            <h2 className="text-4xl md:text-6xl font-display font-black tracking-tight text-[#1F2937] mb-8 leading-tight">
+              Organize o agora sem se cobrar perfeição.
+            </h2>
+            <p className="text-xl text-[#64748B] font-medium mb-12 max-w-xl mx-auto leading-relaxed italic">
+              &quot;A constância não é sobre nunca parar, mas sobre ter as ferramentas certas para recomeçar sempre que precisar.&quot;
+            </p>
+            <Link href="/register">
+              <button className="bg-[#1F2937] text-white px-12 py-6 rounded-[2.5rem] font-black text-xl shadow-2xl flex items-center gap-4 mx-auto hover:bg-black transition-all">
+                CRIAR MINHA CONTA <ArrowRight className="h-6 w-6" />
+              </button>
+            </Link>
+            <p className="mt-8 text-xs font-bold text-[#9CA3AF] uppercase tracking-widest">
+              Comece seu teste gratuito de 7 dias hoje.
+            </p>
+          </div>
+        </div>
       </section>
 
-      {/* Footer */}
       <footer className="py-20 border-t border-[#E5E7EB] bg-white">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8 text-center md:text-left">
@@ -94,7 +81,18 @@ export default function LandingPage() {
               </div>
               <p className="text-xs font-bold text-[#9CA3AF] uppercase tracking-widest italic">Feito para mentes inquietas.</p>
             </div>
-            <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-[0.2em]">© 2026 TDAH CONSTANTE. TODOS OS DIREITOS RESERVADOS.</p>
+            <div className="flex flex-col md:items-end gap-3">
+              <div className="flex flex-wrap justify-center md:justify-end gap-x-6 gap-y-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">
+                <Link href="/legal/privacidade" className="hover:text-[#1F2937]">Privacidade</Link>
+                <Link href="/legal/termos" className="hover:text-[#1F2937]">Termos</Link>
+                <Link href="/legal/disclaimer" className="hover:text-[#1F2937]">Aviso clínico</Link>
+                <Link href="/legal/exclusao" className="hover:text-[#1F2937]">Excluir conta</Link>
+              </div>
+              <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-[0.2em]">© 2026 TDAH CONSTANTE. TODOS OS DIREITOS RESERVADOS.</p>
+              <p className="text-[10px] text-[#9CA3AF] italic max-w-md text-center md:text-right">
+                Ferramenta de apoio comportamental e educacional. Não substitui acompanhamento médico, psicológico ou psiquiátrico.
+              </p>
+            </div>
           </div>
         </div>
       </footer>

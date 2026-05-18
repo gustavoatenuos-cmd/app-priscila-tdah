@@ -81,23 +81,23 @@ export default function OnboardingPage() {
         <Brain className="h-10 w-10 text-[#84A59D]" />
       </div>
       <h1 className="text-5xl font-black text-[#1F2937] tracking-tight mb-8 leading-[0.95]">
-        Bem-vinda ao seu <br/> <span className="text-[#84A59D]">Córtex Externo</span>.
+        Bem-vinda. <br/> <span className="text-[#84A59D]">Vamos te conhecer um pouco.</span>
       </h1>
       <p className="text-[#64748B] text-xl font-medium mb-14 leading-relaxed">
-        Vamos realizar uma varredura comportamental para calibrar seu assistente pessoal. O objetivo é remover a carga de organização do seu cérebro e transferi-la para o nosso motor de IA.
+        Em poucos minutos vou entender seu jeito — sua energia, suas travas, o que te ajuda. Depois disso, o app passa a falar com você no seu ritmo, sem cobrança e sem rigidez.
       </p>
-      <button 
+      <button
         onClick={nextStep}
         className="bg-[#1F2937] hover:bg-black text-white px-12 py-6 rounded-[28px] font-bold text-xl shadow-2xl transition-all flex items-center gap-4 group"
       >
-        Iniciar Protocolo <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
+        Começar com leveza <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
       </button>
     </motion.div>,
 
     // 1. Funções Executivas (Mapeamento de Falha)
     <motion.div key="exec" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col items-center text-center max-w-5xl w-full">
-      <span className="text-[#9CA3AF] font-bold tracking-[0.3em] uppercase mb-6 text-[10px]">Módulo 01 — Análise de Funções Executivas</span>
-      <h2 className="text-4xl font-black text-[#1F2937] tracking-tight mb-12">Onde ocorre o colapso da sua execução?</h2>
+      <span className="text-[#9CA3AF] font-bold tracking-[0.3em] uppercase mb-6 text-[10px]">Bloco 01 — Onde costuma travar</span>
+      <h2 className="text-4xl font-black text-[#1F2937] tracking-tight mb-12">O que mais te trava no dia a dia?</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
         <ChoiceCard icon={<Zap />} title="Fase de Arranque" desc="Dificuldade extrema em sair do repouso para a ação (Inércia de transição)." active={selections.executive_dysfunction === "inercia"} onClick={() => setSelections({...selections, executive_dysfunction: "inercia"})} />

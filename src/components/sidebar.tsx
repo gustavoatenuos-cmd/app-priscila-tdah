@@ -1,63 +1,59 @@
 "use client";
 
-import { Home, CheckSquare, Target, BarChart2, BookOpen, Brain, Crown, Zap, LogOut, HelpCircle, Fingerprint } from "lucide-react";
-import Link from "next/link";
+import { Home, BookOpen, CheckSquare, Wind, Brain, LogOut } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import Link from "next/link";
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [streak, setStreak] = useState<number | null>(null);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/login");
   };
 
-  useEffect(() => {
-    async function loadStreak() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase
-        .from('profiles')
-        .select('streak_count')
-        .eq('id', user.id)
-        .single();
-      if (data) setStreak(data.streak_count ?? 0);
-    }
-    loadStreak();
-  }, []);
-
+  // 5 itens essenciais — seguindo a proposta de produto
   const navItems = [
     { href: "/dashboard", icon: Home, label: "Início" },
-    { href: "/dashboard/planner", icon: CheckSquare, label: "Tarefas" },
-    { href: "/dashboard/focus", icon: Target, label: "Foco" },
-    { href: "/dashboard/analytics", icon: BarChart2, label: "Análises" },
-    { href: "/dashboard/journal", icon: BookOpen, label: "Diário" },
-    { href: "/dashboard/brain-dump", icon: Brain, label: "Mente" },
-    { href: "/dashboard/sos", icon: Zap, label: "SOS" },
-    { href: "/dashboard/support", icon: HelpCircle, label: "IA Ajuda" },
-    { href: "/dashboard/profile", icon: Fingerprint, label: "Perfil" },
-    { href: "/pricing", icon: Crown, label: "Assine" },
+    { href: "/dashboard/presenca-365", icon: BookOpen, label: "365 Dias" },
+    { href: "/dashboard/planner", icon: CheckSquare, label: "Meu Dia" },
+    { href: "/dashboard/presenca", icon: Wind, label: "Presença" },
+    { href: "/dashboard/cerebro", icon: Brain, label: "Cérebro" },
   ];
 
   return (
-    <aside className="w-24 border-r border-[#E5E7EB] bg-[#F5F5F0] hidden md:flex flex-col items-center py-8 z-10 sticky top-0 h-screen transition-all">
-      <nav className="flex-1 flex flex-col items-center gap-10 mt-4">
+    <aside className="w-20 border-r border-[#E5E7EB] bg-[#F5F5F0] hidden md:flex flex-col items-center py-8 z-10 sticky top-0 h-screen">
+      {/* Logo */}
+      <div className="h-10 w-10 bg-[#1F2937] rounded-xl flex items-center justify-center mb-10">
+        <span className="text-white font-bold text-xs">TC</span>
+      </div>
+
+      {/* Nav */}
+      <nav className="flex-1 flex flex-col items-center gap-6 w-full">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
           return (
-            <Link key={item.href} href={item.href} className="flex flex-col items-center gap-1 group relative">
+            <Link
+              key={item.href}
+              href={item.href}
+              className="flex flex-col items-center gap-1.5 group relative w-full"
+            >
               {isActive && (
-                <div className="bg-[#64748B] w-2 h-8 rounded-r-lg absolute -left-10 transition-all"></div>
+                <div className="bg-[#84A59D] w-1 h-6 rounded-r-lg absolute left-0 transition-all" />
               )}
               <item.icon
-                className={`h-6 w-6 transition-colors ${isActive ? 'text-[#64748B]' : 'text-[#9CA3AF] group-hover:text-[#64748B]'}`}
-                strokeWidth={isActive ? 2.5 : 2}
+                className={`h-5 w-5 transition-colors ${
+                  isActive ? "text-[#1F2937]" : "text-[#9CA3AF] group-hover:text-[#64748B]"
+                }`}
+                strokeWidth={isActive ? 2.5 : 1.8}
               />
-              <span className={`text-[10px] font-bold transition-colors ${isActive ? 'text-[#64748B]' : 'text-[#9CA3AF] group-hover:text-[#64748B]'}`}>
+              <span
+                className={`text-[9px] font-semibold transition-colors ${
+                  isActive ? "text-[#1F2937]" : "text-[#9CA3AF] group-hover:text-[#64748B]"
+                }`}
+              >
                 {item.label}
               </span>
             </Link>
@@ -65,21 +61,13 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Streak Block — Dinâmico */}
-      <div className="bg-[#FFFFFF] border border-[#E5E7EB] rounded-2xl flex flex-col items-center justify-center p-3 shadow-[0_4px_15_rgba(0,0,0,0.02)] mb-6">
-        <span className="text-[7.5px] font-bold text-[#9CA3AF] uppercase text-center leading-tight tracking-wider">Sequência<br/>Atual</span>
-        <span className="text-2xl font-black text-[#333333] font-mono mt-1">
-          {streak === null ? "—" : streak}
-        </span>
-        <span className="text-[9px] font-bold text-[#9CA3AF] uppercase">Dias</span>
-      </div>
-
+      {/* Logout */}
       <button
         onClick={handleLogout}
-        className="flex flex-col items-center gap-1 group mb-8 text-[#9CA3AF] hover:text-red-500 transition-colors"
+        className="flex flex-col items-center gap-1 text-[#9CA3AF] hover:text-red-400 transition-colors mb-4"
       >
-        <LogOut className="h-6 w-6" strokeWidth={2} />
-        <span className="text-[10px] font-bold uppercase tracking-widest">Sair</span>
+        <LogOut className="h-4 w-4" strokeWidth={1.8} />
+        <span className="text-[8px] font-semibold">Sair</span>
       </button>
     </aside>
   );

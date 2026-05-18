@@ -9,14 +9,21 @@ CREATE TABLE IF NOT EXISTS profiles (
   full_name TEXT,
   email TEXT,
   whatsapp TEXT,
+  avatar_url TEXT,
   
   -- Mapeamento Neurocognitivo (Profissional)
-  main_struggle TEXT,          -- Executive Dysfunction area
-  energy_level TEXT,           -- Cognitive Load (alta/baixa)
-  peak_time TEXT,              -- Performance peaks
-  interaction_tone TEXT,       -- Support style (acolhedor/direto)
+  main_struggle TEXT,          -- Executive Dysfunction area (inercia/memoria/foco)
   mindset_profile TEXT,        -- Dominant state (criativa, sobrecarga, hiperfoco)
+  life_friction TEXT,          -- Area of friction (trabalho/casa/saude/financas/social/projetos)
+  energy_level TEXT,           -- Cognitive Load (alta/baixa)
+  peak_time TEXT,              -- Performance peaks (manha/noite)
+  interaction_tone TEXT,       -- Support style (acolhedor/direto)
   
+  -- Personal Info for AI context
+  occupation TEXT,
+  age INTEGER,
+  bio TEXT,
+
   streak_count INTEGER DEFAULT 0,
   total_points INTEGER DEFAULT 0,
   current_level INTEGER DEFAULT 1,
@@ -148,7 +155,6 @@ CREATE POLICY "Users can manage own journal_entries" ON journal_entries FOR ALL 
 
 -- ============================================================
 -- FUNÇÃO para criar perfil automático ao registrar novo usuário
--- (Evita o problema de perfil não criado se o frontend falhar)
 -- ============================================================
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$

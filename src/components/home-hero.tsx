@@ -45,7 +45,7 @@ function AssistantBubble() {
       <div>
         <p className="text-[10px] font-black text-[#84A59D] uppercase tracking-widest mb-1">TC Assistant</p>
         <p className="text-sm text-white/70 font-medium leading-snug italic">
-          "Parece que você tem energia alta agora. Que tal começar pela tarefa essencial?"
+          "Hoje a energia está mais baixa. Que tal escolher só uma das três prioridades — sem cobrança?"
         </p>
       </div>
     </motion.div>
@@ -148,7 +148,7 @@ export function HomeHero() {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#84A59D]/20 bg-[#84A59D]/5">
             <Sparkles className="h-3.5 w-3.5 text-[#84A59D]" />
             <span className="text-[10px] font-black uppercase tracking-[0.25em] text-[#84A59D]">
-              Seu segundo cérebro para TDAH
+              Método de uma neurocientista com TDAH
             </span>
           </div>
         </motion.div>
@@ -171,9 +171,9 @@ export function HomeHero() {
               textShadow: "none",
             }}
           >
-            Organize a mente.
+            Cansada de começar
             <br />
-            <span style={{ color: "#84A59D", WebkitTextFillColor: "#84A59D" }}>Destrave o dia.</span>
+            <span style={{ color: "#84A59D", WebkitTextFillColor: "#84A59D" }}>e nunca continuar?</span>
           </h1>
         </motion.div>
 
@@ -184,7 +184,7 @@ export function HomeHero() {
           transition={{ delay: 0.8, duration: 0.8 }}
           className="mt-6 text-center text-lg md:text-xl text-white/50 font-medium max-w-xl mx-auto leading-relaxed"
         >
-          Um assistente pessoal que entende como o seu cérebro funciona — e te ajuda a começar quando parece impossível.
+          Um sistema feito por uma neurocientista com TDAH para mulheres que querem constância possível, não rotina perfeita. Sem culpa, sem rigidez, no seu ritmo.
         </motion.p>
 
         {/* CTA */}
@@ -208,7 +208,7 @@ export function HomeHero() {
         </motion.div>
 
         <p className="mt-4 text-center text-[10px] font-bold text-white/20 uppercase tracking-widest">
-          Sem cartão de crédito · Leva menos de 2 minutos
+          7 dias grátis · Sem cartão de crédito · Cancele quando quiser
         </p>
 
         {/* ── Assistant bubble ── */}

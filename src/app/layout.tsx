@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import { SosModal } from "@/components/sos-modal";
+import { ConsentBanner } from "@/components/consent-banner";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -15,8 +15,9 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "TDAH Constante | Seu Acompanhamento Diário",
-  description: "Um segundo cérebro focado em transformar a neuroplasticidade em ação sem fricção.",
+  title: "TDAH Constante | Constância possível, sem rigidez",
+  description:
+    "Sistema de apoio à constância feito por uma neurocientista com TDAH para mulheres que querem organizar a rotina sem se cobrar perfeição.",
 };
 
 export default function RootLayout({
@@ -31,7 +32,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col font-sans">
         {children}
-        <SosModal />
+        <ConsentBanner />
         <Toaster position="top-right" richColors />
       </body>
     </html>
