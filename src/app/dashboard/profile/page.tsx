@@ -7,7 +7,7 @@ import {
   Clock, Heart, Shield, Sparkles, 
   Save, Loader2, Brain, Fingerprint,
   Activity, TrendingUp, AlertCircle,
-  ChevronRight, BrainCircuit
+  ChevronRight, BrainCircuit, Camera
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -103,24 +103,28 @@ export default function ProfilePage() {
         {/* Header Section */}
         <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16">
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="h-14 w-14 bg-[#1F2937] rounded-2xl flex items-center justify-center shadow-2xl shadow-black/20 relative group overflow-hidden cursor-pointer shrink-0">
-                {profile.avatar_url ? (
-                   <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
-                ) : (
-                   <BrainCircuit className="h-7 w-7 text-[#84A59D]" />
-                )}
-                <div className="absolute inset-0 bg-black/60 hidden group-hover:flex flex-col items-center justify-center transition-all">
-                   <span className="text-[8px] text-white font-bold uppercase tracking-widest mt-1">Foto</span>
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="h-16 w-16 bg-[#1F2937] rounded-2xl flex items-center justify-center shadow-2xl shadow-black/20 overflow-hidden shrink-0">
+                  {profile.avatar_url ? (
+                     <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+                  ) : (
+                     <BrainCircuit className="h-8 w-8 text-[#84A59D]" />
+                  )}
                 </div>
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  onChange={handleImageUpload}
-                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                  title="Alterar foto de perfil"
-                />
+                
+                {/* Upload Button overlay */}
+                <label className="absolute -bottom-2 -right-2 bg-white text-[#1F2937] p-1.5 rounded-xl shadow-lg border border-[#E5E7EB] cursor-pointer hover:bg-[#F5F5F0] transition-colors group">
+                  <Camera className="h-4 w-4" />
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </label>
               </div>
+
               <div>
                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#9CA3AF] block">Módulo de Biometria Neural</span>
                 <h1 className="text-4xl md:text-5xl font-black text-[#1F2937] tracking-tight">
