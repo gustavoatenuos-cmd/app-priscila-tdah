@@ -4,6 +4,7 @@ import { MobileHeader } from "@/components/mobile-header";
 import { TraveiButton } from "@/components/travei-button";
 import { FrasesFlutuantes } from "@/components/frases-flutuantes";
 import { OnboardingGuard } from "@/components/onboarding-guard";
+import { TrialBanner } from "@/components/trial-banner";
 
 export default function DashboardLayout({
   children,
@@ -16,6 +17,7 @@ export default function DashboardLayout({
         <Sidebar />
 
         <div className="flex-1 flex flex-col min-h-screen relative overflow-hidden">
+          <TrialBanner />
           <MobileHeader />
 
           <main className="flex-1 overflow-y-auto pb-24 md:pb-0">

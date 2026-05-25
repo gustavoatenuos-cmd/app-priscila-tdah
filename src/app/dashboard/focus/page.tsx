@@ -11,6 +11,8 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useState, useEffect, useRef } from "react";
 import { AssistantVoice } from "@/components/assistant-voice";
+import { usePaywall } from "@/hooks/usePaywall";
+import { PaywallPopup } from "@/components/paywall-popup";
 
 const MINDFULNESS_DURATION = 2 * 60; // 2 minutos
 const FOCUS_DURATION = 50 * 60; // 50 minutos
@@ -30,6 +32,8 @@ export default function FocusPage() {
   const [focusScore, setFocusScore] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [history, setHistory] = useState<any[]>([]);
+
+  const { showPaywall, setShowPaywall, checkAccess } = usePaywall("Foco Profundo");
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -107,8 +111,10 @@ export default function FocusPage() {
     return `${m}:${s}`;
   };
 
-  const startMindfulness = () => {
+  const startMindfulness = async () => {
     if (!selectedTask) return toast.error("Selecione uma intenção para focar.");
+    const hasAccess = await checkAccess();
+    if (!hasAccess) return;
     setStage('mindfulness');
     setTimeLeft(MINDFULNESS_DURATION);
     setIsRunning(true);
@@ -201,7 +207,11 @@ export default function FocusPage() {
 
   return (
     <div className="w-full flex flex-col min-h-screen relative">
-
+        <PaywallPopup 
+          isOpen={showPaywall} 
+          onClose={() => setShowPaywall(false)} 
+          featureName="Foco Profundo" 
+        />
         
         {/* Background Visual Effects (Dynamic based on stage) */}
         <div className="fixed inset-0 pointer-events-none z-0">

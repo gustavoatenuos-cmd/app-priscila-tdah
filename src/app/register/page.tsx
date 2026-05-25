@@ -39,6 +39,15 @@ export default function RegisterPage() {
     const password = target.password.value;
     const whatsapp = target.whatsapp.value;
 
+    let signup_ip = "";
+    try {
+      const res = await fetch("https://api.ipify.org?format=json");
+      const data = await res.json();
+      signup_ip = data.ip;
+    } catch (err) {
+      console.warn("Could not fetch IP", err);
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -46,6 +55,7 @@ export default function RegisterPage() {
         data: {
           full_name: name,
           whatsapp: whatsapp,
+          signup_ip: signup_ip,
         }
       }
     });

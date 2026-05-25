@@ -148,20 +148,23 @@ CREATE TRIGGER on_user_created_make_journey
 -- 10. handle_new_user fix: não sobrescrever full_name em re-auths (bug pré-existente).
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
-DECLARE
+  DECLARE
   meta_full_name TEXT;
   meta_whatsapp TEXT;
+  meta_signup_ip TEXT;
 BEGIN
   IF NEW.raw_user_meta_data IS NOT NULL THEN
     meta_full_name := COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', '');
     meta_whatsapp := NEW.raw_user_meta_data->>'whatsapp';
+    meta_signup_ip := NEW.raw_user_meta_data->>'signup_ip';
   ELSE
     meta_full_name := '';
     meta_whatsapp := NULL;
+    meta_signup_ip := NULL;
   END IF;
 
-  INSERT INTO public.profiles (id, full_name, email, whatsapp, streak_count, is_premium)
-  VALUES (NEW.id, meta_full_name, NEW.email, meta_whatsapp, 0, FALSE)
+  INSERT INTO public.profiles (id, full_name, email, whatsapp, streak_count, is_premium, signup_ip)
+  VALUES (NEW.id, meta_full_name, NEW.email, meta_whatsapp, 0, FALSE, meta_signup_ip)
   ON CONFLICT (id) DO UPDATE SET
     -- Só atualiza full_name se o atual está vazio (evita sobrescrever em re-auth)
     full_name = CASE
@@ -170,6 +173,7 @@ BEGIN
         ELSE profiles.full_name
       END,
     whatsapp = COALESCE(profiles.whatsapp, EXCLUDED.whatsapp),
+    signup_ip = COALESCE(profiles.signup_ip, EXCLUDED.signup_ip),
     updated_at = NOW();
   RETURN NEW;
 END;

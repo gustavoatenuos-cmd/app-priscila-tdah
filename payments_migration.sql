@@ -13,7 +13,11 @@ ALTER TABLE profiles
   -- 'monthly' | 'yearly' | null
   ADD COLUMN IF NOT EXISTS current_period_end TIMESTAMPTZ,
   ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMPTZ,
-  ADD COLUMN IF NOT EXISTS canceled_at TIMESTAMPTZ;
+  ADD COLUMN IF NOT EXISTS canceled_at TIMESTAMPTZ,
+  
+  -- Novas colunas (Fase 5: Monetização)
+  ADD COLUMN IF NOT EXISTS signup_ip TEXT,
+  ADD COLUMN IF NOT EXISTS premium_uses_left INTEGER DEFAULT 3;
 
 CREATE INDEX IF NOT EXISTS profiles_stripe_customer_id_idx
   ON profiles(stripe_customer_id) WHERE stripe_customer_id IS NOT NULL;
@@ -43,7 +47,7 @@ RETURNS TRIGGER AS $$
 BEGIN
   -- Se ainda não tem trial e ainda não é premium
   IF NEW.trial_ends_at IS NULL AND COALESCE(NEW.is_premium, FALSE) = FALSE THEN
-    NEW.trial_ends_at := NOW() + INTERVAL '30 days';
+    NEW.trial_ends_at := NOW() + INTERVAL '7 days';
     NEW.subscription_status := 'trialing';
   END IF;
   RETURN NEW;
@@ -57,7 +61,7 @@ CREATE TRIGGER profiles_init_trial
 
 -- 4. Atualiza perfis existentes que ainda não têm trial.
 UPDATE profiles
-SET trial_ends_at = COALESCE(trial_ends_at, NOW() + INTERVAL '30 days'),
+SET trial_ends_at = COALESCE(trial_ends_at, NOW() + INTERVAL '7 days'),
     subscription_status = COALESCE(subscription_status,
       CASE WHEN is_premium THEN 'active' ELSE 'trialing' END)
 WHERE trial_ends_at IS NULL;

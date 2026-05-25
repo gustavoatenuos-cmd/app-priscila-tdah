@@ -3,6 +3,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, Check, Snowflake, ChevronRight, BrainCircuit, Sparkles, Wind, CheckSquare, BookMarked, User, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { usePaywall } from "@/hooks/usePaywall";
+import { PaywallPopup } from "@/components/paywall-popup";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useState, useEffect } from "react";
@@ -47,6 +49,8 @@ export default function MeuDia() {
   const [traveiStep, setTraveiStep] = useState<"opcoes" | "timer" | "respirar" | "minima" | "feito">("opcoes");
   const [traveiTimer, setTraveiTimer] = useState(60);
   const [traveiAcao, setTraveiAcao] = useState("");
+
+  const { showPaywall, setShowPaywall, checkAccess } = usePaywall("SOS Travei");
 
   useEffect(() => {
     setMounted(true);
@@ -224,7 +228,9 @@ export default function MeuDia() {
     setTarefas((prev) => ({ ...prev, [tipo]: { ...prev[tipo], feito: novoStatus } }));
   };
 
-  const abrirTravei = () => {
+  const abrirTravei = async () => {
+    const hasAccess = await checkAccess();
+    if (!hasAccess) return;
     setTraveiAberto(true);
     setTraveiStep("opcoes");
     setTraveiTimer(60);
@@ -300,6 +306,7 @@ export default function MeuDia() {
 
   return (
     <>
+      <PaywallPopup isOpen={showPaywall} onClose={() => setShowPaywall(false)} featureName="SOS Travei" />
       <div className="px-6 py-8 md:px-12 lg:max-w-5xl mx-auto pb-32">
 
         {/* ── SAUDAÇÃO ── */}

@@ -6,6 +6,8 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Heart, Save, BookMarked } from "lucide-react";
+import { usePaywall } from "@/hooks/usePaywall";
+import { PaywallPopup } from "@/components/paywall-popup";
 
 export default function JournalPage() {
   const [gratitude, setGratitude] = useState(["", "", ""]);
@@ -13,6 +15,8 @@ export default function JournalPage() {
   const [book, setBook] = useState("");
   const [progress, setProgress] = useState("");
   const [loading, setLoading] = useState(true);
+
+  const { showPaywall, setShowPaywall, checkAccess } = usePaywall("Diário e Mente");
 
   useEffect(() => {
     async function loadJournal() {
@@ -45,6 +49,9 @@ export default function JournalPage() {
       return;
     }
 
+    const hasAccess = await checkAccess();
+    if (!hasAccess) return;
+
     const { error } = await supabase
       .from('journal_entries')
       .insert({
@@ -62,7 +69,8 @@ export default function JournalPage() {
   if (loading) return <div className="flex items-center justify-center min-h-screen bg-[#F5F5F0]">Abrindo seu diário...</div>;
 
   return (
-    <div className="w-full flex flex-col min-h-screen">
+    <div className="w-full flex flex-col min-h-screen relative">
+        <PaywallPopup isOpen={showPaywall} onClose={() => setShowPaywall(false)} featureName="Diário e Mente" />
 
         <header className="h-auto py-4 md:h-20 border-b border-[#E5E7EB] flex flex-col md:flex-row items-center justify-between px-6 md:px-12 bg-white/60 backdrop-blur-md md:sticky top-0 z-30 gap-4">
           <h1 className="text-xl md:text-2xl font-bold tracking-tight text-[#1F2937]">Journal & Gratidão</h1>
