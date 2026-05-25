@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 import {
   Home,
   BookOpen,
@@ -33,6 +35,18 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadAvatar() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase.from('profiles').select('avatar_url').eq('id', user.id).single();
+        if (data?.avatar_url) setAvatarUrl(data.avatar_url);
+      }
+    }
+    loadAvatar();
+  }, [pathname]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -42,9 +56,13 @@ export function Sidebar() {
   return (
     <aside className="w-20 border-r border-[#E5E7EB] bg-[#F5F5F0] hidden md:flex flex-col items-center py-6 z-10 sticky top-0 h-screen">
       {/* Logo */}
-      <div className="h-10 w-10 bg-[#1F2937] rounded-xl flex items-center justify-center mb-8 shrink-0">
-        <span className="text-white font-bold text-xs">TC</span>
-      </div>
+      <Link href="/dashboard/profile" className="h-10 w-10 bg-[#1F2937] rounded-xl flex items-center justify-center mb-8 shrink-0 overflow-hidden hover:opacity-90 transition-opacity">
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+        ) : (
+          <span className="text-white font-bold text-xs">TC</span>
+        )}
+      </Link>
 
       {/* Nav */}
       <nav className="flex-1 flex flex-col items-center gap-1 w-full overflow-y-auto" style={{ scrollbarWidth: "none" }}>

@@ -48,6 +48,23 @@ export default function ProfilePage() {
     loadProfile();
   }, []);
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Check file size (max 2MB) to avoid huge Base64 strings
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("A imagem deve ter no máximo 2MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setProfile({ ...profile, avatar_url: reader.result as string });
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -87,8 +104,22 @@ export default function ProfilePage() {
         <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16">
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="h-12 w-12 bg-[#1F2937] rounded-2xl flex items-center justify-center shadow-2xl shadow-black/20">
-                <BrainCircuit className="h-7 w-7 text-[#84A59D]" />
+              <div className="h-14 w-14 bg-[#1F2937] rounded-2xl flex items-center justify-center shadow-2xl shadow-black/20 relative group overflow-hidden cursor-pointer shrink-0">
+                {profile.avatar_url ? (
+                   <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+                ) : (
+                   <BrainCircuit className="h-7 w-7 text-[#84A59D]" />
+                )}
+                <div className="absolute inset-0 bg-black/60 hidden group-hover:flex flex-col items-center justify-center transition-all">
+                   <span className="text-[8px] text-white font-bold uppercase tracking-widest mt-1">Foto</span>
+                </div>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleImageUpload}
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                  title="Alterar foto de perfil"
+                />
               </div>
               <div>
                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#9CA3AF] block">Módulo de Biometria Neural</span>
@@ -160,6 +191,16 @@ export default function ProfilePage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="md:col-span-2 space-y-3">
+                  <label className="text-[10px] font-black uppercase text-[#9CA3AF] tracking-widest ml-1">Seu Nome Completo</label>
+                  <input 
+                    type="text"
+                    placeholder="Ex: Maria Silva"
+                    value={profile.full_name || ""}
+                    onChange={(e) => setProfile({...profile, full_name: e.target.value})}
+                    className="w-full bg-[#F8F9FA] border-2 border-transparent p-5 rounded-2xl font-bold text-[#1F2937] focus:border-[#84A59D]/20 focus:bg-white outline-none transition-all shadow-inner"
+                  />
+                </div>
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase text-[#9CA3AF] tracking-widest ml-1">Ocupação Atual</label>
                   <input 
