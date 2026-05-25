@@ -164,7 +164,7 @@ export default function ProfilePage() {
                   <label className="text-[10px] font-black uppercase text-[#9CA3AF] tracking-widest ml-1">Ocupação Atual</label>
                   <input 
                     type="text"
-                    placeholder="Ex: Gestor de Tráfego"
+                    placeholder="Ex: Empreendedor(a)"
                     value={profile.occupation}
                     onChange={(e) => setProfile({...profile, occupation: e.target.value})}
                     className="w-full bg-[#F8F9FA] border-2 border-transparent p-5 rounded-2xl font-bold text-[#1F2937] focus:border-[#84A59D]/20 focus:bg-white outline-none transition-all shadow-inner"
