@@ -44,9 +44,13 @@ export function MobileHeader() {
     <>
       <header className="md:hidden sticky top-0 z-40 w-full bg-[#F5F5F0]/80 backdrop-blur-md border-b border-[#E5E7EB] px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-2">
-           <div className="h-8 w-8 bg-[#1F2937] rounded-lg flex items-center justify-center">
-              <span className="text-white font-black text-xs">TC</span>
-           </div>
+           <Link href="/dashboard/profile" className="h-8 w-8 bg-[#1F2937] rounded-lg flex items-center justify-center overflow-hidden">
+             {profile?.avatar_url ? (
+               <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+             ) : (
+               <span className="text-white font-black text-xs">TC</span>
+             )}
+           </Link>
            <h1 className="text-xs font-black tracking-[0.2em] text-[#1F2937] uppercase">TDAH Constante</h1>
         </div>
 
@@ -80,8 +84,12 @@ export function MobileHeader() {
             >
               <div className="p-6 border-b border-[#F1F5F9] flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-[#F1F5F9] flex items-center justify-center text-[#64748B]">
-                    <User className="h-5 w-5" />
+                  <div className="h-10 w-10 rounded-full bg-[#F1F5F9] flex items-center justify-center text-[#64748B] overflow-hidden">
+                    {profile?.avatar_url ? (
+                      <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+                    ) : (
+                      <User className="h-5 w-5" />
+                    )}
                   </div>
                   <div>
                     <p className="text-sm font-bold text-[#1F2937]">{profile?.full_name || "Sua Conta"}</p>

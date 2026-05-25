@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { Heart, Save, BookMarked } from "lucide-react";
+import { Heart, Save, BookMarked, History } from "lucide-react";
 import { usePaywall } from "@/hooks/usePaywall";
 import { PaywallPopup } from "@/components/paywall-popup";
 
@@ -14,6 +14,7 @@ export default function JournalPage() {
   const [learning, setLearning] = useState("");
   const [book, setBook] = useState("");
   const [progress, setProgress] = useState("");
+  const [historyEntries, setHistoryEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const { showPaywall, setShowPaywall, checkAccess } = usePaywall("Diário e Mente");
@@ -23,24 +24,36 @@ export default function JournalPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data } = await supabase
+      const { data: allData } = await supabase
         .from('journal_entries')
         .select('*')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+        .order('created_at', { ascending: false });
 
-      if (data) {
-        setGratitude(data.gratitude_items || ["", "", ""]);
-        setLearning(data.learning || "");
-        setBook(data.reading_book || "");
-        setProgress(data.reading_progress || "");
+      if (allData && allData.length > 0) {
+        setHistoryEntries(allData);
+        // Preenche o form com o último, caso a pessoa queira continuar editando
+        const last = allData[0];
+        // Opcional: só preencher se for do mesmo dia
+        const isToday = new Date(last.created_at).toDateString() === new Date().toDateString();
+        if (isToday) {
+          setGratitude(last.gratitude_items || ["", "", ""]);
+          setLearning(last.learning || "");
+          setBook(last.reading_book || "");
+          setProgress(last.reading_progress || "");
+        }
       }
       setLoading(false);
     }
     loadJournal();
   }, []);
+
+  const loadHistory = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data } = await supabase.from('journal_entries').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+    if (data) setHistoryEntries(data);
+  };
 
   const handleSave = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -63,7 +76,10 @@ export default function JournalPage() {
       });
 
     if (error) toast.error("Erro ao salvar: " + error.message);
-    else toast.success("Sua reflexão foi guardada. ✨");
+    else {
+      toast.success("Sua reflexão foi guardada. ✨");
+      loadHistory();
+    }
   };
 
   if (loading) return <div className="flex items-center justify-center min-h-screen bg-[#F5F5F0]">Abrindo seu diário...</div>;
@@ -161,6 +177,61 @@ export default function JournalPage() {
                </div>
              </div>
            </motion.div>
+
+           {/* Cápsula do Tempo */}
+           {historyEntries.length > 0 && (
+             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mt-16">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="h-10 w-10 rounded-xl bg-[#1F2937] flex items-center justify-center text-[#84A59D]">
+                     <History className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-xl font-black text-[#1F2937]">Cápsula do Tempo</h3>
+                </div>
+
+                <div className="grid gap-6">
+                  {historyEntries.map((entry) => (
+                    <div key={entry.id} className="bg-white rounded-[32px] p-8 border border-[#E5E7EB] shadow-sm hover:shadow-md transition-shadow">
+                      <p className="text-[10px] font-black text-[#84A59D] uppercase tracking-widest mb-4">
+                        {new Date(entry.created_at).toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                      </p>
+                      
+                      <div className="grid md:grid-cols-2 gap-8">
+                        <div>
+                           <h4 className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider mb-3 flex items-center gap-2">
+                              <Heart className="h-3 w-3" /> Gratidão
+                           </h4>
+                           <ul className="space-y-2">
+                             {entry.gratitude_items?.filter((i: string) => i.trim()).map((item: string, idx: number) => (
+                               <li key={idx} className="text-sm font-bold text-[#333333] flex items-start gap-2">
+                                 <span className="text-[#84A59D]">•</span> {item}
+                               </li>
+                             ))}
+                           </ul>
+                        </div>
+                        
+                        <div>
+                           {entry.learning && (
+                             <div className="mb-6">
+                               <h4 className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider mb-3">Aprendizado</h4>
+                               <p className="text-sm font-medium text-[#64748B] italic">"{entry.learning}"</p>
+                             </div>
+                           )}
+                           
+                           {entry.reading_book && (
+                             <div>
+                               <h4 className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider mb-2 flex items-center gap-2">
+                                 <BookMarked className="h-3 w-3" /> Leitura
+                               </h4>
+                               <p className="text-sm font-bold text-[#333333]">{entry.reading_book} <span className="text-[#9CA3AF] font-medium">- {entry.reading_progress}</span></p>
+                             </div>
+                           )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+             </motion.div>
+           )}
 
         </div>
     </div>

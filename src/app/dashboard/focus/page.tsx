@@ -78,7 +78,7 @@ export default function FocusPage() {
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
-      .limit(5);
+      .limit(15);
     setHistory(historyData || []);
 
     setLoading(false);
@@ -292,23 +292,38 @@ export default function FocusPage() {
                   </div>
                 </div>
 
-                <div className="hidden lg:flex flex-col gap-6">
-                   <h3 className="text-xs font-black text-[#9CA3AF] uppercase tracking-[0.2em] mb-2">Evolução Recente</h3>
+                <div className="hidden lg:flex flex-col gap-6 max-h-[650px] overflow-y-auto pr-2" style={{ scrollbarWidth: "thin" }}>
+                   <h3 className="text-xs font-black text-[#9CA3AF] uppercase tracking-[0.2em] mb-2 sticky top-0 bg-[#F5F5F0] py-2 z-10">Histórico de Sessões</h3>
                    {history.map((session, i) => (
-                     <div key={session.id} className="bg-white/50 backdrop-blur-sm p-6 rounded-3xl border border-[#E5E7EB] flex items-center justify-between group hover:bg-white transition-all">
-                        <div className="flex items-center gap-4">
-                           <div className="h-10 w-10 rounded-2xl bg-[#84A59D]/10 flex items-center justify-center text-[#84A59D]">
-                              <Zap className="h-5 w-5" />
-                           </div>
-                           <div>
-                              <p className="text-xs font-black text-[#1F2937] uppercase">{new Date(session.created_at).toLocaleDateString()}</p>
-                              <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">{session.duration_minutes} MINUTOS</p>
-                           </div>
+                     <div key={session.id} className="bg-white/50 backdrop-blur-sm p-6 rounded-3xl border border-[#E5E7EB] flex flex-col gap-4 group hover:bg-white transition-all shrink-0">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                               <div className="h-10 w-10 rounded-2xl bg-[#84A59D]/10 flex items-center justify-center text-[#84A59D]">
+                                  <Zap className="h-5 w-5" />
+                               </div>
+                               <div>
+                                  <p className="text-xs font-black text-[#1F2937] uppercase">{new Date(session.created_at).toLocaleDateString()}</p>
+                                  <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">{session.duration_minutes} MINUTOS</p>
+                               </div>
+                            </div>
+                            <div className="text-right">
+                               <p className="text-lg font-black text-[#1F2937]">+{session.focus_score}</p>
+                               <p className="text-[8px] font-black text-[#84A59D] uppercase">PTS</p>
+                            </div>
                         </div>
-                        <div className="text-right">
-                           <p className="text-lg font-black text-[#1F2937]">+{session.focus_score}</p>
-                           <p className="text-[8px] font-black text-[#84A59D] uppercase">PTS</p>
-                        </div>
+
+                        {session.session_notes && session.session_notes.trim() !== "" && (
+                          <div className="pt-4 border-t border-[#F1F5F9]">
+                             <p className="text-[9px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2">
+                               {session.distractions_count} Distrações Processadas
+                             </p>
+                             <div className="space-y-1">
+                               {session.session_notes.split("\n").map((note: string, idx: number) => (
+                                 <p key={idx} className="text-xs font-bold text-[#64748B] flex gap-2"><span className="text-[#84A59D]">•</span> {note}</p>
+                               ))}
+                             </div>
+                          </div>
+                        )}
                      </div>
                    ))}
                    {history.length === 0 && <p className="text-sm font-bold text-[#9CA3AF]">Sua jornada começa agora. 🚀</p>}

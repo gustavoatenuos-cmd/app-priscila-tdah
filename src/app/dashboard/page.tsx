@@ -49,6 +49,7 @@ export default function MeuDia() {
   const [traveiStep, setTraveiStep] = useState<"opcoes" | "timer" | "respirar" | "minima" | "feito">("opcoes");
   const [traveiTimer, setTraveiTimer] = useState(60);
   const [traveiAcao, setTraveiAcao] = useState("");
+  const [traveiLogs, setTraveiLogs] = useState<any[]>([]);
 
   const { showPaywall, setShowPaywall, checkAccess } = usePaywall("SOS Travei");
 
@@ -139,6 +140,8 @@ export default function MeuDia() {
             opcional: o ? { id: o.id, titulo: o.title, feito: o.completed } : { titulo: "", feito: false },
           });
         }
+        
+        loadTraveiLogs(user.id);
 
         // Constância da semana
         const now = new Date();
@@ -178,6 +181,16 @@ export default function MeuDia() {
     }
     loadData();
   }, [router]);
+
+  const loadTraveiLogs = async (userId: string) => {
+    const { data } = await supabase
+      .from("travei_logs")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(5);
+    if (data) setTraveiLogs(data);
+  };
 
   // Timer do Travei
   useEffect(() => {
@@ -256,13 +269,26 @@ export default function MeuDia() {
               opcional: { id: data.id, titulo: newTitle, feito: true }
             }));
           }
+          await supabase.from("travei_logs").insert({
+            user_id: user.id,
+            exit_chosen: "minimo"
+          });
+          loadTraveiLogs(user.id);
         }
       } catch (err) {
         console.error(err);
       }
+    } else {
+       const { data: { user } } = await supabase.auth.getUser();
+       if (user) {
+         await supabase.from("travei_logs").insert({
+            user_id: user.id,
+            exit_chosen: traveiStep === "respirar" ? "respirar" : "um_minuto"
+         });
+         loadTraveiLogs(user.id);
+       }
     }
-    setTraveiStep("feito");
-    setFrase("Um passo minúsculo ainda é um passo para frente. Orgulho de você! 🌿");
+    setTraveiAberto(false);
   };
 
   const limparTarefas = async () => {
@@ -406,81 +432,107 @@ export default function MeuDia() {
             </p>
           </section>
 
-          {/* ── PLANNER: 3 TAREFAS DO DIA ── */}
-          <section className="md:col-span-8 bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6 relative overflow-hidden">
-             <div className="absolute right-0 top-0 opacity-5 pointer-events-none -translate-y-1/4 translate-x-1/4">
-                <CheckSquare className="w-64 h-64" />
-             </div>
-             <div className="relative z-10">
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 bg-[#1F2937]/5 rounded-xl flex items-center justify-center">
-                    <CheckSquare className="h-5 w-5 text-[#1F2937]" />
-                  </div>
-                  <div>
-                    <h2 className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">Planner Diário</h2>
-                    <p className="text-sm font-bold text-[#1F2937]">Minhas 3 tarefas de hoje</p>
-                  </div>
-                </div>
-                <button
-                  onClick={limparTarefas}
-                  className="text-[10px] font-bold text-[#84A59D] hover:text-[#1F2937] transition-colors uppercase tracking-wider bg-[#84A59D]/10 hover:bg-[#84A59D]/20 px-3 py-1.5 rounded-lg"
-                >
-                  Recomeçar
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                {(["essencial", "leve", "opcional"] as const).map((tipo) => {
-                  const labels = { essencial: "Essencial", leve: "Leve", opcional: "Opcional" };
-                  const colors = {
-                    essencial: "bg-[#1F2937]",
-                    leve: "bg-[#84A59D]",
-                    opcional: "bg-[#D1D5DB]",
-                  };
-                  const tarefa = tarefas[tipo];
-
-                  return (
-                    <div key={tipo} className="flex items-center gap-4 bg-[#F8F9FA] p-3 rounded-2xl border border-transparent hover:border-[#E5E7EB] transition-colors">
-                      <button
-                        onClick={() => tarefa.id && marcarFeito(tipo)}
-                        disabled={!tarefa.id}
-                        className={`h-7 w-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${tarefa.feito
-                            ? `${colors[tipo]} border-transparent`
-                            : "border-[#D1D5DB] hover:border-[#84A59D] bg-white"
-                          } ${!tarefa.id ? "opacity-30" : "cursor-pointer"}`}
-                      >
-                        {tarefa.feito && <Check className="h-4 w-4 text-white" strokeWidth={3} />}
-                      </button>
-
-                      <div className="flex-1 min-w-0">
-                        <label className="text-[9px] font-bold text-[#9CA3AF] uppercase tracking-wider block mb-0.5">
-                          {labels[tipo]}
-                        </label>
-                        <input
-                          type="text"
-                          value={tarefa.titulo}
-                          placeholder={`Tarefa ${labels[tipo].toLowerCase()}...`}
-                          onChange={(e) =>
-                            setTarefas((prev) => ({
-                              ...prev,
-                              [tipo]: { ...prev[tipo], titulo: e.target.value },
-                            }))
-                          }
-                          onBlur={(e) => saveTarefa(tipo, e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") saveTarefa(tipo, (e.target as HTMLInputElement).value);
-                          }}
-                          className={`w-full bg-transparent text-sm font-semibold text-[#1F2937] focus:outline-none placeholder:text-[#D1D5DB] ${tarefa.feito ? "line-through text-[#9CA3AF]" : ""
-                            }`}
-                        />
-                      </div>
+          <div className="md:col-span-12 grid lg:grid-cols-[1fr_300px] gap-8">
+            {/* ── PLANNER: 3 TAREFAS DO DIA ── */}
+            <section className="bg-white rounded-[40px] p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-[#E5E7EB]/50 relative overflow-hidden">
+               <div className="absolute right-0 top-0 opacity-5 pointer-events-none -translate-y-1/4 translate-x-1/4">
+                  <CheckSquare className="w-64 h-64" />
+               </div>
+               <div className="relative z-10">
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 bg-[#1F2937]/5 rounded-xl flex items-center justify-center">
+                      <CheckSquare className="h-5 w-5 text-[#1F2937]" />
                     </div>
-                  );
-                })}
+                    <div>
+                      <h2 className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">Planner Diário</h2>
+                      <p className="text-sm font-bold text-[#1F2937]">Minhas 3 tarefas de hoje</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={limparTarefas}
+                    className="text-[10px] font-bold text-[#84A59D] hover:text-[#1F2937] transition-colors uppercase tracking-wider bg-[#84A59D]/10 hover:bg-[#84A59D]/20 px-3 py-1.5 rounded-lg"
+                  >
+                    Recomeçar
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {(["essencial", "leve", "opcional"] as const).map((tipo) => {
+                    const labels = { essencial: "Essencial", leve: "Leve", opcional: "Opcional" };
+                    const colors = {
+                      essencial: "bg-[#1F2937]",
+                      leve: "bg-[#84A59D]",
+                      opcional: "bg-[#D1D5DB]",
+                    };
+                    const tarefa = tarefas[tipo];
+
+                    return (
+                      <div key={tipo} className="flex items-center gap-4 bg-[#F8F9FA] p-3 rounded-2xl border border-transparent hover:border-[#E5E7EB] transition-colors">
+                        <button
+                          onClick={() => tarefa.id && marcarFeito(tipo)}
+                          disabled={!tarefa.id}
+                          className={`h-7 w-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${tarefa.feito
+                              ? `${colors[tipo]} border-transparent`
+                              : "border-[#D1D5DB] hover:border-[#84A59D] bg-white"
+                            } ${!tarefa.id ? "opacity-30" : "cursor-pointer"}`}
+                        >
+                          {tarefa.feito && <Check className="h-4 w-4 text-white" strokeWidth={3} />}
+                        </button>
+
+                        <div className="flex-1 min-w-0">
+                          <label className="text-[9px] font-bold text-[#9CA3AF] uppercase tracking-wider block mb-0.5">
+                            {labels[tipo]}
+                          </label>
+                          <input
+                            type="text"
+                            value={tarefa.titulo}
+                            placeholder={`Tarefa ${labels[tipo].toLowerCase()}...`}
+                            onChange={(e) =>
+                              setTarefas((prev) => ({
+                                ...prev,
+                                [tipo]: { ...prev[tipo], titulo: e.target.value },
+                              }))
+                            }
+                            onBlur={(e) => saveTarefa(tipo, e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") saveTarefa(tipo, (e.target as HTMLInputElement).value);
+                            }}
+                            className={`w-full bg-transparent text-sm font-semibold text-[#1F2937] focus:outline-none placeholder:text-[#D1D5DB] ${tarefa.feito ? "line-through text-[#9CA3AF]" : ""
+                              }`}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
+            </section>
+
+            {/* SOS Travei History Widget */}
+            <div className="bg-white rounded-[40px] p-8 border border-[#E5E7EB]/50 flex flex-col shadow-[0_20px_50px_rgba(0,0,0,0.03)]">
+               <h3 className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-6 flex items-center gap-2">
+                 <Snowflake className="h-4 w-4" /> Histórico SOS
+               </h3>
+               <div className="flex-1 flex flex-col gap-4">
+                 {traveiLogs.length > 0 ? traveiLogs.map((log) => (
+                   <div key={log.id} className="bg-[#F8F9FA] p-4 rounded-2xl flex flex-col gap-1 border border-[#F1F5F9]">
+                     <span className="text-[9px] font-black uppercase text-[#84A59D]">
+                       {new Date(log.created_at).toLocaleDateString()}
+                     </span>
+                     <span className="text-sm font-bold text-[#333333]">
+                       Saída: {log.exit_chosen === 'minimo' ? 'Ação Mínima' : log.exit_chosen === 'respirar' ? 'Respiração' : '1 Minuto'}
+                     </span>
+                   </div>
+                 )) : (
+                   <div className="flex-1 flex flex-col items-center justify-center text-center opacity-50">
+                      <Check className="h-8 w-8 text-[#9CA3AF] mb-2" />
+                      <p className="text-xs font-bold text-[#9CA3AF]">Nenhum travamento recente.</p>
+                   </div>
+                 )}
+               </div>
             </div>
-          </section>
+          </div>
 
           {/* ── ATALHOS: SOS, DIÁRIO, PERFIL ── */}
           <section className="md:col-span-4 grid grid-cols-2 gap-4">

@@ -11,6 +11,8 @@ import { toast } from "sonner";
 export default function BrainDumpPage() {
   const [note, setNote] = useState("");
   const [items, setItems] = useState<any[]>([]);
+  const [processedItems, setProcessedItems] = useState<any[]>([]);
+  const [view, setView] = useState<"pendentes" | "processadas">("pendentes");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,10 +27,12 @@ export default function BrainDumpPage() {
       .from('brain_dump')
       .select('id, content, category, processed, created_at')
       .eq('user_id', user.id)
-      .eq('processed', false)
       .order('created_at', { ascending: false });
 
-    setItems(data || []);
+    if (data) {
+      setItems(data.filter(i => !i.processed));
+      setProcessedItems(data.filter(i => i.processed));
+    }
     setLoading(false);
   };
 
@@ -111,21 +115,37 @@ export default function BrainDumpPage() {
           </div>
         </div>
 
+        {/* View Toggle */}
+        <div className="flex items-center gap-4 mb-8 border-b border-[#E5E7EB] pb-4">
+          <button 
+            onClick={() => setView("pendentes")}
+            className={`font-black text-sm uppercase tracking-widest transition-colors ${view === "pendentes" ? "text-[#1F2937]" : "text-[#9CA3AF] hover:text-[#64748B]"}`}
+          >
+            Pendentes ({items.length})
+          </button>
+          <button 
+            onClick={() => setView("processadas")}
+            className={`font-black text-sm uppercase tracking-widest transition-colors ${view === "processadas" ? "text-[#1F2937]" : "text-[#9CA3AF] hover:text-[#64748B]"}`}
+          >
+            Processadas ({processedItems.length})
+          </button>
+        </div>
+
         {/* List of Items */}
         <div className="space-y-6">
           <AnimatePresence>
-            {items.map((item) => (
+            {(view === "pendentes" ? items : processedItems).map((item) => (
               <motion.div
                 key={item.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="bg-white rounded-2xl p-6 shadow-sm border border-[#E5E7EB] flex flex-col gap-4"
+                className={`rounded-2xl p-6 shadow-sm border flex flex-col gap-4 ${view === "processadas" ? "bg-[#F9FAFB] border-[#F1F5F9] opacity-70" : "bg-white border-[#E5E7EB]"}`}
               >
-                <p className="text-lg font-bold text-[#333333]">{item.content}</p>
+                <p className={`text-lg font-bold ${view === "processadas" ? "text-[#9CA3AF] line-through" : "text-[#333333]"}`}>{item.content}</p>
                 
                 <div className="flex flex-wrap gap-3">
-                  {!item.category ? (
+                  {!item.processed ? (
                     <>
                       <button onClick={() => setCategory(item.id, "agora")} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#84A59D]/10 text-[#84A59D] text-xs font-bold uppercase transition-all hover:bg-[#84A59D]/20">
                         <Zap className="h-3 w-3" /> Fazer Agora
@@ -144,11 +164,9 @@ export default function BrainDumpPage() {
                         item.category === 'depois' ? 'bg-[#64748B] text-white' : 
                         'bg-red-400 text-white'
                       }`}>
-                        {item.category.replace('_', ' ')}
+                        {item.category?.replace('_', ' ') || 'PROCESSADO'}
                       </span>
-                      <button onClick={() => removeItem(item.id)} className="text-[#9CA3AF] hover:text-red-400">
-                        <Check className="h-5 w-5" />
-                      </button>
+                      <Check className="h-5 w-5 text-[#9CA3AF]" />
                     </div>
                   )}
                 </div>
@@ -156,10 +174,17 @@ export default function BrainDumpPage() {
             ))}
           </AnimatePresence>
 
-          {items.length === 0 && (
+          {view === "pendentes" && items.length === 0 && (
             <div className="text-center py-20 opacity-30">
               <Brain className="h-16 w-16 mx-auto mb-4 text-[#9CA3AF]" />
-              <p className="font-bold text-[#9CA3AF]">Sua cabeça está leve. Nada por aqui.</p>
+              <p className="font-bold text-[#9CA3AF]">Sua cabeça está leve. Nada pendente por aqui.</p>
+            </div>
+          )}
+
+          {view === "processadas" && processedItems.length === 0 && (
+            <div className="text-center py-20 opacity-30">
+              <Brain className="h-16 w-16 mx-auto mb-4 text-[#9CA3AF]" />
+              <p className="font-bold text-[#9CA3AF]">Você ainda não processou nenhuma distração.</p>
             </div>
           )}
         </div>
