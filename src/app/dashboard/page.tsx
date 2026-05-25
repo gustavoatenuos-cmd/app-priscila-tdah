@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, Check, Snowflake, ChevronRight } from "lucide-react";
+import { BookOpen, Check, Snowflake, ChevronRight, BrainCircuit, Sparkles, Wind, CheckSquare, BookMarked, User, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -38,6 +38,10 @@ export default function MeuDia() {
   const [diasSemana, setDiasSemana] = useState<boolean[]>([false, false, false, false, false, false, false]);
   const [diasPresente, setDiasPresente] = useState(0);
 
+  // IA Insight
+  const [insight, setInsight] = useState("");
+  const [loadingInsight, setLoadingInsight] = useState(false);
+
   // Travei modal
   const [traveiAberto, setTraveiAberto] = useState(false);
   const [traveiStep, setTraveiStep] = useState<"opcoes" | "timer" | "respirar" | "minima" | "feito">("opcoes");
@@ -57,7 +61,37 @@ export default function MeuDia() {
         // Profile
         const { data: profileData } = await supabase
           .from("profiles").select("*").eq("id", user.id).single();
-        setProfile(profileData || { full_name: "Você" });
+        const pData = profileData || { full_name: "Você", id: user.id };
+        setProfile(pData);
+
+        const today = new Date().toISOString().split("T")[0];
+
+        // Carregar ou Gerar Insight da IA
+        if (pData.last_insight_date === today && pData.daily_insight) {
+          setInsight(pData.daily_insight);
+        } else if (pData.occupation) {
+          setLoadingInsight(true);
+          try {
+            const res = await fetch('/api/insights', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(pData)
+            });
+            const d = await res.json();
+            if (d.insight) {
+              setInsight(d.insight);
+              // Tenta salvar no Supabase de forma otimista (se a coluna existir)
+              supabase.from('profiles').update({
+                daily_insight: d.insight,
+                last_insight_date: today
+              }).eq('id', user.id).then();
+            }
+          } catch (e) {
+            console.error("Erro ao gerar insight:", e);
+          } finally {
+            setLoadingInsight(false);
+          }
+        }
 
         // Calcular dia atual do 365
         const { data: presencas } = await supabase
@@ -83,7 +117,6 @@ export default function MeuDia() {
         setPresencaHoje(!!presencaHojeData);
 
         // Carregar tarefas de hoje
-        const today = new Date().toISOString().split("T")[0];
         const { data: tarefasData } = await supabase
           .from("tasks")
           .select("*")
@@ -267,145 +300,213 @@ export default function MeuDia() {
 
   return (
     <>
-      <div className="px-6 py-8 md:px-12 lg:max-w-2xl mx-auto space-y-8 pb-32">
+      <div className="px-6 py-8 md:px-12 lg:max-w-5xl mx-auto pb-32">
 
         {/* ── SAUDAÇÃO ── */}
-        <header>
+        <header className="mb-8">
           <h1 className="text-2xl md:text-3xl font-bold text-[#1F2937]">{getGreeting()}</h1>
           <p className="text-sm text-[#9CA3AF] mt-1 capitalize">{currentDate}</p>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-sm text-[#84A59D] mt-3 italic font-medium"
-          >
-            "{frase}"
-          </motion.p>
         </header>
 
-        {/* ── 365 DIAS DE PRESENÇA ── */}
-        <Link href="/dashboard/presenca-365">
-          <motion.section
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
-            className="bg-white rounded-3xl p-6 border border-[#E5E7EB] shadow-sm cursor-pointer group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 bg-[#84A59D]/10 rounded-2xl flex items-center justify-center">
-                  <BookOpen className="h-6 w-6 text-[#84A59D]" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">
-                    Dia {diaAtual} de 365
-                  </p>
-                  <p className="text-sm font-semibold text-[#1F2937] mt-0.5">
-                    {presencaHoje ? "✅ Presente hoje!" : "Sua presença de hoje te espera"}
-                  </p>
-                </div>
-              </div>
-              <ChevronRight className="h-5 w-5 text-[#9CA3AF] group-hover:text-[#1F2937] transition-colors" />
+        {/* ── BENTO GRID COMMAND CENTER ── */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+          {/* ── MÓDULO CÉREBRO (IA INSIGHT) ── */}
+          <section className="md:col-span-12 bg-gradient-to-br from-[#1F2937] to-[#111827] rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-6 opacity-10">
+              <BrainCircuit className="w-32 h-32 text-white" />
             </div>
-          </motion.section>
-        </Link>
-
-        {/* ── 3 TAREFAS DO DIA ── */}
-        <section className="bg-white rounded-3xl p-6 border border-[#E5E7EB] shadow-sm space-y-5">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">Minhas 3 tarefas de hoje</h2>
-            <button
-              onClick={limparTarefas}
-              className="text-[10px] font-bold text-[#84A59D] hover:text-[#1F2937] transition-colors uppercase tracking-wider bg-[#84A59D]/10 px-2 py-1 rounded-md"
-            >
-              Recomeçar
-            </button>
-          </div>
-
-          {(["essencial", "leve", "opcional"] as const).map((tipo) => {
-            const labels = { essencial: "Essencial", leve: "Leve", opcional: "Opcional" };
-            const colors = {
-              essencial: "bg-[#1F2937]",
-              leve: "bg-[#84A59D]",
-              opcional: "bg-[#D1D5DB]",
-            };
-            const tarefa = tarefas[tipo];
-
-            return (
-              <div key={tipo} className="flex items-center gap-3">
-                {/* Bolinha de status */}
-                <button
-                  onClick={() => tarefa.id && marcarFeito(tipo)}
-                  disabled={!tarefa.id}
-                  className={`h-6 w-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${tarefa.feito
-                      ? `${colors[tipo]} border-transparent`
-                      : "border-[#D1D5DB] hover:border-[#84A59D]"
-                    } ${!tarefa.id ? "opacity-30" : "cursor-pointer"}`}
-                >
-                  {tarefa.feito && <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />}
-                </button>
-
-                {/* Input */}
-                <div className="flex-1 min-w-0">
-                  <label className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-wider block mb-0.5">
-                    {labels[tipo]}
-                  </label>
-                  <input
-                    type="text"
-                    value={tarefa.titulo}
-                    placeholder={`Tarefa ${labels[tipo].toLowerCase()}...`}
-                    onChange={(e) =>
-                      setTarefas((prev) => ({
-                        ...prev,
-                        [tipo]: { ...prev[tipo], titulo: e.target.value },
-                      }))
-                    }
-                    onBlur={(e) => saveTarefa(tipo, e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") saveTarefa(tipo, (e.target as HTMLInputElement).value);
-                    }}
-                    className={`w-full bg-transparent text-sm font-medium text-[#1F2937] focus:outline-none placeholder:text-[#D1D5DB] ${tarefa.feito ? "line-through text-[#9CA3AF]" : ""
-                      }`}
-                  />
+            <div className="relative z-10 flex flex-col md:flex-row gap-6 md:items-center justify-between">
+              <div className="flex-1 space-y-3">
+                <div className="flex items-center gap-2 text-[#84A59D]">
+                  <Sparkles className="h-4 w-4" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">Seu Cérebro Hoje</span>
                 </div>
+                {loadingInsight ? (
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="h-5 w-5 animate-spin text-[#84A59D]" />
+                    <p className="text-sm text-[#D1D5DB] animate-pulse">Sincronizando biometria neural com sua profissão...</p>
+                  </div>
+                ) : insight ? (
+                  <h2 className="text-lg md:text-xl font-medium text-white leading-relaxed max-w-3xl">
+                    "{insight}"
+                  </h2>
+                ) : (
+                  <h2 className="text-lg md:text-xl font-medium text-white leading-relaxed max-w-3xl">
+                    "{frase}"
+                  </h2>
+                )}
+                {profile?.occupation && !loadingInsight && insight && (
+                  <p className="text-xs text-[#9CA3AF] font-semibold mt-2 border border-[#84A59D]/30 inline-block px-3 py-1 rounded-full bg-[#84A59D]/10">
+                    Know-how gerado para: {profile.occupation}
+                  </p>
+                )}
               </div>
-            );
-          })}
+            </div>
+          </section>
 
-          <p className="text-xs text-[#84A59D] italic text-center pt-2">
-            Fiz ✓ mesmo que mínimo — isso conta.
-          </p>
-        </section>
+          {/* ── 365 DIAS DE PRESENÇA ── */}
+          <Link href="/dashboard/presenca-365" className="md:col-span-8">
+            <motion.section
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm cursor-pointer h-full flex flex-col justify-center relative overflow-hidden"
+            >
+              <div className="absolute right-0 bottom-0 opacity-5 pointer-events-none translate-x-1/4 translate-y-1/4">
+                <Wind className="w-48 h-48" />
+              </div>
+              <div className="flex items-center justify-between relative z-10">
+                <div className="flex items-center gap-5">
+                  <div className="h-14 w-14 bg-[#84A59D]/10 rounded-2xl flex items-center justify-center shrink-0">
+                    <BookOpen className="h-7 w-7 text-[#84A59D]" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider mb-1">
+                      Dia {diaAtual} de 365
+                    </p>
+                    <h3 className="text-lg md:text-xl font-bold text-[#1F2937]">
+                      {presencaHoje ? "✅ Presente hoje!" : "Sua presença de hoje te espera"}
+                    </h3>
+                  </div>
+                </div>
+                <ChevronRight className="h-6 w-6 text-[#D1D5DB]" />
+              </div>
+            </motion.section>
+          </Link>
 
-        {/* ── CONSTÂNCIA DA SEMANA ── */}
-        <section className="bg-white rounded-3xl p-6 border border-[#E5E7EB] shadow-sm">
-          <h2 className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider mb-4">Esta semana</h2>
-          <div className="flex items-center justify-center gap-3 mb-3">
-            {["D", "S", "T", "Q", "Q", "S", "S"].map((dia, i) => (
-              <div key={i} className="flex flex-col items-center gap-1.5">
-                <span className="text-[10px] font-bold text-[#9CA3AF]">{dia}</span>
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: i * 0.05 }}
-                  className={`h-8 w-8 rounded-full flex items-center justify-center transition-all ${diasSemana[i]
-                      ? "bg-[#84A59D] shadow-sm"
-                      : i <= new Date().getDay()
-                        ? "bg-[#F1F5F9]"
-                        : "bg-[#F9FAFB] border border-dashed border-[#E5E7EB]"
-                    }`}
+          {/* ── CONSTÂNCIA DA SEMANA ── */}
+          <section className="md:col-span-4 bg-white rounded-3xl p-6 border border-[#E5E7EB] shadow-sm flex flex-col justify-center">
+            <h2 className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-wider mb-4 text-center">Constância Semanal</h2>
+            <div className="flex items-center justify-center gap-2 mb-3">
+              {["D", "S", "T", "Q", "Q", "S", "S"].map((dia, i) => (
+                <div key={i} className="flex flex-col items-center gap-1.5">
+                  <span className="text-[9px] font-bold text-[#9CA3AF]">{dia}</span>
+                  <div
+                    className={`h-6 w-6 md:h-7 md:w-7 rounded-full flex items-center justify-center transition-all ${diasSemana[i]
+                        ? "bg-[#84A59D] shadow-sm"
+                        : i <= new Date().getDay()
+                          ? "bg-[#F1F5F9]"
+                          : "bg-[#F9FAFB] border border-dashed border-[#E5E7EB]"
+                      }`}
+                  >
+                    {diasSemana[i] && <Check className="h-3 w-3 text-white" strokeWidth={3} />}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-[#64748B] text-center font-medium mt-2">
+              <span className="font-bold text-[#1F2937]">{diasPresente}</span> {diasPresente === 1 ? "dia" : "dias"} na semana 🌿
+            </p>
+          </section>
+
+          {/* ── PLANNER: 3 TAREFAS DO DIA ── */}
+          <section className="md:col-span-8 bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6 relative overflow-hidden">
+             <div className="absolute right-0 top-0 opacity-5 pointer-events-none -translate-y-1/4 translate-x-1/4">
+                <CheckSquare className="w-64 h-64" />
+             </div>
+             <div className="relative z-10">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 bg-[#1F2937]/5 rounded-xl flex items-center justify-center">
+                    <CheckSquare className="h-5 w-5 text-[#1F2937]" />
+                  </div>
+                  <div>
+                    <h2 className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">Planner Diário</h2>
+                    <p className="text-sm font-bold text-[#1F2937]">Minhas 3 tarefas de hoje</p>
+                  </div>
+                </div>
+                <button
+                  onClick={limparTarefas}
+                  className="text-[10px] font-bold text-[#84A59D] hover:text-[#1F2937] transition-colors uppercase tracking-wider bg-[#84A59D]/10 hover:bg-[#84A59D]/20 px-3 py-1.5 rounded-lg"
                 >
-                  {diasSemana[i] && <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />}
-                </motion.div>
+                  Recomeçar
+                </button>
               </div>
-            ))}
-          </div>
-          <p className="text-sm text-[#64748B] text-center font-medium">
-            Você apareceu <span className="font-bold text-[#1F2937]">{diasPresente}</span> {diasPresente === 1 ? "dia" : "dias"} esta semana 🌿
-          </p>
-          <p className="text-xs text-[#9CA3AF] text-center mt-1 italic">
-            Sem pressa. Sem perfeição. Só presença.
-          </p>
-        </section>
+
+              <div className="space-y-4">
+                {(["essencial", "leve", "opcional"] as const).map((tipo) => {
+                  const labels = { essencial: "Essencial", leve: "Leve", opcional: "Opcional" };
+                  const colors = {
+                    essencial: "bg-[#1F2937]",
+                    leve: "bg-[#84A59D]",
+                    opcional: "bg-[#D1D5DB]",
+                  };
+                  const tarefa = tarefas[tipo];
+
+                  return (
+                    <div key={tipo} className="flex items-center gap-4 bg-[#F8F9FA] p-3 rounded-2xl border border-transparent hover:border-[#E5E7EB] transition-colors">
+                      <button
+                        onClick={() => tarefa.id && marcarFeito(tipo)}
+                        disabled={!tarefa.id}
+                        className={`h-7 w-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${tarefa.feito
+                            ? `${colors[tipo]} border-transparent`
+                            : "border-[#D1D5DB] hover:border-[#84A59D] bg-white"
+                          } ${!tarefa.id ? "opacity-30" : "cursor-pointer"}`}
+                      >
+                        {tarefa.feito && <Check className="h-4 w-4 text-white" strokeWidth={3} />}
+                      </button>
+
+                      <div className="flex-1 min-w-0">
+                        <label className="text-[9px] font-bold text-[#9CA3AF] uppercase tracking-wider block mb-0.5">
+                          {labels[tipo]}
+                        </label>
+                        <input
+                          type="text"
+                          value={tarefa.titulo}
+                          placeholder={`Tarefa ${labels[tipo].toLowerCase()}...`}
+                          onChange={(e) =>
+                            setTarefas((prev) => ({
+                              ...prev,
+                              [tipo]: { ...prev[tipo], titulo: e.target.value },
+                            }))
+                          }
+                          onBlur={(e) => saveTarefa(tipo, e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") saveTarefa(tipo, (e.target as HTMLInputElement).value);
+                          }}
+                          className={`w-full bg-transparent text-sm font-semibold text-[#1F2937] focus:outline-none placeholder:text-[#D1D5DB] ${tarefa.feito ? "line-through text-[#9CA3AF]" : ""
+                            }`}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
+          {/* ── ATALHOS: SOS, DIÁRIO, PERFIL ── */}
+          <section className="md:col-span-4 grid grid-cols-2 gap-4">
+             <Link href="/dashboard/sos" className="bg-[#1F2937] hover:bg-black rounded-3xl p-5 shadow-sm flex flex-col justify-center items-center gap-3 transition-colors group">
+                <div className="h-12 w-12 bg-white/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Snowflake className="h-6 w-6 text-white" />
+                </div>
+                <span className="text-xs font-bold text-white uppercase tracking-wider">SOS Travei</span>
+             </Link>
+             
+             <Link href="/dashboard/journal" className="bg-white hover:bg-[#F8F9FA] border border-[#E5E7EB] rounded-3xl p-5 shadow-sm flex flex-col justify-center items-center gap-3 transition-colors group">
+                <div className="h-12 w-12 bg-[#84A59D]/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <BookMarked className="h-6 w-6 text-[#84A59D]" />
+                </div>
+                <span className="text-xs font-bold text-[#1F2937] uppercase tracking-wider">Diário</span>
+             </Link>
+             
+             <Link href="/dashboard/presenca" className="bg-white hover:bg-[#F8F9FA] border border-[#E5E7EB] rounded-3xl p-5 shadow-sm flex flex-col justify-center items-center gap-3 transition-colors group">
+                <div className="h-12 w-12 bg-[#84A59D]/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Wind className="h-6 w-6 text-[#84A59D]" />
+                </div>
+                <span className="text-xs font-bold text-[#1F2937] uppercase tracking-wider text-center">Momento<br/>Presença</span>
+             </Link>
+             
+             <Link href="/dashboard/profile" className="bg-white hover:bg-[#F8F9FA] border border-[#E5E7EB] rounded-3xl p-5 shadow-sm flex flex-col justify-center items-center gap-3 transition-colors group">
+                <div className="h-12 w-12 bg-[#84A59D]/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <User className="h-6 w-6 text-[#84A59D]" />
+                </div>
+                <span className="text-xs font-bold text-[#1F2937] uppercase tracking-wider">Meu Perfil</span>
+             </Link>
+          </section>
+
+        </div>
       </div>
 
       {/* ── BOTÃO TRAVEI (FLUTUANTE) ── */}
