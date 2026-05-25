@@ -13,11 +13,20 @@ export default function OnboardingPage() {
   const [selections, setSelections] = useState({
     executive_dysfunction: "",
     behavioral_pattern: "",
-    life_friction: "",
+    life_friction: [] as string[],
     peak_performance: "",
     support_style: "",
     initial_trigger: "",
   });
+
+  const toggleFriction = (value: string) => {
+    setSelections((prev) => ({
+      ...prev,
+      life_friction: prev.life_friction.includes(value)
+        ? prev.life_friction.filter((v) => v !== value)
+        : [...prev.life_friction, value],
+    }));
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem('onboarding_selections');
@@ -51,6 +60,8 @@ export default function OnboardingPage() {
               peak_time: selections.peak_performance,
               interaction_tone: selections.support_style,
               mindset_profile: selections.behavioral_pattern,
+              life_friction_areas: selections.life_friction,
+              onboarding_completed: true,
             });
 
           if (error) throw error;
@@ -129,48 +140,55 @@ export default function OnboardingPage() {
     // 3. Life Friction (Contextos de Vida)
     <motion.div key="friction" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col items-center text-center max-w-6xl w-full">
       <span className="text-[#9CA3AF] font-bold tracking-[0.3em] uppercase mb-6 text-[10px]">Módulo 03 — Fricção e Contextos</span>
-      <h2 className="text-4xl font-black text-[#1F2937] tracking-tight mb-8 leading-tight">Qual área da sua vida mais <br/> sofre com a desorganização?</h2>
-      
+      <h2 className="text-4xl font-black text-[#1F2937] tracking-tight mb-4 leading-tight">Qual área da sua vida mais <br/> sofre com a desorganização?</h2>
+      <p className="text-sm text-[#9CA3AF] font-medium mb-8">Selecione quantas quiser — isso ajuda a IA a entender seu contexto completo.</p>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
-         <OnboardingChoiceCard 
-           active={selections.life_friction === 'trabalho'} 
-           onClick={() => setSelections({...selections, life_friction: 'trabalho'})}
-           title="Carreira e Prazos" 
-           desc="Projetos atrasados, reuniões perdidas e a sensação de nunca estar em dia." 
+         <OnboardingChoiceCard
+           active={selections.life_friction.includes('trabalho')}
+           onClick={() => toggleFriction('trabalho')}
+           title="Carreira e Prazos"
+           desc="Projetos atrasados, reuniões perdidas e a sensação de nunca estar em dia."
          />
-         <OnboardingChoiceCard 
-           active={selections.life_friction === 'casa'} 
-           onClick={() => setSelections({...selections, life_friction: 'casa'})}
-           title="Gestão Doméstica" 
-           desc="A pilha de louça, a roupa para lavar e a manutenção básica do seu espaço." 
+         <OnboardingChoiceCard
+           active={selections.life_friction.includes('casa')}
+           onClick={() => toggleFriction('casa')}
+           title="Gestão Doméstica"
+           desc="A pilha de louça, a roupa para lavar e a manutenção básica do seu espaço."
          />
-         <OnboardingChoiceCard 
-           active={selections.life_friction === 'saude'} 
-           onClick={() => setSelections({...selections, life_friction: 'saude'})}
-           title="Saúde e Rotina" 
-           desc="Esquecer remédios, pular refeições e a luta para manter exercícios." 
+         <OnboardingChoiceCard
+           active={selections.life_friction.includes('saude')}
+           onClick={() => toggleFriction('saude')}
+           title="Saúde e Rotina"
+           desc="Esquecer remédios, pular refeições e a luta para manter exercícios."
          />
-         <OnboardingChoiceCard 
-           active={selections.life_friction === 'financas'} 
-           onClick={() => setSelections({...selections, life_friction: 'financas'})}
-           title="Vida Financeira" 
-           desc="Contas vencidas, impostos acumulados e o caos nas planilhas e e-mails." 
+         <OnboardingChoiceCard
+           active={selections.life_friction.includes('financas')}
+           onClick={() => toggleFriction('financas')}
+           title="Vida Financeira"
+           desc="Contas vencidas, impostos acumulados e o caos nas planilhas e e-mails."
          />
-         <OnboardingChoiceCard 
-           active={selections.life_friction === 'social'} 
-           onClick={() => setSelections({...selections, life_friction: 'social'})}
-           title="Social e Afetivo" 
-           desc="Vácuos em mensagens, esquecimento de aniversários e exaustão social." 
+         <OnboardingChoiceCard
+           active={selections.life_friction.includes('social')}
+           onClick={() => toggleFriction('social')}
+           title="Social e Afetivo"
+           desc="Vácuos em mensagens, esquecimento de aniversários e exaustão social."
          />
-         <OnboardingChoiceCard 
-           active={selections.life_friction === 'projetos'} 
-           onClick={() => setSelections({...selections, life_friction: 'projetos'})}
-           title="Cenários Diários" 
-           desc="Hobbys abandonados, cursos inacabados e ideias que nunca saem do papel." 
+         <OnboardingChoiceCard
+           active={selections.life_friction.includes('projetos')}
+           onClick={() => toggleFriction('projetos')}
+           title="Cenários Diários"
+           desc="Hobbys abandonados, cursos inacabados e ideias que nunca saem do papel."
          />
       </div>
 
-      <button disabled={!selections.life_friction} onClick={nextStep} className="mt-12 bg-[#1F2937] hover:bg-black disabled:opacity-20 text-white px-12 py-5 rounded-2xl font-black transition-all shadow-xl uppercase tracking-widest text-xs">
+      {selections.life_friction.length > 0 && (
+        <p className="text-xs font-bold text-[#84A59D] mt-4">
+          {selections.life_friction.length} área{selections.life_friction.length > 1 ? 's' : ''} selecionada{selections.life_friction.length > 1 ? 's' : ''}
+        </p>
+      )}
+
+      <button disabled={selections.life_friction.length === 0} onClick={nextStep} className="mt-8 bg-[#1F2937] hover:bg-black disabled:opacity-20 text-white px-12 py-5 rounded-2xl font-black transition-all shadow-xl uppercase tracking-widest text-xs">
         Configurar Tom do Assistente
       </button>
     </motion.div>,

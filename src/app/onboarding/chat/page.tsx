@@ -84,6 +84,7 @@ export default function OnboardingChatPage() {
         await supabase.from('profiles').upsert({
           id: user.id,
           ...profileData,
+          onboarding_completed: true,
           updated_at: new Date()
         });
 

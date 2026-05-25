@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, BookOpen, CheckSquare, Wind, Brain } from "lucide-react";
+import { Home, BookOpen, CheckSquare, Wind, Brain, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -15,6 +15,7 @@ export function MobileNav() {
     { href: "/dashboard/planner", icon: CheckSquare, label: "Meu Dia" },
     { href: "/dashboard/presenca", icon: Wind, label: "Presença" },
     { href: "/dashboard/cerebro", icon: Brain, label: "Cérebro" },
+    { href: "/dashboard/profile", icon: User, label: "Perfil" },
   ];
 
   return (
