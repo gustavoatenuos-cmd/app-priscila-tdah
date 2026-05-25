@@ -192,9 +192,9 @@ export default function MeuDia() {
   const getGreeting = () => {
     const hour = new Date().getHours();
     const name = profile?.full_name?.split(" ")[0] || "Você";
-    if (hour < 12) return `Bom dia, ${name} 🌿`;
-    if (hour < 18) return `Boa tarde, ${name} 🌿`;
-    return `Boa noite, ${name} 🌿`;
+    if (hour < 12) return `Bom dia, ${name}`;
+    if (hour < 18) return `Boa tarde, ${name}`;
+    return `Boa noite, ${name}`;
   };
 
   const saveTarefa = async (tipo: "essencial" | "leve" | "opcional", titulo: string) => {
