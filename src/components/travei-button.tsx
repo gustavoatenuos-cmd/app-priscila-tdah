@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Zap, X, Timer, Wind, Sparkle } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
@@ -32,6 +33,9 @@ const OPTIONS: { id: ExitChoice; icon: any; title: string; desc: string }[] = [
 export function TraveiButton() {
   const [open, setOpen] = useState(false);
   const [chosen, setChosen] = useState<ExitChoice | null>(null);
+  const pathname = usePathname();
+
+  if (pathname === "/dashboard") return null;
 
   async function choose(id: ExitChoice) {
     setChosen(id);
