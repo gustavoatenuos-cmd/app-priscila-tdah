@@ -7,7 +7,11 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className={`flex items-center gap-2 px-4 py-2 rounded-md bg-${theme}-primary text-${theme}-primary-foreground hover:bg-${theme}-secondary transition shadow-sm border border-[#E5E7EB]`}
+      className={`flex items-center gap-2 px-4 py-2 rounded-md transition shadow-sm border ${
+        theme === 'dark' 
+          ? 'bg-[#1F2937] text-white border-[#374151] hover:bg-black' 
+          : 'bg-white text-[#1F2937] border-[#E5E7EB] hover:bg-[#F5F5F0]'
+      }`}
     >
       {theme === 'dark' ? (
         <>
