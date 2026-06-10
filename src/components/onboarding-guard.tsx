@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { AppLogo } from "@/components/app-logo";
 
 export function OnboardingGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -44,9 +45,7 @@ export function OnboardingGuard({ children }: { children: React.ReactNode }) {
     return (
       <div className="min-h-screen bg-[#F5F5F0] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-10 w-10 bg-[#1F2937] rounded-xl flex items-center justify-center">
-            <span className="text-white font-bold text-xs">TC</span>
-          </div>
+          <AppLogo className="h-12 w-12 ring-1 ring-[#E5E7EB]" />
           <div className="flex gap-1.5">
             {[0, 1, 2].map((i) => (
               <div

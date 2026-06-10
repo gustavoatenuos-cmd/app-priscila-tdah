@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
@@ -15,22 +16,33 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://app-priscila-tdah.vercel.app"),
   title: "TDAH Constante | Constância possível, sem rigidez",
   description:
     "Sistema de apoio à constância feito por uma neurocientista com TDAH para mulheres que querem organizar a rotina sem se cobrar perfeição.",
+  icons: {
+    icon: "/tdah-constante-logo.png",
+    apple: "/tdah-constante-logo.png",
+  },
+  openGraph: {
+    images: ["/tdah-constante-logo.png"],
+  },
 };
+
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html
       lang="pt-BR"
       className={`${inter.variable} ${outfit.variable} h-full antialiased bg-background text-foreground`}
     >
       <body className="min-h-full flex flex-col font-sans">
+        <ThemeToggle />
         {children}
         <ConsentBanner />
         <Toaster position="top-right" richColors />

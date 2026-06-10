@@ -29,7 +29,7 @@ export default function PrivacidadePage() {
         <li><strong>Identificação:</strong> nome, e-mail, número de WhatsApp (opcional).</li>
         <li><strong>Perfil cognitivo e contexto:</strong> respostas do onboarding sobre rotina, energia, padrões de foco e estilo de suporte preferido. Essas respostas são tratadas como dados sensíveis (saúde) e exigem seu consentimento explícito.</li>
         <li><strong>Uso do produto:</strong> tarefas, sessões de foco, anotações, descarrego mental, registros de journal, conquistas.</li>
-        <li><strong>Pagamento:</strong> processado pela Stripe; nós não armazenamos dados de cartão.</li>
+        <li><strong>Pagamento:</strong> processado pela Pagar.me; nós não armazenamos dados de cartão.</li>
         <li><strong>Logs técnicos:</strong> IP, tipo de dispositivo, navegador, erros e métricas de uso anonimizadas.</li>
       </ul>
 
@@ -56,7 +56,7 @@ export default function PrivacidadePage() {
       <ul className="list-disc pl-6 space-y-2 mb-6">
         <li><strong>Supabase</strong> — hospedagem do banco de dados e autenticação.</li>
         <li><strong>Vercel</strong> — hospedagem da aplicação web.</li>
-        <li><strong>Stripe</strong> — processamento de pagamentos.</li>
+        <li><strong>Pagar.me</strong> — processamento de pagamentos.</li>
         <li><strong>Resend</strong> — envio de e-mails transacionais.</li>
         <li><strong>OpenAI / Groq</strong> — processamento das mensagens enviadas ao TC Assistant. Nenhum dado é usado para treinar modelos públicos.</li>
         <li>Autoridades públicas, quando legalmente exigido.</li>

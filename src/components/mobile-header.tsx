@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { AppLogo } from "@/components/app-logo";
 
 export function MobileHeader() {
   const [isOpen, setIsOpen] = useState(false);
@@ -48,7 +49,7 @@ export function MobileHeader() {
              {profile?.avatar_url ? (
                <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
              ) : (
-               <span className="text-white font-black text-xs">TC</span>
+               <AppLogo className="h-full w-full rounded-lg" />
              )}
            </Link>
            <h1 className="text-xs font-black tracking-[0.2em] text-[#1F2937] uppercase">TDAH Constante</h1>

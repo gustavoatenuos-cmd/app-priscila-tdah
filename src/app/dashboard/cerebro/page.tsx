@@ -2,11 +2,11 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, ArrowLeft, Sparkles } from "lucide-react";
+import { Send, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { AnimatedBrain } from "@/components/animated-brain";
 import { toast } from "sonner";
+import { AppLogo } from "@/components/app-logo";
 
 interface Message {
   role: "user" | "assistant";
@@ -19,6 +19,15 @@ const SUGESTOES = [
   "Minha cabeça está uma bagunça hoje",
   "Quero entender por que procrastino tanto",
 ];
+
+const frictionLabels: Record<string, string> = {
+  trabalho: "trabalho",
+  casa: "casa",
+  saude: "saúde",
+  financas: "finanças",
+  social: "relações",
+  projetos: "projetos",
+};
 
 export default function CerebroPage() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -34,16 +43,37 @@ export default function CerebroPage() {
       if (user) {
         const { data } = await supabase
           .from("profiles")
-          .select("full_name, occupation, interaction_tone")
+          .select(`
+            full_name,
+            occupation,
+            interaction_tone,
+            main_struggle,
+            mindset_profile,
+            life_friction,
+            life_friction_areas,
+            energy_level,
+            peak_time
+          `)
           .eq("id", user.id)
           .single();
         setProfile(data);
 
         const nome = data?.full_name?.split(" ")[0] || "você";
+        const areas = Array.isArray(data?.life_friction_areas) && data.life_friction_areas.length > 0
+          ? data.life_friction_areas
+          : data?.life_friction
+            ? [data.life_friction]
+            : [];
+        const areasText = areas
+          .map((area: string) => frictionLabels[area] || area)
+          .slice(0, 3)
+          .join(", ");
         setMessages([
           {
             role: "assistant",
-            content: `Olá, ${nome}! Sou seu TC Assistant. Estou aqui para te ajudar a organizar os pensamentos, quebrar tarefas grandes e navegar pelos momentos difíceis. O que está passando pela sua cabeça agora?`,
+            content: areasText
+              ? `Olá, ${nome}! Eu já tenho um pouco do seu mapa: hoje posso te apoiar especialmente em ${areasText}. Me diga o que está mais pesado agora e eu te devolvo um próximo passo pequeno.`
+              : `Olá, ${nome}! Sou seu TC Assistant. Estou aqui para te ajudar a organizar os pensamentos, quebrar tarefas grandes e navegar pelos momentos difíceis. O que está passando pela sua cabeça agora?`,
           },
         ]);
       }
@@ -102,9 +132,7 @@ export default function CerebroPage() {
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
-        <div className="h-10 w-10 bg-[#1F2937] rounded-2xl flex items-center justify-center shadow-md">
-          <AnimatedBrain size={24} state={loading ? "thinking" : "idle"} />
-        </div>
+        <AppLogo className={`h-11 w-11 shadow-md ring-1 ring-[#E5E7EB] ${loading ? "animate-pulse" : ""}`} />
         <div>
           <h1 className="text-sm font-black text-[#1F2937] uppercase tracking-tight">TC Assistant</h1>
           <p className="text-[10px] text-[#84A59D] font-bold uppercase tracking-widest">
@@ -129,9 +157,7 @@ export default function CerebroPage() {
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
               {msg.role === "assistant" && (
-                <div className="h-7 w-7 bg-[#1F2937] rounded-xl flex items-center justify-center mr-2 mt-1 shrink-0">
-                  <Sparkles className="h-3.5 w-3.5 text-white" />
-                </div>
+                <AppLogo className="h-7 w-7 mr-2 mt-1 ring-1 ring-[#E5E7EB]" />
               )}
               <div
                 className={`max-w-[80%] md:max-w-[65%] px-5 py-3.5 rounded-2xl text-sm leading-relaxed ${
@@ -152,9 +178,7 @@ export default function CerebroPage() {
             animate={{ opacity: 1 }}
             className="flex justify-start"
           >
-            <div className="h-7 w-7 bg-[#1F2937] rounded-xl flex items-center justify-center mr-2 mt-1 shrink-0">
-              <Sparkles className="h-3.5 w-3.5 text-white" />
-            </div>
+            <AppLogo className="h-7 w-7 mr-2 mt-1 ring-1 ring-[#E5E7EB]" />
             <div className="bg-white border border-[#E5E7EB] px-5 py-4 rounded-2xl rounded-tl-sm shadow-sm flex gap-1.5">
               {[0, 1, 2].map((i) => (
                 <motion.div

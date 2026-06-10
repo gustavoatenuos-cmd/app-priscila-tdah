@@ -7,11 +7,12 @@ import {
   Clock, Heart, Shield, Sparkles, 
   Save, Loader2, Brain, Fingerprint,
   Activity, TrendingUp, AlertCircle,
-  ChevronRight, BrainCircuit, Camera
+  ChevronRight, Camera
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { AnimatedBrain } from "@/components/animated-brain";
+import { AppLogo } from "@/components/app-logo";
 
 export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
@@ -109,7 +110,7 @@ export default function ProfilePage() {
                   {profile.avatar_url ? (
                      <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
                   ) : (
-                     <BrainCircuit className="h-8 w-8 text-[#84A59D]" />
+                     <AppLogo className="h-full w-full rounded-2xl" />
                   )}
                 </div>
                 

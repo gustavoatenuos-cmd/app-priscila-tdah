@@ -11,7 +11,7 @@ export type DatabaseUser = {
   preferences: UserPreferences;
 };
 
-// ── Profile / Diagnostic Data ────────────────────────────────────────────────
+// Profile / Diagnostic Data
 export type UserProfile = {
   id: string; // matches auth.uid
   full_name?: string;
@@ -21,9 +21,11 @@ export type UserProfile = {
   main_struggle?: 'inercia' | 'memoria' | 'foco';
   mindset_profile?: 'paralisia' | 'criativa' | 'hiperfoco';
   life_friction?: 'trabalho' | 'casa' | 'saude' | 'financas' | 'social' | 'projetos';
+  life_friction_areas?: Array<'trabalho' | 'casa' | 'saude' | 'financas' | 'social' | 'projetos'>;
   energy_level?: 'baixa' | 'alta';
   peak_time?: 'manha' | 'noite';
   interaction_tone?: 'acolhedor' | 'direto';
+  onboarding_completed?: boolean;
   
   // Personal Info for AI context
   occupation?: string;
@@ -99,7 +101,7 @@ export type FinancialMetrics = {
   net_profit: number; // revenue - ad_spend - fixed_costs
 };
 
-// ── Chat & AI History ────────────────────────────────────────────────────────
+// Chat & AI History
 export type ChatSession = {
   id: string;
   user_id: string;

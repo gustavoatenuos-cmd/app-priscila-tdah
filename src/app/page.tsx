@@ -1,31 +1,33 @@
 "use client";
 
 import { HomeHero } from "@/components/home-hero";
+import { HomeMindState } from "@/components/home-mind-state";
 import { HomeFeatures } from "@/components/home-features";
 import { HomeSosPreview } from "@/components/home-sos-preview";
+import { AppLogo } from "@/components/app-logo";
 import PricingSection from "@/components/ui/pricing-section-4";
-import { ArrowRight, Sparkles, Heart } from "lucide-react";
+import { ArrowRight, Heart } from "lucide-react";
 import Link from "next/link";
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#F5F5F0] overflow-x-hidden font-sans">
-      <nav className="fixed top-0 left-0 right-0 h-20 bg-transparent z-50 px-8 flex items-center justify-between transition-all">
+      <nav className="fixed top-0 left-0 right-0 h-20 bg-white/50 backdrop-blur-md z-50 px-8 flex items-center justify-between transition-all border-b border-[#E5E7EB]/50">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 bg-[#84A59D]/20 border border-[#84A59D]/30 rounded-xl flex items-center justify-center">
-            <Sparkles className="h-5 w-5 text-[#84A59D]" />
-          </div>
-          <span className="text-xl font-display font-black tracking-tight text-white">TDAH CONSTANTE</span>
+          <AppLogo className="h-10 w-10 ring-2 ring-[#84A59D]/20" />
+          <span className="text-xl font-display font-black tracking-tight text-[#1F2937]">TDAH CONSTANTE</span>
         </div>
         <div className="flex items-center gap-8">
-          <Link href="/login" className="text-xs font-bold uppercase tracking-widest text-white/50 hover:text-white transition-colors">Entrar</Link>
+          <Link href="/login" className="text-xs font-bold uppercase tracking-widest text-[#64748B] hover:text-[#1F2937] transition-colors">Entrar</Link>
           <Link href="/register">
-            <button className="border border-[#84A59D]/40 bg-[#84A59D]/10 text-[#84A59D] px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-[#84A59D] hover:text-white transition-all">Começar</button>
+            <button className="border border-[#84A59D]/40 bg-[#84A59D]/10 text-[#84A59D] px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-[#84A59D] hover:text-white transition-all shadow-sm">Começar</button>
           </Link>
         </div>
       </nav>
 
       <HomeHero />
+      
+      <HomeMindState />
 
       <section className="py-28 bg-[#F5F5F0]">
         <div className="container mx-auto px-6 text-center">
@@ -76,7 +78,7 @@ export default function LandingPage() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-8 text-center md:text-left">
             <div>
               <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
-                <div className="h-6 w-6 bg-[#1F2937] rounded-lg"></div>
+                <AppLogo className="h-8 w-8 ring-1 ring-[#E5E7EB]" />
                 <span className="text-sm font-display font-black text-[#1F2937] uppercase tracking-wider">TDAH Constante</span>
               </div>
               <p className="text-xs font-bold text-[#9CA3AF] uppercase tracking-widest italic">Feito para mentes inquietas.</p>

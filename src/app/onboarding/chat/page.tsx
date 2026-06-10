@@ -2,11 +2,11 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Brain, Sparkles, Loader2, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Send, Sparkles, Loader2, ArrowRight, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { AnimatedBrain } from "@/components/animated-brain";
 import { toast } from "sonner";
+import { AppLogo } from "@/components/app-logo";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -115,9 +115,7 @@ export default function OnboardingChatPage() {
         {/* Header */}
         <header className="px-10 py-8 border-b border-[#F1F3F5] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 bg-[#1F2937] rounded-2xl flex items-center justify-center shadow-lg">
-              <AnimatedBrain size={30} state={loading ? "thinking" : "idle"} />
-            </div>
+            <AppLogo className={`h-12 w-12 shadow-lg ring-1 ring-[#E5E7EB] ${loading ? "animate-pulse" : ""}`} />
             <div>
               <h1 className="text-xl font-black text-[#1F2937] tracking-tight uppercase">Diagnóstico Neural</h1>
               <p className="text-[10px] font-bold text-[#84A59D] uppercase tracking-widest">Sincronizando Segundo Cérebro</p>

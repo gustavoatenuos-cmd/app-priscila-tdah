@@ -1,16 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { AppLogo } from "@/components/app-logo";
 
 export default function LegalLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#F5F5F0] font-sans">
       <nav className="sticky top-0 bg-[#F5F5F0]/90 backdrop-blur-md border-b border-[#E5E7EB]/50 z-40 px-6 md:px-12 py-5 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
-          <div className="h-9 w-9 bg-[#84A59D]/20 border border-[#84A59D]/30 rounded-xl flex items-center justify-center">
-            <Sparkles className="h-5 w-5 text-[#84A59D]" />
-          </div>
+          <AppLogo className="h-10 w-10 ring-1 ring-[#E5E7EB]" />
           <span className="text-lg font-display font-black tracking-tight text-[#1F2937]">TDAH CONSTANTE</span>
         </Link>
         <Link

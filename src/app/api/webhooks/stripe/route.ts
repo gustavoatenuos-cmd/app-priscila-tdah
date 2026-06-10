@@ -1,66 +1,150 @@
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
-import { supabase } from "@/lib/supabase";
-import { headers } from "next/headers";
+import { createClient } from "@supabase/supabase-js";
 
-const getStripe = () => new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2025-01-27" as any,
-});
+const getAdminSupabase = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
-
-export async function POST(req: Request) {
-  const stripe = getStripe();
-  const body = await req.text();
-  const signature = (await headers()).get("stripe-signature")!;
-
-  let event: Stripe.Event;
-
-  try {
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-  } catch (err: any) {
-    console.error(`Webhook signature verification failed: ${err.message}`);
-    return NextResponse.json({ error: "Webhook Error" }, { status: 400 });
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY não configurada.");
   }
 
-  // Handle the event
-  switch (event.type) {
-    case "checkout.session.completed":
-      const session = event.data.object as Stripe.Checkout.Session;
-      const userId = session.metadata?.userId;
+  return createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+};
 
-      if (userId) {
-        // Update user status in Supabase
+export async function POST(req: Request) {
+  try {
+    const rawBody = await req.text();
+    const event = JSON.parse(rawBody);
+    const eventType = getEventType(event);
+    const eventId = getEventId(event);
+    const payload = getEventPayload(event);
+    const userId = getUserId(event, payload);
+    const customerId = getCustomerId(payload);
+    const subscriptionId = getSubscriptionId(payload);
+
+    if (!eventType || !eventId) {
+      return NextResponse.json({ error: "Evento Pagar.me inválido." }, { status: 400 });
+    }
+
+    const supabase = getAdminSupabase();
+
+    const { error: eventInsertError } = await supabase.from("payment_events").insert({
+      stripe_event_id: eventId,
+      event_type: eventType,
+      user_id: userId,
+      stripe_customer_id: customerId,
+      payload: event,
+    });
+
+    if (eventInsertError) {
+      if (eventInsertError.code === "23505") {
+        return NextResponse.json({ received: true, duplicate: true });
+      }
+
+      console.error("Erro ao registrar evento Pagar.me:", eventInsertError);
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
+    }
+
+    if (["charge.paid", "subscription.created", "subscription.updated"].includes(eventType)) {
+      const targetUserId = userId || await findUserIdByPagarmeCustomer(supabase, customerId);
+
+      if (targetUserId) {
         const { error } = await supabase
           .from("profiles")
-          .update({ is_premium: true, stripe_customer_id: session.customer as string })
-          .eq("id", userId);
+          .update({
+            is_premium: true,
+            subscription_status: "active",
+            plan: "monthly",
+            pagarme_customer_id: customerId,
+            pagarme_subscription_id: subscriptionId,
+            premium_uses_left: 999999,
+          })
+          .eq("id", targetUserId);
 
         if (error) {
-          console.error("Erro ao atualizar status premium:", error);
+          console.error("Erro ao liberar Premium via Pagar.me:", error);
           return NextResponse.json({ error: "Database error" }, { status: 500 });
         }
       }
-      break;
-    
-    case "customer.subscription.deleted":
-      const subscription = event.data.object as Stripe.Subscription;
-      const customerId = subscription.customer as string;
+    }
 
-      // Update user status to not premium
-      const { error: deleteError } = await supabase
-        .from("profiles")
-        .update({ is_premium: false })
-        .eq("stripe_customer_id", customerId);
+    if (["charge.payment_failed", "subscription.canceled", "subscription.expired"].includes(eventType)) {
+      const targetUserId = userId || await findUserIdByPagarmeCustomer(supabase, customerId);
 
-      if (deleteError) {
-        console.error("Erro ao remover status premium:", deleteError);
+      if (targetUserId) {
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            is_premium: false,
+            subscription_status: eventType,
+            pagarme_customer_id: customerId,
+            pagarme_subscription_id: subscriptionId,
+          })
+          .eq("id", targetUserId);
+
+        if (error) {
+          console.error("Erro ao bloquear Premium via Pagar.me:", error);
+          return NextResponse.json({ error: "Database error" }, { status: 500 });
+        }
       }
-      break;
+    }
 
-    default:
-      console.log(`Unhandled event type ${event.type}`);
+    return NextResponse.json({ received: true });
+  } catch (error: any) {
+    console.error("Erro no webhook Pagar.me:", error);
+    return NextResponse.json(
+      { error: error.message || "Erro no webhook Pagar.me." },
+      { status: 500 },
+    );
   }
+}
 
-  return NextResponse.json({ received: true });
+function getEventType(event: any) {
+  return event?.type || event?.event || event?.name || event?.event_type || null;
+}
+
+function getEventId(event: any) {
+  return event?.id || event?.event_id || event?.data?.id || `${getEventType(event)}-${Date.now()}`;
+}
+
+function getEventPayload(event: any) {
+  return event?.data?.object || event?.data || event?.payload || event;
+}
+
+function getUserId(event: any, payload: any) {
+  return event?.metadata?.user_id
+    || payload?.metadata?.user_id
+    || payload?.order?.metadata?.user_id
+    || payload?.subscription?.metadata?.user_id
+    || null;
+}
+
+function getCustomerId(payload: any) {
+  const customer = payload?.customer || payload?.subscription?.customer || payload?.order?.customer;
+  if (!customer) return null;
+  return typeof customer === "string" ? customer : customer.id || null;
+}
+
+function getSubscriptionId(payload: any) {
+  const subscription = payload?.subscription;
+  if (!subscription) return payload?.subscription_id || payload?.id || null;
+  return typeof subscription === "string" ? subscription : subscription.id || null;
+}
+
+async function findUserIdByPagarmeCustomer(supabase: any, customerId: string | null) {
+  if (!customerId) return null;
+
+  const { data } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("pagarme_customer_id", customerId)
+    .maybeSingle();
+
+  return data?.id || null;
 }

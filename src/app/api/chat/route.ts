@@ -8,23 +8,86 @@ O TDAH Constante é um sistema de apoio focado em constância leve.
 PILARES: 1-2-3 (Tarefas), SOS (Micro-ação), Zona de Fluxo (Timer + Sandbox), Esvaziar a Mente, Power Score.
 `;
 
+const MAIN_STRUGGLE_LABELS: Record<string, string> = {
+  inercia: "dificuldade de iniciar",
+  memoria: "perda de etapas no meio da execução",
+  foco: "paralisia por excesso de opções",
+};
+
+const MINDSET_LABELS: Record<string, string> = {
+  paralisia: "paralisia defensiva quando há sobrecarga",
+  criativa: "hiperfixação errática em assuntos paralelos",
+  hiperfoco: "explosão reativa tentando fazer tudo ao mesmo tempo",
+};
+
+const FRICTION_LABELS: Record<string, string> = {
+  trabalho: "carreira e prazos",
+  casa: "gestão doméstica",
+  saude: "saúde e rotina",
+  financas: "vida financeira",
+  social: "social e afetivo",
+  projetos: "projetos pessoais e ideias inacabadas",
+};
+
+const PEAK_TIME_LABELS: Record<string, string> = {
+  manha: "manhã",
+  noite: "noite",
+};
+
 function buildSystemPrompt(profile: any): string {
-  const { full_name, occupation, interaction_tone } = profile || {};
+  const {
+    full_name,
+    occupation,
+    interaction_tone,
+    main_struggle,
+    mindset_profile,
+    life_friction_areas,
+    life_friction,
+    energy_level,
+    peak_time,
+  } = profile || {};
   const nameContext = full_name ? `Usuário: ${full_name}.` : "";
   const jobContext = occupation ? `Cargo: ${occupation}.` : "";
+  const frictionAreas = Array.isArray(life_friction_areas) && life_friction_areas.length > 0
+    ? life_friction_areas
+    : life_friction
+      ? [life_friction]
+      : [];
+  const frictionContext = frictionAreas.length > 0
+    ? frictionAreas.map((area: string) => FRICTION_LABELS[area] || area).join(", ")
+    : "não informado";
+  const struggleContext = main_struggle
+    ? MAIN_STRUGGLE_LABELS[main_struggle] || main_struggle
+    : "não informado";
+  const mindsetContext = mindset_profile
+    ? MINDSET_LABELS[mindset_profile] || mindset_profile
+    : "não informado";
+  const energyContext = energy_level || "não informado";
+  const peakTimeContext = peak_time
+    ? PEAK_TIME_LABELS[peak_time] || peak_time
+    : "não informado";
 
   return `
-Você é o TC Assistant, guia de neuroplasticidade.
+Você é o TC Assistant, companheiro diário do app TDAH Constante.
 ${nameContext} ${jobContext}
+
+PERFIL COGNITIVO DO USUÁRIO:
+- Trava principal: ${struggleContext}.
+- Reação à sobrecarga: ${mindsetContext}.
+- Áreas da vida com maior fricção: ${frictionContext}.
+- Energia percebida: ${energyContext}.
+- Melhor janela de performance: ${peakTimeContext}.
+- Tom preferido: ${interaction_tone || 'acolhedor'}.
 
 DIRETRIZES CRÍTICAS (ANTI-FADIGA):
 1. Respostas CURTAS (máximo 2 parágrafos pequenos ou 3 bullets).
-2. Não dê respostas prontas. PERGUNTE para entender melhor.
-3. Se o usuário quiser criar uma tarefa ou hábito, peça detalhes (nome, prioridade, horário).
-4. Tom: ${interaction_tone || 'acolhedor'}.
+2. Comece validando a experiência sem reforçar culpa.
+3. Sempre termine com uma próxima ação pequena ou uma pergunta objetiva.
+4. Adapte exemplos ao perfil acima; não responda como planner genérico.
+5. Evite linguagem clínica diagnóstica. O app é apoio comportamental, não atendimento médico.
 
 AÇÕES INTELIGENTES:
-Se o usuário confirmar a criação de algo, adicione no final: [ACTION: type=task|habit data={title:"...", priority:"..."}]
+Se o usuário confirmar a criação de algo, adicione no final: [ACTION: type=task|habit data={title:"...", priority:"..."}].
 
 ${KNOWLEDGE_BASE}
   `.trim();
@@ -44,8 +107,8 @@ export async function POST(req: Request) {
       baseURL: "https://api.groq.com/openai/v1",
     });
 
-    const systemPrompt = onboardingMode 
-      ? `Você é o TC Assistant no Onboarding. Seja acolhedor e pergunte sobre Profissão e Desafios. Use [DATA: key=value] para extrair info.`
+    const systemPrompt = onboardingMode
+      ? `Você é o TC Assistant no Onboarding. Seja acolhedor, faça perguntas curtas sobre profissão, desafios, energia, rotina e estilo de suporte. Use [DATA: key=value] para extrair informações úteis quando aparecerem.`
       : buildSystemPrompt(profile);
 
     const messages: any[] = [

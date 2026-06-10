@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Check, Heart, Battery, Brain, Sparkles, Sunset, Moon, Sun, Shield, Target, Zap, Clock, CircleCheck } from "lucide-react";
+import { ArrowRight, Check, Heart, Battery, Sparkles, Sunset, Moon, Sun, Shield, Target, Zap, Clock, CircleCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { AppLogo } from "@/components/app-logo";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -60,6 +61,7 @@ export default function OnboardingPage() {
               peak_time: selections.peak_performance,
               interaction_tone: selections.support_style,
               mindset_profile: selections.behavioral_pattern,
+              life_friction: selections.life_friction[0] || null,
               life_friction_areas: selections.life_friction,
               onboarding_completed: true,
             });
@@ -88,9 +90,7 @@ export default function OnboardingPage() {
   const steps = [
     // 0. Intro Conceitual
     <motion.div key="intro" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="flex flex-col items-center text-center max-w-2xl">
-      <div className="h-20 w-20 bg-[#1F2937] rounded-3xl flex items-center justify-center mb-10 shadow-2xl">
-        <Brain className="h-10 w-10 text-[#84A59D]" />
-      </div>
+      <AppLogo className="h-24 w-24 mb-10 shadow-2xl ring-4 ring-white" />
       <h1 className="text-5xl font-black text-[#1F2937] tracking-tight mb-8 leading-[0.95]">
         Bem-vinda. <br/> <span className="text-[#84A59D]">Vamos te conhecer um pouco.</span>
       </h1>

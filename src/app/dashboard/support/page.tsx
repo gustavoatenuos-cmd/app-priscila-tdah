@@ -10,10 +10,10 @@ import {
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
-import { AnimatedBrain } from "@/components/animated-brain";
 import { supabase } from "@/lib/supabase";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { AppLogo } from "@/components/app-logo";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -231,9 +231,7 @@ export default function SupportPage() {
         {/* Header */}
         <header className="h-20 bg-white/70 backdrop-blur-md border-b border-[#E5E7EB] flex items-center justify-between px-8 z-30 shrink-0">
           <div className="flex items-center gap-4">
-            <div className="h-11 w-11 bg-[#1F2937] rounded-2xl flex items-center justify-center shadow-lg">
-              <AnimatedBrain size={28} state={loading ? "thinking" : "idle"} />
-            </div>
+            <AppLogo className={`h-11 w-11 shadow-lg ring-1 ring-[#E5E7EB] ${loading ? "animate-pulse" : ""}`} />
             <div>
               <h1 className="text-base font-black text-[#1F2937] tracking-tight uppercase">TC Assistant</h1>
               <p className="text-[10px] font-bold text-[#84A59D] uppercase tracking-widest">Sincronizado</p>
@@ -263,7 +261,7 @@ export default function SupportPage() {
                   <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${
                     msg.role === 'user' ? 'bg-[#84A59D] text-white' : 'bg-[#1F2937] text-white'
                   }`}>
-                    {msg.role === 'user' ? <User className="h-5 w-5" /> : <AnimatedBrain size={22} state="idle" />}
+                    {msg.role === 'user' ? <User className="h-5 w-5" /> : <AppLogo className="h-full w-full rounded-xl" />}
                   </div>
                   <div className={`px-5 py-4 rounded-[1.5rem] text-sm md:text-base leading-relaxed ${
                     msg.role === 'user' 
@@ -280,9 +278,7 @@ export default function SupportPage() {
           {loading && (
             <div className="flex justify-start">
                <div className="flex gap-3">
-                 <div className="h-10 w-10 bg-[#1F2937] rounded-xl flex items-center justify-center shadow-lg">
-                    <AnimatedBrain size={22} state="thinking" />
-                 </div>
+                 <AppLogo className="h-10 w-10 rounded-xl shadow-lg animate-pulse" />
                  <div className="bg-white border border-[#E5E7EB] rounded-[1.5rem] rounded-tl-none px-6 py-4 flex gap-1 items-center">
                     {[0, 1, 2].map(i => (
                       <motion.div key={i} className="h-1.5 w-1.5 rounded-full bg-[#84A59D]" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1, delay: i*0.2 }} />

@@ -18,6 +18,7 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import { AppLogo } from "@/components/app-logo";
 
 const navItems = [
   { href: "/dashboard",              icon: Home,           label: "Início" },
@@ -56,11 +57,11 @@ export function Sidebar() {
   return (
     <aside className="w-20 border-r border-[#E5E7EB] bg-[#F5F5F0] hidden md:flex flex-col items-center py-6 z-10 sticky top-0 h-screen">
       {/* Logo */}
-      <Link href="/dashboard/profile" className="h-10 w-10 bg-[#1F2937] rounded-xl flex items-center justify-center mb-8 shrink-0 overflow-hidden hover:opacity-90 transition-opacity">
+      <Link href="/dashboard/profile" className="mb-8 shrink-0 hover:opacity-90 transition-opacity">
         {avatarUrl ? (
-          <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+          <img src={avatarUrl} alt="Avatar" className="h-10 w-10 rounded-xl object-cover" />
         ) : (
-          <span className="text-white font-bold text-xs">TC</span>
+          <AppLogo className="h-11 w-11 ring-1 ring-[#E5E7EB]" />
         )}
       </Link>
 

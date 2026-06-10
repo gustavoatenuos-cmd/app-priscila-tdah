@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, Check, Snowflake, ChevronRight, BrainCircuit, Sparkles, Wind, CheckSquare, BookMarked, User, Loader2 } from "lucide-react";
+import { BookOpen, Check, Snowflake, ChevronRight, BrainCircuit, Sparkles, Wind, CheckSquare, BookMarked, User, Loader2, Target, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { usePaywall } from "@/hooks/usePaywall";
 import { PaywallPopup } from "@/components/paywall-popup";
@@ -12,6 +12,21 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { fraseDodia } from "@/lib/frases-data";
 import { PRESENCA_365 } from "@/lib/presenca-data";
+
+const STRUGGLE_LABELS: Record<string, string> = {
+  inercia: "iniciar",
+  memoria: "não se perder no meio",
+  foco: "escolher uma direção",
+};
+
+const FRICTION_LABELS: Record<string, string> = {
+  trabalho: "trabalho",
+  casa: "casa",
+  saude: "saúde",
+  financas: "finanças",
+  social: "relações",
+  projetos: "projetos",
+};
 
 export default function MeuDia() {
   const router = useRouter();
@@ -214,6 +229,65 @@ export default function MeuDia() {
     return `Boa noite, ${name}`;
   };
 
+  const getPendingTask = () => {
+    if (tarefas.essencial.titulo && !tarefas.essencial.feito) return { label: "Essencial", task: tarefas.essencial.titulo };
+    if (tarefas.leve.titulo && !tarefas.leve.feito) return { label: "Leve", task: tarefas.leve.titulo };
+    if (tarefas.opcional.titulo && !tarefas.opcional.feito) return { label: "Opcional", task: tarefas.opcional.titulo };
+    return null;
+  };
+
+  const getFrictionText = () => {
+    const areas = Array.isArray(profile?.life_friction_areas) && profile.life_friction_areas.length > 0
+      ? profile.life_friction_areas
+      : profile?.life_friction
+        ? [profile.life_friction]
+        : [];
+    return areas
+      .map((area: string) => FRICTION_LABELS[area] || area)
+      .slice(0, 2)
+      .join(" e ");
+  };
+
+  const getCommandCenter = () => {
+    const pending = getPendingTask();
+    const struggle = STRUGGLE_LABELS[profile?.main_struggle] || "começar sem peso";
+    const friction = getFrictionText();
+    const peak = profile?.peak_time === "noite" ? "à noite" : "pela manhã";
+
+    if (pending) {
+      return {
+        action: `Faça só o primeiro movimento da tarefa ${pending.label.toLowerCase()}: ${pending.task}`,
+        reason: `Como seu perfil tende a precisar de apoio para ${struggle}, o objetivo agora é reduzir a entrada, não terminar tudo.`,
+        planB: profile?.main_struggle === "memoria"
+          ? "Antes de agir, escreva 3 passos visíveis. Depois execute apenas o primeiro."
+          : profile?.main_struggle === "foco"
+            ? "Se aparecerem muitas opções, escolha a versão de 5 minutos e ignore o resto por agora."
+            : "Se iniciar parecer pesado, abra o material, toque nele ou deixe tudo pronto. Isso já conta como ativação.",
+        energy: `Sua melhor janela registrada é ${peak}. Se agora não for esse horário, use uma versão mínima.`,
+      };
+    }
+
+    if (!presencaHoje) {
+      return {
+        action: `Marque sua presença do dia ${diaAtual} antes de planejar qualquer coisa.`,
+        reason: "Presença vem antes de produtividade. Isso mantém o vínculo com o app sem transformar o dia em cobrança.",
+        planB: "Se não quiser fazer a reflexão completa, leia só a frase do dia e volte.",
+        energy: friction
+          ? `Hoje, proteja energia nas áreas de ${friction}.`
+          : "Hoje, proteja energia antes de adicionar novas obrigações.",
+      };
+    }
+
+    return {
+      action: "Escolha uma tarefa essencial pequena para hoje.",
+      reason: "O app funciona melhor quando o dia tem uma direção principal e duas opções leves, não uma lista infinita.",
+      planB: "Se estiver sem clareza, use o Cérebro para despejar o que está na cabeça e transformar em uma micro-ação.",
+      energy: friction
+        ? `Priorize algo que alivie ${friction}, mesmo que seja pequeno.`
+        : `Use sua janela de melhor energia ${peak} para o que exige mais foco.`,
+    };
+  };
+
   const saveTarefa = async (tipo: "essencial" | "leve" | "opcional", titulo: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user || !titulo.trim()) return;
@@ -317,6 +391,7 @@ export default function MeuDia() {
   };
 
   const diaData = PRESENCA_365.find((d) => d.dia === diaAtual);
+  const commandCenter = getCommandCenter();
 
   if (loading) return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#F5F5F0]">
@@ -340,6 +415,45 @@ export default function MeuDia() {
           <h1 className="text-2xl md:text-3xl font-bold text-[#1F2937]">{getGreeting()}</h1>
           <p className="text-sm text-[#9CA3AF] mt-1 capitalize">{currentDate}</p>
         </header>
+
+        <section className="mb-6 bg-white border border-[#E5E7EB] rounded-[32px] p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.03)] overflow-hidden relative">
+          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#84A59D]/10" />
+          <div className="relative z-10 grid gap-6 lg:grid-cols-[1.25fr_0.9fr] lg:items-end">
+            <div>
+              <div className="flex items-center gap-2 text-[#84A59D] mb-4">
+                <Target className="h-4 w-4" />
+                <span className="text-[10px] font-black uppercase tracking-[0.25em]">Central do agora</span>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-black tracking-tight text-[#1F2937] leading-tight max-w-3xl">
+                {commandCenter.action}
+              </h2>
+              <p className="mt-4 text-sm md:text-base text-[#64748B] font-medium leading-relaxed max-w-2xl">
+                {commandCenter.reason}
+              </p>
+            </div>
+
+            <div className="grid gap-3">
+              <div className="rounded-2xl bg-[#F8FAF9] border border-[#E5E7EB] p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <RotateCcw className="h-4 w-4 text-[#84A59D]" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-[#9CA3AF]">Plano B</span>
+                </div>
+                <p className="text-sm font-semibold leading-relaxed text-[#1F2937]">
+                  {commandCenter.planB}
+                </p>
+              </div>
+              <div className="rounded-2xl bg-[#1F2937] p-4 text-white">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="h-4 w-4 text-[#84A59D]" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-white/50">Energia</span>
+                </div>
+                <p className="text-sm font-semibold leading-relaxed text-white/90">
+                  {commandCenter.energy}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* ── BENTO GRID COMMAND CENTER ── */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">

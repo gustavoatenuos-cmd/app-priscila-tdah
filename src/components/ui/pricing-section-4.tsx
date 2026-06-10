@@ -3,14 +3,17 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card-premium";
 import { Sparkles as SparklesComp } from "@/components/ui/sparkles";
 import { TimelineContent } from "@/components/ui/timeline-animation";
 import { VerticalCutReveal } from "@/components/ui/vertical-cut-reveal";
+import { startCheckout } from "@/lib/start-checkout";
 import { cn } from "@/lib/utils";
 import NumberFlow from "@number-flow/react";
 import { motion } from "framer-motion";
 import { useRef, useState } from "react";
 import { Check } from "lucide-react";
+import { toast } from "sonner";
 
 const plans = [
   {
+    slug: "base",
     name: "Base",
     description: "Experimente o poder da clareza sem compromisso.",
     price: 0,
@@ -26,6 +29,7 @@ const plans = [
     ],
   },
   {
+    slug: "constante",
     name: "Constante",
     description: "O sistema essencial para manter sua rotina no trilho todos os dias.",
     price: 49.90,
@@ -42,6 +46,7 @@ const plans = [
     ],
   },
   {
+    slug: "pleno",
     name: "Pleno",
     description: "Suporte completo para quem busca acompanhamento contínuo.",
     price: 97.90,
@@ -111,6 +116,7 @@ const PricingSwitch = ({ onSwitch }: { onSwitch: (value: string) => void }) => {
 
 export default function PricingSection() {
   const [isYearly, setIsYearly] = useState(false);
+  const [checkoutPlan, setCheckoutPlan] = useState<string | null>(null);
   const pricingRef = useRef<HTMLDivElement>(null);
 
   const revealVariants = {
@@ -132,6 +138,24 @@ export default function PricingSection() {
 
   const togglePricingPeriod = (value: string) =>
     setIsYearly(Number.parseInt(value) === 1);
+
+  const handlePlanClick = async (planSlug: string, planName: string) => {
+    if (planName === "Base") {
+      window.location.href = "/register";
+      return;
+    }
+
+    setCheckoutPlan(planName);
+    try {
+      await startCheckout({
+        plan: planSlug === "pleno" ? "pleno" : "constante",
+        billing: isYearly ? "yearly" : "monthly",
+      });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Erro ao iniciar checkout.");
+      setCheckoutPlan(null);
+    }
+  };
 
   return (
     <div
@@ -239,16 +263,18 @@ export default function PricingSection() {
 
               <CardContent className="p-0">
                 <button
+                  onClick={() => handlePlanClick(plan.slug, plan.name)}
+                  disabled={checkoutPlan === plan.name}
                   className={`w-full mb-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all duration-300 hover:scale-[1.02] active:scale-95 ${
                     plan.popular
                       ? "bg-[#84A59D] text-white shadow-lg shadow-[#84A59D]/20"
-                      : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
+                      : "bg-white border border-[#E5E7EB] text-[#1F2937] hover:border-[#84A59D] hover:text-[#84A59D] hover:bg-[#84A59D]/5"
                   }`}
                 >
-                  {plan.buttonText}
+                  {checkoutPlan === plan.name ? "Redirecionando..." : plan.buttonText}
                 </button>
 
-                <div className="space-y-4 pt-8 border-t border-white/5">
+                <div className="space-y-4 pt-8 border-t border-[#E5E7EB]">
                   <h4 className="text-[10px] font-black uppercase tracking-widest text-[#84A59D]">
                     {plan.includes[0]}
                   </h4>

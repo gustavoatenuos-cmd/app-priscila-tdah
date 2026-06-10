@@ -2,8 +2,9 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { Lock, Sparkles, X, Check } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
+import { startCheckout } from "@/lib/start-checkout";
 
 interface PaywallPopupProps {
   isOpen: boolean;
@@ -12,13 +13,16 @@ interface PaywallPopupProps {
 }
 
 export function PaywallPopup({ isOpen, onClose, featureName }: PaywallPopupProps) {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const handleCheckout = async () => {
     setLoading(true);
-    // Aqui roteia para a página de checkout ou API do Stripe
-    router.push("/api/checkout");
+    try {
+      await startCheckout();
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao iniciar checkout.");
+      setLoading(false);
+    }
   };
 
   return (
@@ -37,7 +41,6 @@ export function PaywallPopup({ isOpen, onClose, featureName }: PaywallPopupProps
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="bg-white rounded-[2rem] p-8 md:p-10 w-full max-w-lg shadow-2xl relative overflow-hidden"
           >
-            {/* Fechar apenas para UX amigável, embora precisem assinar */}
             <button
               onClick={onClose}
               className="absolute top-6 right-6 text-[#9CA3AF] hover:text-[#1F2937] transition-colors"
@@ -60,28 +63,23 @@ export function PaywallPopup({ isOpen, onClose, featureName }: PaywallPopupProps
               </h2>
 
               <p className="text-[#64748B] font-medium leading-relaxed max-w-sm mx-auto">
-                Para continuar utilizando as ferramentas terapêuticas e de foco ilimitadas, torne-se um membro Premium do TDAH Constante.
+                Para continuar utilizando as ferramentas terapêuticas e de foco ilimitadas,
+                torne-se um membro Premium do TDAH Constante.
               </p>
 
               <div className="bg-[#F8F9FA] rounded-2xl p-5 text-left space-y-3 border border-[#E5E7EB]">
-                <div className="flex items-center gap-3">
-                  <div className="h-6 w-6 bg-[#84A59D]/20 rounded-full flex items-center justify-center shrink-0">
-                    <Check className="h-3 w-3 text-[#84A59D] font-bold" />
+                {[
+                  "Módulo Foco Ilimitado",
+                  "Diário e Mente (Brain Dump) livre",
+                  "Acesso total à Inteligência Artificial",
+                ].map((item) => (
+                  <div key={item} className="flex items-center gap-3">
+                    <div className="h-6 w-6 bg-[#84A59D]/20 rounded-full flex items-center justify-center shrink-0">
+                      <Check className="h-3 w-3 text-[#84A59D] font-bold" />
+                    </div>
+                    <span className="text-sm font-bold text-[#1F2937]">{item}</span>
                   </div>
-                  <span className="text-sm font-bold text-[#1F2937]">Módulo Foco Ilimitado</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="h-6 w-6 bg-[#84A59D]/20 rounded-full flex items-center justify-center shrink-0">
-                    <Check className="h-3 w-3 text-[#84A59D] font-bold" />
-                  </div>
-                  <span className="text-sm font-bold text-[#1F2937]">Diário e Mente (Brain Dump) livre</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="h-6 w-6 bg-[#84A59D]/20 rounded-full flex items-center justify-center shrink-0">
-                    <Check className="h-3 w-3 text-[#84A59D] font-bold" />
-                  </div>
-                  <span className="text-sm font-bold text-[#1F2937]">Acesso total à Inteligência Artificial</span>
-                </div>
+                ))}
               </div>
 
               <button
@@ -89,14 +87,16 @@ export function PaywallPopup({ isOpen, onClose, featureName }: PaywallPopupProps
                 disabled={loading}
                 className="w-full bg-[#1F2937] hover:bg-black text-white py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl active:scale-95 disabled:opacity-70"
               >
-                {loading ? "Redirecionando..." : (
+                {loading ? (
+                  "Redirecionando..."
+                ) : (
                   <>
                     <Sparkles className="h-5 w-5 text-[#84A59D]" />
                     Desbloquear Acesso Premium
                   </>
                 )}
               </button>
-              
+
               <p className="text-[10px] text-[#9CA3AF] font-semibold uppercase tracking-wider">
                 Pagamento seguro e cancelamento fácil.
               </p>
