@@ -1,7 +1,6 @@
 "use client";
 
-import { HomeHero } from "@/components/home-hero";
-import { HomeJourneySection } from "@/components/home-journey-section";
+import { HomeEditorialJourney } from "@/components/home-editorial-journey";
 import { HomeMindState } from "@/components/home-mind-state";
 import { HomeFeatures } from "@/components/home-features";
 import { HomeSosPreview } from "@/components/home-sos-preview";
@@ -26,9 +25,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      <HomeHero />
-      
-      <HomeJourneySection />
+      <HomeEditorialJourney />
 
       <HomeMindState />
 
