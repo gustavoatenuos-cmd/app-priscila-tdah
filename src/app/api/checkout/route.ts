@@ -85,12 +85,9 @@ export async function POST(req: Request) {
           accepted_payment_methods: ["credit_card", "boleto"],
         },
         cart_settings: {
-          recurrences: [
-            {
-              plan_id: planId,
-              start_in: 1,
-            },
-          ],
+          recurrence: {
+            plan_id: planId,
+          },
         },
         metadata: {
           user_id: user.id,
