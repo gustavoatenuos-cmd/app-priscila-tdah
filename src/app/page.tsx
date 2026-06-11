@@ -1,6 +1,7 @@
 "use client";
 
 import { HomeHero } from "@/components/home-hero";
+import { HomeJourneySection } from "@/components/home-journey-section";
 import { HomeMindState } from "@/components/home-mind-state";
 import { HomeFeatures } from "@/components/home-features";
 import { HomeSosPreview } from "@/components/home-sos-preview";
@@ -27,23 +28,12 @@ export default function LandingPage() {
 
       <HomeHero />
       
+      <HomeJourneySection />
+
       <HomeMindState />
 
-      <section className="py-28 bg-[#F5F5F0]">
-        <div className="container mx-auto px-6 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#84A59D] mb-6">O custo do silêncio</h3>
-            <p className="text-2xl md:text-4xl font-display font-medium text-[#1F2937] leading-relaxed mb-8">
-              &quot;Eu sei o que preciso fazer, mas não consigo começar.&quot;
-            </p>
-            <p className="text-lg text-[#64748B] font-medium leading-relaxed">
-              O caos mental não é falta de vontade. É a sua mente funcionando do jeito dela — em ondas de energia, com travas reais e dias que não cabem em uma lista. O TDAH Constante foi feito para acompanhar essas ondas, não para te cobrar perfeição.
-            </p>
-          </div>
-        </div>
-      </section>
-
       <HomeFeatures />
+      
       <HomeSosPreview />
 
       <div className="bg-white">
