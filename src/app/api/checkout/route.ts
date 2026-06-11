@@ -110,9 +110,10 @@ export async function POST(req: Request) {
         status: checkoutResponse.status,
         message: checkout?.message,
         errors: checkout?.errors,
+        fullResponse: checkout
       });
       return NextResponse.json(
-        { error: checkout?.message || checkout?.errors?.[0]?.message || "Erro ao criar checkout Pagar.me." },
+        { error: `Erro Pagar.me: ${JSON.stringify(checkout)}` },
         { status: checkoutResponse.status || 500 },
       );
     }
