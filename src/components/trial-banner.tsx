@@ -1,4 +1,4 @@
-"use client";
+use client;
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -16,14 +16,14 @@ export function TrialBanner() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("trial_ends_at, is_premium")
+        .select("trial_expires_at, is_premium")
         .eq("id", user.id)
         .single();
 
       if (profile) {
         setIsPremium(profile.is_premium || false);
-        if (profile.trial_ends_at && !profile.is_premium) {
-          const endDate = new Date(profile.trial_ends_at);
+        if (profile.trial_expires_at && !profile.is_premium) {
+          const endDate = new Date(profile.trial_expires_at);
           const now = new Date();
           const diffTime = endDate.getTime() - now.getTime();
           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
