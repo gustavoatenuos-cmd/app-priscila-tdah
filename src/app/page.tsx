@@ -3,6 +3,7 @@
 import { HomeEditorialJourney } from "@/components/home-editorial-journey";
 import { HomeMindState } from "@/components/home-mind-state";
 import { HomeFeatures } from "@/components/home-features";
+import { HomeHero } from "@/components/home-hero";
 import { HomeSosPreview } from "@/components/home-sos-preview";
 import { AppLogo } from "@/components/app-logo";
 import PricingSection from "@/components/ui/pricing-section-4";
@@ -24,6 +25,8 @@ export default function LandingPage() {
           </Link>
         </div>
       </nav>
+
+      <HomeHero />
 
       <HomeEditorialJourney />
 
