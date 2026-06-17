@@ -1,10 +1,7 @@
 "use client";
 
 import { HomeEditorialJourney } from "@/components/home-editorial-journey";
-import { HomeMindState } from "@/components/home-mind-state";
-import { HomeFeatures } from "@/components/home-features";
 import { HomeHero } from "@/components/home-hero";
-import { HomeSosPreview } from "@/components/home-sos-preview";
 import { AppLogo } from "@/components/app-logo";
 import PricingSection from "@/components/ui/pricing-section-4";
 import { ArrowRight, Heart } from "lucide-react";
@@ -12,7 +9,7 @@ import Link from "next/link";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#F5F5F0] overflow-x-hidden font-sans">
+    <div className="min-h-screen bg-[#F5F5F0] overflow-x-clip font-sans">
       <nav className="fixed top-0 left-0 right-0 h-20 bg-white/50 backdrop-blur-md z-50 px-8 flex items-center justify-between transition-all border-b border-[#E5E7EB]/50">
         <div className="flex items-center gap-3">
           <AppLogo className="h-10 w-10 ring-2 ring-[#84A59D]/20" />
@@ -29,12 +26,6 @@ export default function LandingPage() {
       <HomeHero />
 
       <HomeEditorialJourney />
-
-      <HomeMindState />
-
-      <HomeFeatures />
-      
-      <HomeSosPreview />
 
       <div className="bg-white">
         <PricingSection />
