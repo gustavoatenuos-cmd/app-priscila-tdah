@@ -213,8 +213,8 @@ export function HomeHero() {
           </Link>
         </motion.div>
 
-        <p className="mt-4 text-center text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">
-          7 dias grátis · Sem cartão · Cancele quando quiser
+        <p className="mt-4 text-center text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest invisible">
+          Espaçador
         </p>
 
         {/* ── Assistant bubble ── */}
