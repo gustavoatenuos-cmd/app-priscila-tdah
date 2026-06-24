@@ -1,37 +1,37 @@
 /* Design Tokens */
 :root {
   /* Light palette */
-  --background: #F5F5F0;
-  --foreground: #1F2937;
+  --background: #F5F0E6;
+  --foreground: #1A1A1A;
   --card: #FFFFFF;
-  --card-foreground: #1F2937;
-  --primary: #1F2937;
+  --card-foreground: #1A1A1A;
+  --primary: #4A3525;
   --primary-foreground: #FFFFFF;
-  --secondary: #F1F5F9;
-  --secondary-foreground: #1F2937;
-  --accent: #84A59D;
+  --secondary: #E8DEC8;
+  --secondary-foreground: #4A3525;
+  --accent: #C69C6D;
   --accent-foreground: #FFFFFF;
-  --destructive: #EF4444;
+  --destructive: #8B5A2B;
   --destructive-foreground: #FFFFFF;
-  --border: #E5E7EB;
-  --input: #F1F5F9;
+  --border: #C69C6D;
+  --input: #E8DEC8;
   --radius: 1.5rem;
 }
 
 .dark {
   /* Dark palette */
-  --background: hsl(240 10% 3.9%);
-  --foreground: hsl(0 0% 98%);
-  --card: hsl(240 10% 3.9%);
-  --card-foreground: hsl(0 0% 98%);
-  --primary: hsl(0 0% 98%);
-  --primary-foreground: hsl(240 5.9% 10%);
-  --secondary: hsl(240 3.7% 15.9%);
-  --secondary-foreground: hsl(0 0% 98%);
-  --accent: hsl(240 3.7% 15.9%);
-  --accent-foreground: hsl(0 0% 98%);
-  --destructive: hsl(0 62.8% 30.6%);
-  --destructive-foreground: hsl(0 0% 98%);
-  --border: hsl(240 3.7% 15.9%);
-  --input: hsl(240 3.7% 15.9%);
+  --background: #1A1A1A;
+  --foreground: #F5F0E6;
+  --card: #4A3525;
+  --card-foreground: #F5F0E6;
+  --primary: #C69C6D;
+  --primary-foreground: #1A1A1A;
+  --secondary: #8B5A2B;
+  --secondary-foreground: #F5F0E6;
+  --accent: #8B5A2B;
+  --accent-foreground: #F5F0E6;
+  --destructive: #C69C6D;
+  --destructive-foreground: #1A1A1A;
+  --border: #4A3525;
+  --input: #4A3525;
 }
